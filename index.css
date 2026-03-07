@@ -1,0 +1,137 @@
+body { background-color: #f4f7f6; color: #333; font-family: 'Montserrat', sans-serif; margin: 0; }
+header { background: #fff; padding: 10px 0; border-bottom: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top:0; z-index:1000; }
+.header-container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.user-menu { display: flex; align-items: center; gap: 12px; position: relative; cursor: pointer; }
+.dropdown-content { display: none; position: absolute; right: 0; top: 40px; background: white; min-width: 250px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); z-index: 100; border-radius: 8px; padding: 15px; border: 1px solid #eee; }
+.galeria-profissional { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 40px 20px; max-width: 1200px; margin: 0 auto; }
+.card-item { background: #fff; border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #eee; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative; display: flex; flex-direction: column; }
+.selo-status { position: absolute; top: 15px; left: 15px; padding: 5px 12px; font-size: 10px; font-weight: bold; border-radius: 4px; z-index: 10; color: white; text-transform: uppercase; }
+.img-container img { width: 100%; height: 350px; object-fit: cover; border-radius: 8px; background: #eee; }
+.compra-acoes { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 15px; }
+.controle-qtd { display: flex; align-items: center; background: #fff; border-radius: 5px; border: 1px solid #bbb; overflow: hidden; }
+.btn-qtd { background: #eee; border: none; width: 35px; height: 38px; cursor: pointer; font-weight: bold; font-size: 18px; color: #000; }
+.qtd-seletor { width: 45px; height: 38px; text-align: center; border: none; background: #fff; font-weight: bold; font-size: 16px; color: #000 !important; }
+.btn-add { flex: 1; background-color: #25D366; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; height: 38px; }
+.btn-info { width: 100%; margin-top: 8px; background-color: #f8f9fa; color: #555; border: 1px solid #ddd; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; }
+.modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display:none; justify-content: center; align-items: center; z-index: 2000; }
+.modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; max-height: 90vh; overflow-y: auto; }
+input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+.btn-acao { background: #25D366; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.link-voltar { display: block; margin-top: 15px; color: #666; font-size: 13px; cursor: pointer; text-decoration: underline; }
+.status-item { font-size: 12px; padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
+@media (max-width: 600px) {
+    .header-container { padding: 0 15px; }
+    h1 { font-size: 18px !important; }
+    .galeria-profissional { grid-template-columns: 1fr; padding: 20px 15px; gap: 20px; }
+    .img-container img { height: 280px; }
+    .compra-acoes { flex-wrap: wrap; }
+    .controle-qtd { width: 100%; justify-content: space-between; }
+    .btn-add { width: 100%; margin-top: 5px; }
+    .dropdown-content { width: calc(100vw - 40px); right: -10px; }
+}
+.rodape {
+background-color: #2c3e50; /* Cor escura igual ao Admin */
+color: white;
+padding: 40px 20px 20px;
+margin-top: 50px;
+}
+/*footer*/
+.rodape-container {
+display: flex;
+justify-content: space-around;
+flex-wrap: wrap; /* Para funcionar no celular */
+max-width: 1200px;
+margin: 0 auto;
+gap: 20px;
+}
+
+.rodape-info, .rodape-links, .rodape-contato {
+flex: 1;
+min-width: 200px;
+}
+
+.rodape h3, .rodape h4 {
+color: #c2c4c3; /* Verde do WhatsApp */
+margin-bottom: 15px;
+}
+
+.rodape ul {
+list-style: none;
+padding: 0;
+}
+
+.rodape ul li { margin-bottom: 10px; }
+
+.rodape a {
+color: #bdc3c7;
+text-decoration: none;
+transition: 0.3s;
+}
+
+.rodape a:hover { color: white; }
+
+.rodape-direitos {
+text-align: center;
+border-top: 1px solid #92a0ae;
+margin-top: 30px;
+padding-top: 20px;
+font-size: 13px;
+color: #95a5a6;
+}
+/*sobre*/
+.secao-sobre {
+padding: 60px 20px;
+background-color: white;
+}
+
+.sobre-container {
+max-width: 1100px;
+margin: 0 auto;
+display: flex;
+align-items: center;
+gap: 40px;
+flex-wrap: wrap; /* Faz um ficar embaixo do outro no celular */
+}
+
+.sobre-imagem {
+flex: 1;
+min-width: 300px;
+}
+
+.sobre-imagem img {
+width: 99%;
+border-radius: 15px;
+}
+
+.sobre-texto {
+flex: 1.5;
+min-width: 300px;
+}
+
+.sobre-texto h2 {
+font-size: 32px;
+color: #2c3e50;
+margin-bottom: 10px;
+}
+
+.linha-verde {
+width: 60px;
+height: 4px;
+border: none;
+margin-left: 0;
+margin-bottom: 20px;
+}
+
+.sobre-texto p {
+line-height: 1.8;
+color: #555;
+margin-bottom: 15px;
+}
+
+.nossos-valores {
+display: flex;
+gap: 15px;
+font-weight: bold;
+color: #2c3e50;
+margin-top: 20px;
+}

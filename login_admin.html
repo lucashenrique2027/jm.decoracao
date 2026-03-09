@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel JM | Gestão Completa & Segura</title>
-    <link  rel =" icon " type =" image/png " href =" img/logoWhatsApp Image 2025-07-29 at 18.56.23.jpeg " >
+    <link rel=" icon " type=" image/png " href=" img/logoWhatsApp Image 2025-07-29 at 18.56.23.jpeg ">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="login_admin.css">
 </head>
+
 <body>
-    <script>if(sessionStorage.getItem("logado") !== "true") window.location.href = "index.html";</script>
+    <script>if (sessionStorage.getItem("logado") !== "true") window.location.href = "index.html";</script>
 
     <div class="mobile-header">
         <span>JM ADMIN</span>
@@ -19,110 +21,156 @@
     </div>
 
     <aside class="sidebar" id="sidebar">
-    <h2>JM ADMIN</h2>
-    <nav>
-        <p onclick="showTab('add-prod'); toggleSidebar()">➕ Novo Produto</p>
-        <p onclick="showTab('estoque'); toggleSidebar()">📦 Estoque & Vitrine</p>
-        <p onclick="showTab('pedidos'); toggleSidebar()">🚚 Pedidos Recebidos</p>
-        <p onclick="showTab('usuarios'); toggleSidebar()">👥 Clientes</p>
-        <p onclick="showTab('lixeira'); toggleSidebar()">🗑️ Pasta de Exclusão</p>
-        <p onclick="showTab('graficos'); toggleSidebar()">📈 Relatórios Vendas</p>
-    </nav>
-    <div style="margin-top: 30px; padding: 0 10px;">
-        <button onclick="exportarBackup()" style="width:100%; background:#3498db; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer; font-weight:bold;">📥 Backup JSON</button>
-        <button onclick="sair()" style="margin-top:12px; width:100%; background:#e74c3c; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer; font-weight:bold;">🚪 Sair</button>
-    </div>
-</aside>
-
-<main class="content">
-    <div id="msg-alerta"></div>
-
-    <section id="add-prod" class="tab-content">
-        <div class="card-dash">
-            <h3>➕ Cadastrar Novo Produto na Vitrine</h3>
-            <input type="text" id="n-nome" placeholder="Nome do Vaso">
-            <input type="number" id="n-preco" placeholder="Preço Sugerido (R$)">
-            <textarea id="n-desc" placeholder="Detalhes (Ex: Vidro temperado, 30cm)"></textarea>
-            <label style="font-size: 12px; color: #666;">Escolha a Imagem:</label>
-            <input type="file" id="n-foto" accept="image/*">
-            <button class="btn-acao" onclick="salvarProduto()">Publicar Agora</button>
+        <h2>JM ADMIN</h2>
+        <nav>
+            <p onclick="showTab('add-prod'); toggleSidebar()">➕ Novo Produto</p>
+            <p onclick="showTab('estoque'); toggleSidebar()">📦 Estoque & Vitrine</p>
+            <p onclick="showTab('pedidos'); toggleSidebar()">🚚 Pedidos Recebidos</p>
+            <p onclick="showTab('usuarios'); toggleSidebar()">👥 Clientes</p>
+            <p onclick="showTab('lixeira'); toggleSidebar()">🗑️ Pasta de Exclusão</p>
+            <p onclick="showTab('graficos'); toggleSidebar()">📈 Relatórios Vendas</p>
+        </nav>
+        <div style="margin-top: 30px; padding: 0 10px;">
+            <button onclick="exportarBackup()"
+                style="width:100%; background:#3498db; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer; font-weight:bold;">📥
+                Backup JSON</button>
+            <button onclick="sair()"
+                style="margin-top:12px; width:100%; background:#e74c3c; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer; font-weight:bold;">🚪
+                Sair</button>
         </div>
-    </section>
+    </aside>
 
-    <section id="estoque" class="tab-content" style="display:none;">
-        <div class="card-dash">
-            <h3>📦 Controle de Estoque</h3>
-            <div style="display:flex; gap:10px; background: #f0f2f5; padding: 15px; border-radius: 8px;">
-                <select id="sel-prod-estoque" style="margin:0;"></select>
-                <select id="sel-status" style="margin:0;">
-                    <option value="Disponível">✅ Disponível</option>
-                    <option value="Esgotado">❌ Esgotado</option>
-                </select>
-                <button class="btn-acao" onclick="atualizarEstoque()">Aplicar Status</button>
+    <main class="content">
+        <div id="msg-alerta"></div>
+
+        <section id="add-prod" class="tab-content">
+            <div class="card-dash">
+                <h3>➕ Cadastrar Novo Produto na Vitrine</h3>
+                <input type="text" id="n-nome" placeholder="Nome do Vaso">
+                <input type="number" id="n-preco" placeholder="Preço Sugerido (R$)">
+                <textarea id="n-desc" placeholder="Detalhes (Ex: Vidro temperado, 30cm)"></textarea>
+                <label style="font-size: 12px; color: #666;">Escolha a Imagem:</label>
+                <input type="file" id="n-foto" accept="image/*">
+                <button class="btn-acao" onclick="salvarProduto()">Publicar Agora</button>
             </div>
-            <div style="overflow-x: auto;">
-                <table id="tabela-estoque">
-                    <thead><tr><th>Produto</th><th>Valor</th><th>Status na Loja</th><th>Ação</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="pedidos" class="tab-content" style="display:none;">
-        <div class="resumo-cards">
-            <div class="mini-card"><h4>Vendas Totais (Entregue)</h4><p id="total-dinheiro" style="font-size:24px; font-weight:bold; color:#2c3e50;">R$ 0,00</p></div>
-            <div class="mini-card" style="border-left-color: #3498db;"><h4>Nº de Pedidos</h4><p id="total-pedidos-count" style="font-size:24px; font-weight:bold; color:#3498db;">0</p></div>
-        </div>
-        <div class="card-dash">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
-                <h3>🚚 Gestão de Pedidos</h3>
-                <button class="btn-acao" style="background:#444;" onclick="exportarPDF()">📄 Exportar PDF</button>
+        <section id="estoque" class="tab-content" style="display:none;">
+            <div class="card-dash">
+                <h3>📦 Controle de Estoque</h3>
+                <div style="display:flex; gap:10px; background: #f0f2f5; padding: 15px; border-radius: 8px;">
+                    <select id="sel-prod-estoque" style="margin:0;"></select>
+                    <select id="sel-status" style="margin:0;">
+                        <option value="Disponível">✅ Disponível</option>
+                        <option value="Esgotado">❌ Esgotado</option>
+                    </select>
+                    <button class="btn-acao" onclick="atualizarEstoque()">Aplicar Status</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="tabela-estoque">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Valor</th>
+                                <th>Status na Loja</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
-            <div style="overflow-x: auto;">
-                <table id="tabela-pedidos">
-                    <thead><tr><th>ID Pedido</th><th>Cliente</th><th>Produto</th><th>Status</th><th>Ação</th></tr></thead>
-                    <tbody></tbody>
-                </table>
+        </section>
+
+        <section id="pedidos" class="tab-content" style="display:none;">
+            <div class="resumo-cards">
+                <div class="mini-card">
+                    <h4>Vendas Totais (Entregue)</h4>
+                    <p id="total-dinheiro" style="font-size:24px; font-weight:bold; color:#2c3e50;">R$ 0,00</p>
+                </div>
+                <div class="mini-card" style="border-left-color: #3498db;">
+                    <h4>Nº de Pedidos</h4>
+                    <p id="total-pedidos-count" style="font-size:24px; font-weight:bold; color:#3498db;">0</p>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <section id="usuarios" class="tab-content" style="display:none;">
-        <div class="card-dash">
-            <h3>👥 Cadastro Manual de Cliente</h3>
-            <div style="display:flex; gap:10px; margin-bottom: 20px;">
-                <input type="text" id="manual-nome" placeholder="Nome Completo" style="margin:0;">
-                <input type="text" id="manual-cpf" placeholder="000.000.000-00" style="margin:0;" maxlength="14" oninput="mascararCPF(this)">
-                <button class="btn-acao" onclick="cadastrarClienteManual()">➕ Adicionar</button>
+            <div class="card-dash">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
+                    <h3>🚚 Gestão de Pedidos</h3>
+                    <button class="btn-acao" style="background:#444;" onclick="exportarPDF()">📄 Exportar PDF</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="tabela-pedidos">
+                        <thead>
+                            <tr>
+                                <th>ID Pedido</th>
+                                <th>Cliente</th>
+                                <th>Produto</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
-            <hr>
-            <h3>👥 Base de Clientes Cadastrados (Nuvem)</h3>
-            <div style="overflow-x: auto;">
-                <table id="tabela-clientes">
-                    <thead><tr><th>Nome</th><th>CPF</th><th>Ação</th></tr></thead>
-                    <tbody></tbody>
-                </table>
+        </section>
+
+        <section id="usuarios" class="tab-content" style="display:none;">
+            <div class="card-dash">
+                <h3>👥 Cadastro Manual de Cliente</h3>
+                <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                    <input type="text" id="manual-nome" placeholder="Nome Completo" style="margin:0;">
+                    <input type="text" id="manual-cpf" placeholder="000.000.000-00" style="margin:0;" maxlength="14"
+                        oninput="mascararCPF(this)">
+                    <button class="btn-acao" onclick="cadastrarClienteManual()">➕ Adicionar</button>
+                </div>
+                <hr>
+                <h3>👥 Base de Clientes Cadastrados (Nuvem)</h3>
+                <div style="overflow-x: auto;">
+                    <table id="tabela-clientes">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="lixeira" class="tab-content" style="display:none;">
-        <div class="card-dash">
-            <h3>🗑️ Pasta de Exclusão (Histórico Local)</h3>
-            <p style="font-size:12px; color:red;">Nota: A lixeira mantém apenas registros removidos nesta sessão.</p>
-            <div style="overflow-x: auto;"><table id="lixeira-pedidos"><thead><tr><th>Item</th><th>Tipo</th><th>Ação</th></tr></thead><tbody></tbody></table></div>
-        </div>
-    </section>
+        <section id="lixeira" class="tab-content" style="display:none;">
+            <div class="card-dash">
+                <h3>🗑️ Pasta de Exclusão (Histórico Local)</h3>
+                <p style="font-size:12px; color:red;">Nota: A lixeira mantém apenas registros removidos nesta sessão.
+                </p>
+                <div style="overflow-x: auto;">
+                    <table id="lixeira-pedidos">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Tipo</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
-    <section id="graficos" class="tab-content" style="display:none;">
-        <div class="card-dash">
-            <h3>📈 Volume de Vendas Diárias</h3>
-            <canvas id="chartVendas" width="400" height="150"></canvas>
-        </div>
-    </section>
-</main>
+        <section id="graficos" class="tab-content" style="display:none;">
+            <div class="card-dash">
+                <h3>📈 Volume de Vendas Diárias</h3>
+                <canvas id="chartVendas" width="400" height="150"></canvas>
+            </div>
+        </section>
+    </main>
 
-<script src="login_admin.js"></script>
+    <script src="login_admin.js"></script>
 </body>
+
 </html>

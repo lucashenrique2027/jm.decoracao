@@ -1,124 +1,131 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arte em Vidro | Vitrine</title>
-  <link  rel =" icon " type =" image/png " href =" img/logoWhatsApp Image 2025-07-29 at 18.56.23.jpeg " >
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="index.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arte em Vidro | Vitrine</title>
+    <link rel=" icon " type=" image/png " href=" img/logoWhatsApp Image 2025-07-29 at 18.56.23.jpeg ">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="index.css">
 </head>
+
 <body>
 
-<header>
-  <div class="header-container">
-    <h1 style="color: #333; margin: 0; font-size: 22px;">Arte em Vidro</h1>
-    <div class="user-menu" onclick="toggleUserMenu()">
-      <span id="nome-usuario-logado" style="font-size: 13px; color: #25D366; font-weight: bold;">Entrar / Cadastro</span>
-      <img src="https://cdn-icons-png.flaticon.com/512/3177/3177440.png" width="30">
-      <div id="dropdown-menu" class="dropdown-content" onclick="event.stopPropagation()">
-        <div id="menu-deslogado">
-          <button class="btn-acao" onclick="abrirModalEscolha()">Minha Conta</button>
-        </div>
-        <div id="menu-logado" style="display:none;">
-          <p id="info-perfil" style="font-weight:bold; margin:0;"></p>
-          <div id="status-pedidos-menu" style="margin: 10px 0;"></div>
-          <button onclick="logoutUsuario()" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Sair</button>
-        </div>
-        <hr style="margin: 10px 0; border:0; border-top: 1px solid #eee;">
-        <a href="javascript:void(0)" onclick="executarAcessoAdmin()" style="font-size: 12,5px;color: #000000;text-decoration: none;">🔐 Painel Administrativo</a>
-      </div>
-    </div>
-  </div>
-</header>
-
-<div id="vitrine" class="galeria-profissional"></div>
-
-<div id="modalEscolha" class="modal-overlay">
-    <div class="modal-box">
-        <h3>Acesse sua Conta</h3>
-        <button class="btn-acao" onclick="abrirModalLogin()">Fazer Login</button>
-        <button class="btn-acao" style="background:#444; margin-top:10px;" onclick="abrirModalCadastro()">Novo Cadastro</button>
-        <span class="link-voltar" onclick="fecharModais()">Voltar para a loja</span>
-    </div>
-</div>
-
-<div id="modalLogin" class="modal-overlay">
-    <div class="modal-box">
-        <h3>Login</h3>
-        <input type="text" id="login-cpf" placeholder="Seu CPF" oninput="mascaraCPF(this)">
-        <button class="btn-acao" onclick="fazerLogin()">Entrar</button>
-        <span class="link-voltar" onclick="abrirModalEscolha()">Voltar</span>
-    </div>
-</div>
-
-<div id="modalCadastro" class="modal-overlay">
-    <div class="modal-box">
-        <h3>Criar Cadastro</h3>
-        <input type="text" id="nome-cli" placeholder="Nome Completo">
-        <input type="text" id="cpf-cli" placeholder="CPF" oninput="mascaraCPF(this)">
-        <input type="text" id="cep-cli" placeholder="CEP" oninput="mascaraCEP(this)">
-        <input type="text" id="end-cli" placeholder="Endereço (Rua, Nº, Bairro)">
-        <textarea id="obs-cli" placeholder="Observações de entrega" rows="2"></textarea>
-        <button class="btn-acao" onclick="salvarCliente()">Finalizar Cadastro</button>
-        <span class="link-voltar" onclick="abrirModalEscolha()">Voltar</span>
-    </div>
-</div>
-
-<section id="sobre" class="secao-sobre">
-    <div class="sobre-container">
-        <div class="sobre-imagem">
-            <img src="img/logoWhatsApp Image 2025-07-29 at 18.56.23.jpeg" alt="Trabalho da JM Arte em Vidro">
-        </div>
-        
-        <div class="sobre-texto">
-            <h2>Sobre a JM Arte em Vidro</h2>
-            <hr class="linha-verde">
-            <p>
-                A <strong>JM Arte em Vidro</strong> nasceu da paixão pelo artesanato e pela elegância que o vidro 
-                proporciona aos ambientes. Localizada em Atibaia, somos especialistas em criar peças únicas 
-                que combinam resistência e sofisticação.
-            </p>
-            <p>
-                Nosso compromisso é com a qualidade total, desde a escolha da matéria-prima até o acabamento 
-                final. Cada vaso e cada peça de decoração é pensada para transformar sua casa ou escritório 
-                em um lugar mais iluminado e moderno.
-            </p>
-            <div class="nossos-valores">
-                <span>✅ Qualidade</span>
-                <span>✅ Peças Exclusivas</span>
+    <header>
+        <div class="header-container">
+            <h1 style="color: #333; margin: 0; font-size: 22px;">Arte em Vidro</h1>
+            <div class="user-menu" onclick="toggleUserMenu()">
+                <span id="nome-usuario-logado" style="font-size: 13px; color: #25D366; font-weight: bold;">Entrar /
+                    Cadastro</span>
+                <img src="https://cdn-icons-png.flaticon.com/512/3177/3177440.png" width="30">
+                <div id="dropdown-menu" class="dropdown-content" onclick="event.stopPropagation()">
+                    <div id="menu-deslogado">
+                        <button class="btn-acao" onclick="abrirModalEscolha()">Minha Conta</button>
+                    </div>
+                    <div id="menu-logado" style="display:none;">
+                        <p id="info-perfil" style="font-weight:bold; margin:0;"></p>
+                        <div id="status-pedidos-menu" style="margin: 10px 0;"></div>
+                        <button onclick="logoutUsuario()"
+                            style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Sair</button>
+                    </div>
+                    <hr style="margin: 10px 0; border:0; border-top: 1px solid #eee;">
+                    <a href="javascript:void(0)" onclick="executarAcessoAdmin()"
+                        style="font-size: 12,5px;color: #000000;text-decoration: none;">🔐 Painel Administrativo</a>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </header>
 
-<script src="index.js"></script>
-<footer class="rodape">
-    <div class="rodape-container">
-        <div class="rodape-info">
-            <h3>JM Arte em Vidro</h3>
-            <p>Transformando ambientes com elegância e qualidade.</p>
-        </div>
-        
-        <div class="rodape-links">
-            <h4>Navegação</h4>
-            <ul>
-                <li><a href="#vitrine">Produtos</a></li>
-                <li><a href="#sobre">Sobre Nós</a></li>
-                <li><a href=https://wa.me/5511972011983?text=Olá target="_blank">Falar com Consultor</a></li>
-            </ul>
-        </div>
+    <div id="vitrine" class="galeria-profissional"></div>
 
-        <div class="rodape-contato">
-            <h4>Atendimento</h4>
-            <p>📍 Atibaia, SP</p>
-            <p>📧 @gmail.com</p>
+    <div id="modalEscolha" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Acesse sua Conta</h3>
+            <button class="btn-acao" onclick="abrirModalLogin()">Fazer Login</button>
+            <button class="btn-acao" style="background:#444; margin-top:10px;" onclick="abrirModalCadastro()">Novo
+                Cadastro</button>
+            <span class="link-voltar" onclick="fecharModais()">Voltar para a loja</span>
         </div>
     </div>
-    <div class="rodape-direitos">
-        <p>&copy; 2026 JM Arte em Vidro - Todos os direitos reservados.</p>
+
+    <div id="modalLogin" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Login</h3>
+            <input type="text" id="login-cpf" placeholder="Seu CPF" oninput="mascaraCPF(this)">
+            <button class="btn-acao" onclick="fazerLogin()">Entrar</button>
+            <span class="link-voltar" onclick="abrirModalEscolha()">Voltar</span>
+        </div>
     </div>
-</footer>
+
+    <div id="modalCadastro" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Criar Cadastro</h3>
+            <input type="text" id="nome-cli" placeholder="Nome Completo">
+            <input type="text" id="cpf-cli" placeholder="CPF" oninput="mascaraCPF(this)">
+            <input type="text" id="cep-cli" placeholder="CEP" oninput="mascaraCEP(this)">
+            <input type="text" id="end-cli" placeholder="Endereço (Rua, Nº, Bairro)">
+            <textarea id="obs-cli" placeholder="Observações de entrega" rows="2"></textarea>
+            <button class="btn-acao" onclick="salvarCliente()">Finalizar Cadastro</button>
+            <span class="link-voltar" onclick="abrirModalEscolha()">Voltar</span>
+        </div>
+    </div>
+
+    <section id="sobre" class="secao-sobre">
+        <div class="sobre-container">
+            <div class="sobre-imagem">
+                <img src="img/logoWhatsApp Image 2025-07-29 at 18.56.23.jpeg" alt="Trabalho da JM Arte em Vidro">
+            </div>
+
+            <div class="sobre-texto">
+                <h2>Sobre a JM Arte em Vidro</h2>
+                <hr class="linha-verde">
+                <p>
+                    A <strong>JM Arte em Vidro</strong> nasceu da paixão pelo artesanato e pela elegância que o vidro
+                    proporciona aos ambientes. Localizada em Atibaia, somos especialistas em criar peças únicas
+                    que combinam resistência e sofisticação.
+                </p>
+                <p>
+                    Nosso compromisso é com a qualidade total, desde a escolha da matéria-prima até o acabamento
+                    final. Cada vaso e cada peça de decoração é pensada para transformar sua casa ou escritório
+                    em um lugar mais iluminado e moderno.
+                </p>
+                <div class="nossos-valores">
+                    <span>✅ Qualidade</span>
+                    <span>✅ Peças Exclusivas</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="index.js"></script>
+    <footer class="rodape">
+        <div class="rodape-container">
+            <div class="rodape-info">
+                <h3>JM Arte em Vidro</h3>
+                <p>Transformando ambientes com elegância e qualidade.</p>
+            </div>
+
+            <div class="rodape-links">
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="#vitrine">Produtos</a></li>
+                    <li><a href="#sobre">Sobre Nós</a></li>
+                    <li><a href=https://wa.me/5511972011983?text=Olá target="_blank">Falar com Consultor</a></li>
+                </ul>
+            </div>
+
+            <div class="rodape-contato">
+                <h4>Atendimento</h4>
+                <p>📍 Atibaia, SP</p>
+                <p>📧 @gmail.com</p>
+            </div>
+        </div>
+        <div class="rodape-direitos">
+            <p>&copy; 2026 JM Arte em Vidro - Todos os direitos reservados.</p>
+        </div>
+    </footer>
 </body>
+
 </html>

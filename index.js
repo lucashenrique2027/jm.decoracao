@@ -15,7 +15,7 @@ const produtosFixos = [
 async function carregarVitrine() {
     const vitrine = document.getElementById('vitrine');
     const { data: produtosDB } = await supabaseClient.from('produtos').select('*');
-    
+
     vitrine.innerHTML = produtosFixos.map((p, index) => {
         // MANTIDO: Busca os dados no banco para cada produto da sua lista fixa
         const dbProd = produtosDB ? produtosDB.find(db => db.nome === p.nome) : null;
@@ -26,7 +26,7 @@ async function carregarVitrine() {
         const descHTML = dbProd && dbProd.descricao ? `<p style="font-size: 11px; color: #777; margin-bottom: 10px;">${dbProd.descricao}</p>` : "";
 
         // Substitua o trecho dentro do seu .map pelo código abaixo:
-return `
+        return `
     <div class="card-item" style="${esgotado ? 'opacity: 0.7;' : ''}">
         <div class="selo-status" style="background: ${esgotado ? '#e74c3c' : '#25D366'}">${esgotado ? 'ESGOTADO' : 'DISPONÍVEL'}</div>
         <div class="img-container"><img src="${p.img}" style="${esgotado ? 'filter: grayscale(1);' : ''}"></div>
@@ -59,8 +59,8 @@ supabaseClient.channel('jm-updates').on('postgres_changes', { event: '*', schema
 
 async function pedir(nome, index) {
     const user = JSON.parse(localStorage.getItem('user_jm_logado'));
-    if(!user) return abrirModalEscolha();
-    
+    if (!user) return abrirModalEscolha();
+
     const qtd = document.getElementById(`qtd-${index}`).value;
     const { error } = await supabaseClient.from('pedidos').insert([{
         id_unico: Math.floor(1000 + Math.random() * 9000),
@@ -70,17 +70,17 @@ async function pedir(nome, index) {
         status_entrega: "Preparo"
     }]);
 
-    if(!error) alert("Pedido enviado!");
+    if (!error) alert("Pedido enviado!");
 }
 
 async function fazerLogin() {
     const cpf = document.getElementById('login-cpf').value;
     const { data: cliente, error } = await supabaseClient.from('clientes').select('*').eq('cpf', cpf).single();
 
-    if(cliente) {
+    if (cliente) {
         localStorage.setItem('user_jm_logado', JSON.stringify(cliente));
         fecharModais();
-        location.reload(); 
+        location.reload();
     } else {
         alert("CPF não encontrado.");
     }
@@ -93,13 +93,13 @@ async function salvarCliente() {
     const cep = document.getElementById('cep-cli').value;
     const obs = document.getElementById('obs-cli').value;
 
-    if(!n || !c || !end) return alert("Preencha Nome, CPF e Endereço.");
+    if (!n || !c || !end) return alert("Preencha Nome, CPF e Endereço.");
 
     const { error } = await supabaseClient.from('clientes').insert([{
         nome: n, cpf: c, endereco: end, cep: cep, observacoes: obs
     }]);
 
-    if(!error) {
+    if (!error) {
         localStorage.setItem('user_jm_logado', JSON.stringify({ nome: n, cpf: c }));
         alert("Cadastro realizado!");
         location.reload();
@@ -110,14 +110,14 @@ async function salvarCliente() {
 
 async function verificarLogin() {
     const user = JSON.parse(localStorage.getItem('user_jm_logado'));
-    if(user) {
+    if (user) {
         document.getElementById('nome-usuario-logado').innerText = "Olá, " + user.nome.split(' ')[0];
         document.getElementById('info-perfil').innerText = user.nome;
         document.getElementById('menu-logado').style.display = 'block';
         document.getElementById('menu-deslogado').style.display = 'none';
-        
+
         const { data: pedidos } = await supabaseClient.from('pedidos').select('*').eq('cliente_cpf', user.cpf).order('id', { ascending: false });
-        if(pedidos) {
+        if (pedidos) {
             document.getElementById('status-pedidos-menu').innerHTML = pedidos.map(p => `
                 <div class="status-item">${p.produto_nome}: <b>${p.status_entrega}</b></div>
             `).join('');
@@ -128,7 +128,7 @@ async function verificarLogin() {
 function altQtd(idx, d) {
     const input = document.getElementById(`qtd-${idx}`);
     let v = parseInt(input.value) + d;
-    if(v < 1) v = 1; 
+    if (v < 1) v = 1;
     input.value = v;
 }
 
@@ -142,11 +142,11 @@ function mascaraCPF(i) { i.value = i.value.replace(/\D/g, "").replace(/(\d{3})(\
 function mascaraCEP(i) { i.value = i.value.replace(/\D/g, "").replace(/(\d{5})(\d{3})/, "$1-$2"); }
 
 // ALTERAÇÃO AQUI: Agora abre o Admin em nova aba sem tirar o cliente da Vitrine
-function executarAcessoAdmin() { 
-    if(prompt("Senha:") === "1234") { 
-        sessionStorage.setItem("logado","true"); 
-        window.open("login_admin.html", "_blank"); 
-    } 
+function executarAcessoAdmin() {
+    if (prompt("Senha:") === "1234") {
+        sessionStorage.setItem("logado", "true");
+        window.open("login_admin.html", "_blank");
+    }
 }
 
 window.onload = carregarVitrine;

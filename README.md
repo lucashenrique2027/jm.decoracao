@@ -1,18 +1,24 @@
 ## pré-requisitos
-docker instalado
+### Instale os pacotes a seguir:
+(Docker Desktop),(Git)
 
 ## baixar repositório (no terminal git bash)
-git clone https://github.com/SEU-USUARIO/SEU-REPO.git
-cd SEU-REPO
 
-## build do frontend
-cd frontend
-npm install
-npm run build
-cd ..
+```sh
+git clone https://github.com/lucashenrique2027/Loja-JM-Decoracao
+```
 
-## subir docker
+## Mude de diretório:
+```sh
+cd  "./Loja-JM-Decoracao"
+```
+
+## subir a aplicação com docker:
+### Após iniciar o Docker Desktop e no mesmo terminal rode:
+
+```sh
 docker-compose up --build
+```
 
 Docker Compose moderno:
 

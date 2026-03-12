@@ -1,0 +1,45 @@
+.secao-sobre {
+  padding: 50px 20px;
+  background: #fff;
+}
+
+.sobre-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.sobre-imagem img {
+  max-width: 300px;
+  border-radius: 8px;
+}
+
+.sobre-texto {
+  flex: 1;
+}
+
+.sobre-texto h2 {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+
+.linha-verde {
+  border: 0;
+  border-top: 3px solid #25D366;
+  width: 60px;
+  margin: 10px 0;
+}
+
+.nossos-valores {
+  margin-top: 15px;
+}
+
+.nossos-valores span {
+  display: inline-block;
+  margin-right: 15px;
+  font-weight: bold;
+  color: #25D366;
+}

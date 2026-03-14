@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 export default function Header() {
 
   function toggleUserMenu() {
-    const m = document.getElementById("dropdown-menu");
+    const menu = document.getElementById("dropdown-menu");
 
-    if (!m) return;
+    if (!menu) return;
 
-    m.style.display =
-      m.style.display === "block" ? "none" : "block";
+    menu.style.display =
+      menu.style.display === "block" ? "none" : "block";
   }
 
   return (
@@ -29,21 +29,10 @@ export default function Header() {
         <div className="user-menu">
 
           <div className="navegacao">
-            <Link to="/">Home</Link>
-            <Link to="/sobre">Sobre</Link>
-            <Link to="/login">Login</Link>
+            <Link to="/" className="links">Home</Link>
+            <Link to="/sobre" className="links">Sobre</Link>
+            <Link to="/login" className="links">Entrar/Cadastrar</Link>
           </div>
-
-          <span
-            id="nome-usuario-logado"
-            style={{
-              fontSize: "13px",
-              color: "#25D366",
-              fontWeight: "bold",
-            }}
-          >
-            Entrar / Cadastro
-          </span>
 
           <img
             src="https://cdn-icons-png.flaticon.com/512/3177/3177440.png"
@@ -51,7 +40,6 @@ export default function Header() {
             onClick={toggleUserMenu}
             style={{ cursor: "pointer" }}
           />
-
           <div
             id="dropdown-menu"
             className="dropdown-content"
@@ -59,7 +47,7 @@ export default function Header() {
 
             <div id="menu-deslogado">
 
-              <Link to="/login">
+              <Link to="/login" className="links">
                 <button className="btn-acao">
                   Minha Conta
                 </button>
@@ -91,7 +79,7 @@ export default function Header() {
 
             <hr />
 
-            <Link to="/sobre">
+            <Link to="/sobre" className="links">
               Sobre nós
             </Link>
 

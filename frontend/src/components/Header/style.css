@@ -25,11 +25,17 @@ header {
     cursor: pointer;
 }
 
+.links{
+    text-decoration: none;
+    color: #25D366;
+    font-weight: bold;
+    font-size: 14px;
+}
 .navegacao {
     display: flex;
     justify-content: space-between;
-    gap: 20px;
-    font-size: 13px;
+    gap: 50px;
+    font-size: 14px;
     color: #25D366;
     font-weight: bold;
     a {

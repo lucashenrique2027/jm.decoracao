@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
 import "./style.css";
 
-function Footer() {
+export default function Footer() {
   return (
     <footer className="rodape">
       <div className="rodape-container">
@@ -13,14 +12,17 @@ function Footer() {
         <div className="rodape-links">
           <h4>Navegação</h4>
           <ul>
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/sobre">Sobre Nós</Link></li>
-            <li><Link to="/login">Login</Link></li>
+            <li>
+              <a href="#vitrine">Produtos</a>
+            </li>
+            <li>
+              <a href="#sobre">Sobre Nós</a>
+            </li>
             <li>
               <a
                 href="https://wa.me/5511972011983?text=Olá"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noreferrer"
               >
                 Falar com Consultor
               </a>
@@ -31,16 +33,13 @@ function Footer() {
         <div className="rodape-contato">
           <h4>Atendimento</h4>
           <p>📍 Atibaia, SP</p>
-          <p>📧 jmdecoracao@email.com</p>
-          <p>📞 (11) 97201-1983</p>
+          <p>📧 @gmail.com</p>
         </div>
       </div>
 
       <div className="rodape-direitos">
-        © 2026 JM Arte em Vidro - Todos os direitos reservados
+        <p>© 2026 JM Arte em Vidro - Todos os direitos reservados.</p>
       </div>
     </footer>
   );
 }
-
-export default Footer;

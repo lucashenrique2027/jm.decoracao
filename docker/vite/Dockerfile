@@ -3,10 +3,11 @@ FROM node:20-alpine
 WORKDIR /app
 
 # copia package.json + package-lock.json para cache de dependências
-COPY docker/vite/package*.json ./frontend/
+COPY docker/vite/package*.json .
+COPY docker/vite/vite.config.js .
 
 # instala dependências
-RUN npm install --prefix frontend
+RUN npm install 
 
 # copia o restante do frontend
 COPY frontend ./frontend
@@ -15,4 +16,4 @@ COPY frontend ./frontend
 EXPOSE 5173
 
 # comando para rodar o Vite dev server
-CMD ["npm", "--prefix", "frontend", "run", "dev"]
+CMD ["npm","run", "dev"]

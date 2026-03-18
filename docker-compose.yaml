@@ -5,6 +5,14 @@ services:
     build:
       context: .
       dockerfile: docker/node/Dockerfile
+    environment:
+    - DB_HOST=postgres
+    - DB_PORT=5432
+    - 
+    - 
+    - 
+    depends_on:
+      - postgres
     ports:
       - "3000:3000"
     networks:
@@ -32,6 +40,22 @@ services:
     networks:
       - app-network
 
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: jm
+      POSTGRES_PASSWORD: jm1234
+      POSTGRES_DB: jm_decoracao
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
 
 
 networks:

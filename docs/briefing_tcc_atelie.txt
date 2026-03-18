@@ -1,0 +1,400 @@
+BRIEFING COMPLETO DO PROJETO
+
+TCC — Plataforma de Vendas para Ateliê Artesanal
+
+Vidros, Potes, Copos e Garrafas com Arte Estilizada
+
+Atibaia — SP • Stack: Vite + React + Supabase + Cloudflare
+
+1. Contexto do Negócio
+
+Este documento é o briefing de contexto completo para o desenvolvimento
+do TCC. Qualquer instância de IA ou desenvolvedor que o leia deve ser
+capaz de operar com o mesmo nível de entendimento construído ao longo
+das sessões de levantamento de requisitos.
+
+1.1 Quem é o cliente
+
+-   Dono de um ateliê artesanal em Atibaia — SP, operado há décadas
+
+-   Produz manualmente e estoca: potes, copos, garrafas e vidros com
+    desenhos estilizados
+
+-   Opera com uma equipe pequena de parceiros e colaboradores
+
+-   Possui equipe própria de entrega local
+
+-   Vende centenas de produtos por dia — volume real, não hobbyista
+
+1.2 Como vende hoje
+
+-   100% por WhatsApp: exibe fotos da galeria, cliente escolhe, paga,
+    manda localização
+
+-   Clientes chegam por indicação boca a boca e loja física
+
+-   Nenhuma presença digital estruturada — tudo manual e humano
+
+-   O próprio dono é o ponto central de atendimento, catálogo e caixa ao
+    mesmo tempo
+
+1.3 O problema real
+
+O dono não tem um problema de vendas — ele já vende. O problema é que
+ele é o único ponto de contato para tudo: exibir produtos, responder
+perguntas, receber pedidos, combinar entrega e confirmar endereço. O
+site precisa absorver as partes repetitivas e operacionais desse fluxo,
+liberando o humano para o que só ele faz: produzir e relacionar.
+
+2. Definição do Produto
+
+2.1 O que o site É
+
+Uma plataforma de catálogo e pedidos para ateliê artesanal de médio
+volume, com foco em apresentação visual de qualidade, autonomia do dono
+para gestão do catálogo e redução do atendimento manual repetitivo.
+
+2.2 O que o site NÃO É
+
+-   Não é um Shopify — sem gateway de pagamento online
+
+-   Não é marketplace — sem múltiplos vendedores
+
+-   Não é sistema de gestão de estoque em tempo real complexo
+
+-   Não é plataforma de escala nacional — atende apenas Atibaia e
+    cidades vizinhas
+
+2.3 Fluxo central do produto
+
+Cliente acessa o site (filtrado por geolocalização — Cloudflare)
+↓
+Navega pelo catálogo (modelos fixos + peças únicas)
+↓
+Chatbot responde dúvidas e sugere produtos por linguagem natural
+↓
+Cliente se cadastra com endereço completo + CEP
+↓
+Sistema valida CEP na zona de entrega (hard block se fora)
+↓
+Cliente monta pedido no site
+↓
+Pagamento combinado fora (Pix / presencial)
+↓
+Dono recebe pedido no painel com endereço, itens e observações
+↓
+Dono confirma, agenda entrega, emite nota fiscal
+
+3. Requisitos Definidos
+
+3.1 Requisitos funcionais confirmados pelo cliente
+
+-   Tela de login para o dono — dados usados para emissão de nota fiscal
+
+-   Painel de controle para gerenciar estoque: adicionar, remover e
+    editar produtos
+
+-   Catálogo público com produtos (modelos fixos + peças únicas)
+
+-   Endereço do cliente capturado no momento do pedido
+
+-   Restrição de entrega por zona geográfica — bloqueia CEP fora da área
+
+-   Campo de observação de entrega (referência, horário, portão)
+
+3.2 Requisitos técnicos definidos
+
+-   Stack: Vite + React (frontend já iniciado com cards visuais básicos)
+
+-   Backend/DB/Auth/Storage: Supabase
+
+-   Geobloqueio camada 1: Cloudflare (regras por cidade — elimina
+    tráfego que não converte)
+
+-   Deploy: Vercel ou Netlify (a definir)
+
+-   Imagens dos produtos: Supabase Storage (decisão fechada — unifica a
+    plataforma)
+
+-   Autenticação: Supabase Auth com sistema de roles
+
+3.3 Roles de usuário
+
+  --------------- ---------------------- ---------------------------------
+  Role            Quem é                 Permissões
+
+  admin           Dono do ateliê         Acesso total — produtos, pedidos,
+                                         zonas de entrega, perfil fiscal
+
+  colaborador     Parceiros do ateliê    Acesso operacional — visualizar e
+                                         gerenciar pedidos
+
+  dev             Equipe de              Acesso técnico — diagnóstico, sem
+                  desenvolvimento        interferir no negócio
+  --------------- ---------------------- ---------------------------------
+
+4. Arquitetura de Restrição Geográfica
+
+O cliente atende apenas Atibaia e cidades vizinhas com sua equipe de
+entrega própria. O site não deve criar compromissos de entrega que ele
+não consiga cumprir. A solução é em camadas:
+
+  ----------- ------------------ ------------------ ---------------------
+  Camada      Mecanismo          Objetivo           Vulnerabilidade
+                                                    aceita?
+
+  1 — CDN     Cloudflare:        Eliminar tráfego   Sim — VPNs passam,
+              geobloqueio por    que não converte   mas não é barreira de
+              cidade                                segurança
+
+  2 —         Validação de CEP   Impedir conta fora Baixa — CEP pode ser
+  Cadastro    no cadastro do     da zona            digitado errado
+              cliente                               
+
+  3 — Pedido  Revalidação de CEP Garantir endereço  Mínima
+              no momento do      real na entrega    
+              pedido                                
+
+  4 — Humana  Dono confirma      Última barreira —  Nenhuma
+              pedido no painel   decisão humana     
+              antes de aceitar                      
+  ----------- ------------------ ------------------ ---------------------
+
+Importante: geobloqueio por IP não é solução de segurança — é filtro de
+tráfego. Isso é tecnicamente honesto e deve ser documentado assim no
+TCC.
+
+5. Backlog por Épicos
+
+Épico 1 — Autenticação e Roles
+
+  ------ -------------------------- --------------------------------------
+  ID     User Story                 Critério de Aceitação
+
+  AU01   Como dono, quero fazer     Login funcional com Supabase Auth,
+         login com e-mail e senha   redirecionamento para painel admin
+
+  AU02   Como dev, quero acesso     Role dev: leitura de logs, sem acesso
+         técnico separado do        a pedidos ou produtos
+         negócio                    
+
+  AU03   Como colaborador, quero    Role colaborador: vê e atualiza
+         acessar apenas o           pedidos, não altera catálogo
+         operacional                
+
+  AU04   Como dono, quero cadastrar Formulário: nome, CPF/CNPJ, endereço —
+         meus dados para nota       salvo no perfil admin
+         fiscal                     
+
+  AU05   Como sistema, quero        Rotas privadas com redirect para login
+         proteger rotas por role    se não autenticado
+  ------ -------------------------- --------------------------------------
+
+Épico 2 — Painel Admin / Produtos
+
+  ------ -------------------------- --------------------------------------
+  ID     User Story                 Critério de Aceitação
+
+  PA01   Como admin, quero          CRUD completo + upload para Supabase
+         cadastrar produtos com     Storage
+         foto                       
+
+  PA02   Como admin, quero          Campo tipo: 'modelo fixo' (com
+         distinguir modelo fixo de  quantidade) ou 'peça única' (sem
+         peça única                 estoque)
+
+  PA03   Como admin, quero alterar  Status: disponível / sob encomenda /
+         status do produto          esgotado — visível no catálogo
+
+  PA04   Como admin, quero          CRUD de CEPs/bairros permitidos +
+         gerenciar zonas de entrega toggle ativar/desativar zona
+
+  PA05   Como admin, quero ver e    Lista de pedidos com endereço, itens,
+         confirmar pedidos          status — ação de confirmar/rejeitar
+         recebidos                  
+  ------ -------------------------- --------------------------------------
+
+Épico 3 — Catálogo Público
+
+  ------ -------------------------- --------------------------------------
+  ID     User Story                 Critério de Aceitação
+
+  CA01   Como visitante, quero ver  Listagem com foto, nome, preço,
+         todos os produtos          categoria e status de disponibilidade
+
+  CA02   Como visitante, quero      Filtros: potes / copos / garrafas /
+         filtrar por categoria      vidros — aplicação instantânea
+
+  CA03   Como visitante, quero ver  Página de detalhe: fotos ampliadas,
+         detalhes do produto        descrição completa, status
+
+  CA04   Como visitante, quero      Badge visual distinguindo 'peça única'
+         saber se é peça única      de 'modelo disponível'
+  ------ -------------------------- --------------------------------------
+
+Épico 4 — Pedido e Entrega
+
+  ------ -------------------------- --------------------------------------
+  ID     User Story                 Critério de Aceitação
+
+  PE01   Como cliente, quero me     Formulário: nome, CEP, endereço,
+         cadastrar com meu endereço bairro, telefone — validação de CEP na
+                                    zona
+
+  PE02   Como cliente, quero montar Carrinho simples: adicionar produtos,
+         meu pedido no site         ver resumo, confirmar
+
+  PE03   Como cliente, quero        Campo livre: referência, horário
+         informar observações de    preferido, observações ao entregador
+         entrega                    
+
+  PE04   Como sistema, quero        Validação hard: formulário não avança
+         bloquear CEP fora da zona  com CEP inválido — mensagem clara
+
+  PE05   Como dono, quero receber   E-mail ou notificação no painel ao
+         notificação de novo pedido chegar novo pedido confirmado
+  ------ -------------------------- --------------------------------------
+
+Épico 5 — Chatbot de Catálogo
+
+  ------ -------------------------- --------------------------------------
+  ID     User Story                 Critério de Aceitação
+
+  CH01   Como visitante, quero      Chatbot responde perguntas sobre o
+         tirar dúvidas sobre        catálogo usando dados reais do
+         produtos em linguagem      Supabase
+         natural                    
+
+  CH02   Como visitante, quero      'Quero algo floral para presente' →
+         receber sugestões por      bot sugere produtos do catálogo
+         estilo/uso                 compatíveis
+
+  CH03   Como visitante, quero ser  Bot retorna link/card do produto
+         encaminhado ao produto     correspondente na conversa
+         certo                      
+
+  CH04   Como sistema, quero que o  Bot usa apenas dados do catálogo
+         bot saiba apenas o que     cadastrado — sem inventar produtos
+         existe                     
+  ------ -------------------------- --------------------------------------
+
+Épico 6 — Identidade e Galeria
+
+  ------ -------------------------- --------------------------------------
+  ID     User Story                 Critério de Aceitação
+
+  ID01   Como visitante, quero      Página 'Sobre': história, quem produz,
+         conhecer a história do     valores da marca
+         ateliê                     
+
+  ID02   Como visitante, quero ver  Galeria de inspirações: fotos em
+         produtos em contexto de    ambientes reais — gerenciável pelo
+         uso                        admin
+
+  ID03   Como visitante, quero      Página de contato com endereço e
+         saber onde fica a loja     horários de atendimento presencial
+  ------ -------------------------- --------------------------------------
+
+6. Sprints Planejados
+
+Os primeiros 4 sprints são independentes de decisões pendentes —
+entregam o núcleo do produto sem depender de reuniões futuras com o
+cliente.
+
+  --------- ------------------ --------------- ---------------------------
+  Sprint    Foco               Épicos          Dependência
+
+  Sprint 1  Autenticação e     AU01–AU05       Nenhuma — base técnica
+            Roles                              
+
+  Sprint 2  Painel Admin +     PA01–PA05       Sprint 1 concluído
+            Produtos                           
+
+  Sprint 3  Catálogo Público   CA01–CA04       Sprint 2 (dados reais)
+
+  Sprint 4  Identidade +       ID01–ID03       Sprint 2 (upload admin)
+            Galeria                            
+
+  Sprint 5  Pedido + Entrega + PE01–PE05       Reunião com cliente
+            CEP                                confirmada
+
+  Sprint 6  Chatbot de         CH01–CH04       Sprint 2 (catálogo
+            Catálogo                           populado)
+  --------- ------------------ --------------- ---------------------------
+
+7. Decisões Pendentes — Reunião com Cliente
+
+Os itens abaixo não foram definidos até o momento deste documento e
+dependem de reunião formal com o cliente:
+
+-   Como o cliente finaliza a compra: WhatsApp qualificado (Caminho A)
+    ou pedido direto no site (Caminho B) — baseado nos requisitos já
+    levantados, o Caminho B é o mais aderente ao negócio
+
+-   Lista exata de cidades/CEPs na zona de entrega
+
+-   Fluxo de pagamento: Pix com comprovante enviado ou confirmação
+    manual pelo dono
+
+-   Se colaboradores também gerenciam entregas ou apenas visualizam
+    pedidos
+
+8. Stack Técnica Definida
+
+  --------------- ------------------ ------------------------------------
+  Camada          Tecnologia         Justificativa
+
+  Frontend        Vite + React       Já iniciado — cards visuais básicos
+                                     existentes
+
+  Backend / DB    Supabase           Auth + DB + Storage em uma
+                  (PostgreSQL)       plataforma — sem fragmentação
+
+  Autenticação    Supabase Auth +    Roles nativos, integrado ao banco,
+                  JWT                sem overhead
+
+  Storage de      Supabase Storage   Elimina a dúvida sobre onde guardar
+  imagens                            fotos — unifica tudo
+
+  CDN / Firewall  Cloudflare         Geobloqueio por cidade
+                                     gratuitamente, sem código
+
+  Deploy          Vercel ou Netlify  A definir — ambos compatíveis com
+                                     Vite
+
+  Chatbot         API Claude /       Consulta catálogo do Supabase em
+                  OpenAI + RAG       tempo real
+                  simples            
+  --------------- ------------------ ------------------------------------
+
+9. Princípios que Guiam o Produto
+
+Estes princípios devem ser usados para avaliar qualquer decisão de
+produto ou técnica durante o desenvolvimento:
+
+1. O software absorve o repetitivo, o humano fica com o relacional.
+
+O dono já resolve tudo — o sistema poupa trabalho, não substitui
+julgamento.
+
+2. Não criar compromisso que o negócio não consegue cumprir.
+
+Validação de CEP é proteção ao dono, não burocracia para o cliente.
+
+3. Simplicidade operacional para o admin.
+
+O dono não é técnico. Qualquer feature do painel precisa ser usável sem
+treinamento.
+
+4. A ausência de carrinho convencional é decisão, não limitação.
+
+Produtos artesanais têm variação e personalização. A conversa com o
+cliente é parte do valor.
+
+5. Cada camada de restrição geográfica tem um objetivo diferente.
+
+Cloudflare filtra tráfego. CEP bloqueia pedido inentregável. Humano
+decide o edge case.
+
+Documento gerado por sessão de levantamento de requisitos — TCC Ateliê
+Artesanal Atibaia

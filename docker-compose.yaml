@@ -5,12 +5,8 @@ services:
     build:
       context: .
       dockerfile: docker/node/Dockerfile
-    environment:
-    - DB_HOST=postgres
-    - DB_PORT=5432
-    - 
-    - 
-    - 
+    env_file:
+      - .env
     depends_on:
       - postgres
     ports:

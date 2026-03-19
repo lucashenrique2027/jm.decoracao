@@ -13,6 +13,14 @@ git clone https://github.com/lucashenrique2027/Loja-JM-Decoracao
 cd  "./Loja-JM-Decoracao"
 ```
 
+## Use as variaveis:
+Altere o nome do arquivo ".env.example" para -> ".env".
+de forma mais automatica rode:
+
+```sh
+mv .env.example .env
+```
+
 ## subir a aplicação com docker:
 ### Após iniciar o Docker Desktop e no mesmo terminal rode:
 

@@ -12,6 +12,9 @@
   "type": "module",
   "dependencies": {
     "express": "^5.2.1",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "drizzle-orm": "^0.41.0",
+    "pg": "^8.13.3",
+    "pg-hstore": "^2.3.4"
   }
 }

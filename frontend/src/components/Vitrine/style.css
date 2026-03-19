@@ -1,0 +1,104 @@
+.galeria-profissional {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #eee;
+    transition: 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.selo-status {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    padding: 5px 12px;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 4px;
+    z-index: 10;
+    color: white;
+    text-transform: uppercase;
+}
+
+.img-container img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #eee;
+}
+
+.compra-acoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 15px;
+}
+
+.controle-qtd {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 5px;
+    border: 1px solid #bbb;
+    overflow: hidden;
+}
+
+.btn-qtd {
+    background: #eee;
+    border: none;
+    width: 35px;
+    height: 38px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.qtd-seletor {
+    width: 45px;
+    height: 38px;
+    text-align: center;
+    border: none;
+    background: #fff;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.btn-add {
+    flex: 1;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    height: 38px;
+}
+
+.btn-info {
+    width: 100%;
+    margin-top: 8px;
+    background-color: #f8f9fa;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+}

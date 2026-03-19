@@ -1,71 +1,68 @@
 import { useState } from "react";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
+
 import "./style.css";
 
-function Login() {
-  const [modal, setModal] = useState(null);
-
-  const abrirModal = (tipo) => setModal(tipo);
-  const fecharModal = () => setModal(null);
+export default function Login() {
+  const [modal, setModal] = useState("escolha");
 
   return (
-    <main>
-      <h2>Área do Cliente</h2>
-      <button className="btn-acao" onClick={() => abrirModal("escolha")}>
-        Acessar Conta
-      </button>
+    <>
+      <Header />
 
-      {modal === "escolha" && (
-        <div className="modal-overlay">
+      <div className="acesso-container">
+        {/* ESCOLHA */}
+        {modal === "escolha" && (
           <div className="modal-box">
             <h3>Acesse sua Conta</h3>
-            <button className="btn-acao" onClick={() => abrirModal("login")}>
+            <button className="btn-acao" onClick={() => setModal("login")}>
               Fazer Login
             </button>
-            <button
-              className="btn-acao"
-              style={{ background: "#444", marginTop: "10px" }}
-              onClick={() => abrirModal("cadastro")}
-            >
+            <button className="btn-acao" onClick={() => setModal("cadastro")}>
               Novo Cadastro
             </button>
-            <span className="link-voltar" onClick={fecharModal}>
-              Voltar para a loja
-            </span>
           </div>
-        </div>
-      )}
+        )}
 
-      {modal === "login" && (
-        <div className="modal-overlay">
+        {/* LOGIN */}
+        {modal === "login" && (
           <div className="modal-box">
             <h3>Login</h3>
-            <input type="text" placeholder="Seu CPF" />
+            <span>Email</span>
+            <input placeholder="Email" type="email" />
+            <span>Senha</span>
+            <input placeholder="Senha" type="password" />
             <button className="btn-acao">Entrar</button>
-            <span className="link-voltar" onClick={() => abrirModal("escolha")}>
+            <span className="link-voltar" onClick={() => setModal("escolha")}>
               Voltar
             </span>
           </div>
-        </div>
-      )}
+        )}
 
-      {modal === "cadastro" && (
-        <div className="modal-overlay">
+        {/* CADASTRO */}
+        {modal === "cadastro" && (
           <div className="modal-box">
             <h3>Criar Cadastro</h3>
-            <input type="text" placeholder="Nome Completo" />
-            <input type="text" placeholder="CPF" />
-            <input type="text" placeholder="CEP" />
-            <input type="text" placeholder="Endereço (Rua, Nº, Bairro)" />
-            <textarea placeholder="Observações de entrega" rows="2"></textarea>
+            <span>Nome</span>
+            <input placeholder="Nome" />
+            <span>CPF</span>
+            <input placeholder="CPF" />
+            <span>CEP</span>
+            <input placeholder="CEP" />
+            <span>Endereço</span>
+            <input placeholder="Endereço" />
+            <span>Observações</span>
+            <textarea placeholder="Observações" />
             <button className="btn-acao">Finalizar Cadastro</button>
-            <span className="link-voltar" onClick={() => abrirModal("escolha")}>
+            <span className="link-voltar" onClick={() => setModal("escolha")}>
               Voltar
             </span>
           </div>
-        </div>
-      )}
-    </main>
+        )}
+      </div>
+
+      <Footer />
+    </>
   );
 }
-
-export default Login;

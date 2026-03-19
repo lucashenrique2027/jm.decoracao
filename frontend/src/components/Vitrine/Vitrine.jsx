@@ -1,12 +1,12 @@
 import { useState } from "react";
 import "./style.css";
 
-import vasoGirassol from "../../components/assets/vaso-girasol.jpeg";
-import jogoSuqueira from "../../components/assets/6-copos-suqueira.png";
-import poteSustentavel from "../../components/assets/pote-sustentavel.png";
-import vasoDesignGeometrico from "../../components/assets/vaso-design-geometrico.png";
-import tacaCristal from "../../components/assets/taça-cristal.png";
-import vasoColoriquadra from "../../components/assets/vaso-coloriquadra.png";
+import vasoGirassol from "../../assets/vaso-girasol.jpeg";
+import jogoSuqueira from "../../assets/6-copos-suqueira.png";
+import poteSustentavel from "../../assets/pote-sustentavel.png";
+import vasoDesignGeometrico from "../../assets/vaso-design-geometrico.png";
+import tacaCristal from "../../assets/taça-cristal.png";
+import vasoColoriquadra from "../../assets/vaso-coloriquadra.png";
 
 const produtosFixos = [
   { img: vasoGirassol, nome: "Vaso Girassol", alt: "Vaso Girassol amarelo decorativo" },

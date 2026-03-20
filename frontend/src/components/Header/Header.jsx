@@ -15,16 +15,11 @@ export default function Header() {
   return (
     <header>
       <div className="header-container">
-
-        <h1
-          style={{
-            color: "#333",
-            margin: 0,
-            fontSize: "22px"
-          }}
-        >
-          Arte em Vidro
-        </h1>
+        
+      <h1 className="titulo">
+        <img src="src/assets/logo" alt="icone" className="icone" />
+        Arte em Vidro
+      </h1>
 
         <div className="user-menu">
 

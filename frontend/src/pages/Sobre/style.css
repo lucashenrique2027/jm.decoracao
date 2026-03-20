@@ -14,8 +14,29 @@
 
 .sobre-imagem {
     flex: 1;
-    min-width: 300px;
-}
+  }
+  
+  /* 🖥️ Desktop */
+  .sobre-imagem .icone {
+    width: 40px;
+    height: 40px;
+  }
+  
+  /* 📱 Tablet */
+  @media (max-width: 1024px) {
+    .sobre-imagem .icone {
+      width: 32px;
+      height: 32px;
+    }
+  }
+  
+  /* 📱 Celular */
+  @media (max-width: 600px) {
+    .sobre-imagem .icone {
+      width: 24px;
+      height: 24px;
+    }
+  }
 
 .sobre-imagem img {
     width: 99%;

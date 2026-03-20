@@ -13,7 +13,7 @@ export default function Sobre() {
 
           <div className="sobre-imagem">
             <img
-              src="/src/assets/logoWhatsApp Image 2025-07-29 at 18.56.23.jpeg"
+              src="/src/assets/logo.jpeg"
               alt="logo"
             />
           </div>

@@ -1,67 +1,66 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-
-import "./style.css";
+import logoJm from "../../assets/logo.jpeg"; // Certifique-se do caminho da sua logo
 
 export default function Login() {
-  const [modal, setModal] = useState("escolha");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
+  const handleEntrarNoSistema = (e) => {
+    e.preventDefault();
+    // Lógica de validação simples
+    if (email === "admin@jm.com" && senha === "123") {
+      // Abre o painel administrativo em uma NOVA ABA
+      window.open("/admin", "_blank");
+    } else {
+      alert("Acesso restrito ao administrador.");
+    }
+  };
 
   return (
     <>
       <Header />
+      <div className="container d-flex align-items-center justify-content-center my-5" style={{ minHeight: "70vh" }}>
+        <div className="card shadow-lg p-4 border-0 text-center" style={{ maxWidth: "400px", width: "100%" }}>
+          
+          <img src={logoJm} alt="JM Decoração" className="rounded-circle mx-auto mb-3" style={{ width: "80px" }} />
+          <h3 className="fw-bold">Login</h3>
+          <p className="text-muted small">Acesso Restrito</p>
 
-      <div className="acesso-container">
-        {/* ESCOLHA */}
-        {modal === "escolha" && (
-          <div className="modal-box">
-            <h3>Acesse sua Conta</h3>
-            <button className="btn-acao" onClick={() => setModal("login")}>
-              Fazer Login
+          <form onSubmit={handleEntrarNoSistema}>
+            <div className="mb-3 text-start">
+              <label className="form-label small">E-mail</label>
+              <input 
+                type="email" 
+                className="form-control" 
+                placeholder="admin@jm.com"
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+              />
+            </div>
+            <div className="mb-3 text-start">
+              <label className="form-label small">Senha</label>
+              <input 
+                type="password" 
+                className="form-control" 
+                placeholder="••••••"
+                onChange={(e) => setSenha(e.target.value)}
+                required 
+              />
+            </div>
+            
+            <button type="submit" className="btn btn-primary w-100 mb-3">
+              Entrar
             </button>
-            <button className="btn-acao" onClick={() => setModal("cadastro")}>
-              Novo Cadastro
-            </button>
-          </div>
-        )}
+          </form>
 
-        {/* LOGIN */}
-        {modal === "login" && (
-          <div className="modal-box">
-            <h3>Login</h3>
-            <span>Email</span>
-            <input placeholder="Email" type="email" />
-            <span>Senha</span>
-            <input placeholder="Senha" type="password" />
-            <button className="btn-acao">Entrar</button>
-            <span className="link-voltar" onClick={() => setModal("escolha")}>
-              Voltar
-            </span>
-          </div>
-        )}
-
-        {/* CADASTRO */}
-        {modal === "cadastro" && (
-          <div className="modal-box">
-            <h3>Criar Cadastro</h3>
-            <span>Nome</span>
-            <input placeholder="Nome" />
-            <span>CPF</span>
-            <input placeholder="CPF" />
-            <span>CEP</span>
-            <input placeholder="CEP" />
-            <span>Endereço</span>
-            <input placeholder="Endereço" />
-            <span>Observações</span>
-            <textarea placeholder="Observações" />
-            <button className="btn-acao">Finalizar Cadastro</button>
-            <span className="link-voltar" onClick={() => setModal("escolha")}>
-              Voltar
-            </span>
-          </div>
-        )}
+          <Link to="/" className="text-decoration-none text-muted small">
+            <i className="bi bi-arrow-left me-1"></i> Voltar para a Página Inicial
+          </Link>
+        </div>
       </div>
-
       <Footer />
     </>
   );

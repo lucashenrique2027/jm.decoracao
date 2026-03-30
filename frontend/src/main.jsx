@@ -12,10 +12,9 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
 
       <Routes>
-  <Route path="/" element={<Home />} />
+  <Route path="/" element={<Home />} />  {/* O Link to="/" procura este caminho */}
   <Route path="/login" element={<Login />} />
-  <Route path="/admin" element={<Admin />} /> {/* Esta linha é obrigatória */}
-  <Route path="/sobre" element={<Sobre />} />
+  <Route path="/admin" element={<Admin />} />
 </Routes>
 
     </BrowserRouter>

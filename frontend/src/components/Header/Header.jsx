@@ -1,84 +1,29 @@
+import { Link } from 'react-router-dom';
 import "./style.css";
-import { Link } from "react-router-dom";
 
 export default function Header() {
-
-  function toggleUserMenu() {
-    const menu = document.getElementById("dropdown-menu");
-
-    if (!menu) return;
-
-    menu.style.display =
-      menu.style.display === "block" ? "none" : "block";
-  }
-
   return (
-    <header>
-      <div className="header-container">
-        
-      <h1 className="titulo">
-        <img src="src/assets/logo" alt="icone" className="icone" />
-        Arte em Vidro
-      </h1>
+    <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm p-3">
+      <div className="container">
+        {/* Logo que volta para a Home */}
+        <Link className="navbar-brand fw-bold" to="/">
+          Arte em Vidro
+        </Link>
 
-        <div className="user-menu">
+        <div className="d-flex align-items-center">
+          {/* Links de Navegação */}
+          <Link className="nav-link me-3 text-success" to="/">Home</Link>
+          <Link className="nav-link me-3 text-success" to="/sobre">Sobre</Link>
+          
+          {/* O NOVO LUGAR DO ADMIN */}
+          <Link className="nav-link me-3 text-danger fw-bold" to="/login">
+            Admin
+          </Link>
 
-          <div className="navegacao">
-            <Link to="/" className="links">Home</Link>
-            <Link to="/sobre" className="links">Sobre</Link>
-            <Link to="/login" className="links">Entrar/Cadastrar</Link>
-          </div>
-
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3177/3177440.png"
-            width="30"
-            onClick={toggleUserMenu}
-            style={{ cursor: "pointer" }}
-          />
-          <div
-            id="dropdown-menu"
-            className="dropdown-content"
-          >
-
-            <div id="menu-deslogado">
-
-              <Link to="/login" className="links">
-                <button className="btn-acao">
-                  Minha Conta
-                </button>
-              </Link>
-
-            </div>
-
-            <div
-              id="menu-logado"
-              style={{ display: "none" }}
-            >
-              <p id="info-perfil"></p>
-
-              <div id="status-pedidos-menu"></div>
-
-              <button
-                style={{
-                  color: "red",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                }}
-              >
-                Sair
-              </button>
-
-            </div>
-
-            <hr />
-
-            <Link to="/sobre" className="links">
-              Sobre nós
-            </Link>
-
-          </div>
+          {/* Botão de Entrar/Cadastrar que você já tem */}
+          <Link className="btn btn-outline-primary btn-sm d-flex align-items-center" to="/login">
+            Entrar/Cadastrar <i className="bi bi-person-circle ms-2"></i>
+          </Link>
         </div>
       </div>
     </header>

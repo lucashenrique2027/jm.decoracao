@@ -13,14 +13,13 @@ header {
     align-items: center;
     gap: 8px;
 }
-  
+
 .icone {
     width: 20px;
     height: 20px;
 }
 
 .header-container {
-    
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -37,12 +36,13 @@ header {
     cursor: pointer;
 }
 
-.links{
+.links {
     text-decoration: none;
     color: #25D366;
     font-weight: bold;
     font-size: 14px;
 }
+
 .navegacao {
     display: flex;
     justify-content: space-between;
@@ -50,13 +50,15 @@ header {
     font-size: 14px;
     color: #25D366;
     font-weight: bold;
-    a {
-        text-decoration: none;
-        color: inherit;
-        :hover {
-            text-decoration: underline;
-        }
-    }
+}
+
+.navegacao a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navegacao a:hover {
+    text-decoration: underline;
 }
 
 .dropdown-content {
@@ -82,4 +84,41 @@ header {
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
+}
+
+/* ── Botão do Carrinho ── */
+.btn-carrinho {
+    position: relative;
+    background: none;
+    border: 2px solid #25D366;
+    border-radius: 10px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #25D366;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.btn-carrinho:hover {
+    background: #f0fff4;
+}
+
+/* Contador de itens no carrinho */
+.btn-carrinho-contador {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #25D366;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

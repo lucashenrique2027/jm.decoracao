@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import express from 'express';
 import listarProdutos from './API/produtosController.js';
+import teste from './queries/teste/teste.js';
 
 export default (function(){
 
@@ -8,6 +9,7 @@ export default (function(){
 
     router.use('/produtos',listarProdutos)
 
+    router.use('/teste', teste);
 
     return router;
 

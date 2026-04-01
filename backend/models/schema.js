@@ -6,6 +6,12 @@ export const jm = pgSchema('jm');
 export const userRoleEnum = jm.enum('user_role', ['admin', 'colaborador', 'cliente']);
 export const statusPedidoEnum = jm.enum('status_pedido', ['pendente', 'confirmado', 'rejeitado', 'entregue']);
 
+// TESTE
+export const teste = jm.table("teste", {
+  id: serial("id").primaryKey(),
+  nome: text("nome").notNull(),
+});
+
 // USUÁRIOS 
 export const usuarios = jm.table('usuarios', {
   id: serial('id').primaryKey(),

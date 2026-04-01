@@ -1,17 +1,13 @@
 import { Router } from 'express';
 import express from 'express';
+import listarProdutos from './API/produtosController.js';
 
 export default (function(){
+
     const router = Router();
 
+    router.use('/produtos',listarProdutos)
 
-    router.get('/api', (req,res) => {
-        res.json({ message: 'api funcionando'});
-    });
-
-    router.get('/health', (req, res) => {
-        res.json({ status: 'ok' });
-    });
 
     return router;
 

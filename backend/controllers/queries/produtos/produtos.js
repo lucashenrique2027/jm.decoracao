@@ -1,20 +1,20 @@
 import { db } from '../../../models/db.js';
+import { produtos } from '../../../models/schema.js';
 import { eq } from 'drizzle-orm';
 
-// VITRINE
-
-// Todos os produtos disponíveis (vitrine pública)
-
-export const listarProtudosDisponiveis = async (req,res) =>{
-    return await db.select().from().produtos().where(eq(produtos.disponivel, true));
+export const listarProdutos = async (req, res) => {
+    const data = await db.select().from(produtos);
+    res.json(data);
 }
 
-export const buscarProdutoPorId = async (req,res) =>{
+export const buscarProdutoPorId = async (req, res) => {
     const { id } = req.params;
-    return await db.select().from().produtos().where(eq(produtos.id, id));
+    const data = await db.select().from(produtos).where(eq(produtos.id, Number(id)));
+    res.json(data[0] ?? null);
 }
 
-export const buscarProdutoPorCategoria = async (req,res) =>{
+export const buscarProdutoPorCategoria = async (req, res) => {
     const { categoria } = req.params;
-    return await db.select().from().produtos().where(eq(produtos.categoria, categoria));
+    const data = await db.select().from(produtos).where(eq(produtos.categoria, categoria));
+    res.json(data);
 }

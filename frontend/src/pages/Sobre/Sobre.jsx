@@ -1,5 +1,7 @@
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
+// IMPORTANTE: Importe a imagem aqui
+import logoJm from "../../../public/logo.jpeg"; 
 
 import "./style.css";
 
@@ -12,16 +14,15 @@ export default function Sobre() {
         <div className="sobre-container">
 
           <div className="sobre-imagem">
+            {/* Use a variável importada entre chaves */}
             <img
-              src="/src/assets/logo.jpeg"
-              alt="logo"
+              src={logoJm}
+              alt="Logo JM Arte em Vidro"
             />
           </div>
 
           <div className="sobre-texto">
-
             <h2>Sobre a JM Arte em Vidro</h2>
-
             <hr className="linha-verde" />
 
             <p>
@@ -38,7 +39,6 @@ export default function Sobre() {
               <span>✅ Qualidade</span>
               <span>✅ Peças Exclusivas</span>
             </div>
-
           </div>
 
         </div>

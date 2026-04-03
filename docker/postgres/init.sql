@@ -8,6 +8,12 @@ CREATE TYPE jm.user_role AS ENUM ('admin', 'colaborador', 'cliente');
 -- ─── STATUS DO PEDIDO ───────────────────────────────────
 CREATE TYPE jm.status_pedido AS ENUM ('pendente', 'confirmado', 'rejeitado', 'entregue');
 
+-- ─── TESTES ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS jm.teste(
+  id SERIAL PRIMARY KEY,
+  nome TEXT NOT NULL
+);
+
 -- ─── USUÁRIOS (admin e colaboradores) ───────────────────
 CREATE TABLE IF NOT EXISTS jm.usuarios (
   id SERIAL PRIMARY KEY,

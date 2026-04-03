@@ -1,66 +1,53 @@
-.acesso-container {
+/* Estilo para o botão primário (Entrar) */
+.btn-primary {
+    background-color: #25D366 !important; 
+    border-color: #25D366 !important;
+    color: white !important; /* Cor do texto branca */
+}
+
+/* Efeito ao passar o mouse (um pouco mais escuro) */
+.btn-primary:hover {
+    background-color: #1ebe57 !important; 
+    border-color: #1ebe57 !important;
+}
+
+/* Estilo para o botão de contorno (Novo Cadastro) */
+.btn-outline-primary {
+    color: #25D366 !important;
+    border-color: #25D366 !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #25D366 !important;
+    color: white !important;
+}
+
+/* Estilo para o link de 'Voltar' */
+.btn-link {
+    color: #25D366 !important;
+}
+
+/* Estilo para o botão do olho (mostrar/ocultar senha) */
+.btn-olho {
+    background: white !important;
+    border: 1px solid #dee2e6 !important;
+    border-left: none !important; /* Faz o "encaixe" perfeito com o input */
+    color: #6c757d !important; /* Cor cinza profissional para o ícone */
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 50vh;         
-    gap: 20px;
-    background: rgb(245, 245, 245);
-    padding: 20px;
+    padding: 0 15px;
 }
 
-.modal-box {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
-    text-align: left;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+/* Efeito ao passar o mouse no botão do olho */
+.btn-olho:focus, .btn-olho:active, .btn-olho:hover {
+    background: white !important;
+    color: #25D366 !important; /* Muda para o seu verde ao passar o mouse */
+    box-shadow: none !important;
+    outline: none !important;
 }
 
-
-.modal-box span {
-    display: block;
-    font-size: 14px;
-    font-weight: bold;
-    margin-top: 10px;
-    color: #333;
-}
-
-input,
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    margin-top: 4px;
-    box-sizing: border-box;
-    font-size: 14px;
-}
-
-textarea {
-    resize: vertical;
-}
-
-.btn-acao {
-    background: #25D366;
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 12px;
-}
-
-.link-voltar {
-    display: block;
-    margin-top: 10px;
-    color: #666;
-    font-size: 13px;
-    cursor: pointer;
-    text-decoration: underline;
-    text-align: center;
+/* Ajuste para o input que fica ao lado do olho */
+.input-senha {
+    border-right: none !important;
 }

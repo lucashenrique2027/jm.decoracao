@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCarrinho } from "../../context/CarrinhoContext";
 import "./style.css";
 
 import vasoGirassol from "../../assets/vaso-girasol.jpeg";
@@ -19,6 +20,9 @@ const produtosFixos = [
 
 export default function Vitrine() {
   const [quantidades, setQuantidades] = useState(Array(produtosFixos.length).fill(1));
+  
+  // Pega a função adicionarItem do contexto do carrinho
+  const { adicionarItem } = useCarrinho();
 
   const altQtd = (idx, delta) => {
     setQuantidades(prev => {
@@ -26,11 +30,6 @@ export default function Vitrine() {
       nova[idx] = Math.max(1, nova[idx] + delta);
       return nova;
     });
-  };
-
-  const pedir = (nome, preco, qtd) => {
-    const total = (preco * qtd).toFixed(2);
-    alert(`Pedido: ${nome}\nQuantidade: ${qtd}\nTotal: R$ ${total}`);
   };
 
   return (
@@ -44,8 +43,7 @@ export default function Vitrine() {
             <img src={p.img} alt={p.alt} />
           </div>
           <p className="mb-1"><b>{p.nome}</b></p>
-          
-          {/* EXIBIÇÃO DO PREÇO */}
+
           <p className="text-success fw-bold mb-2">
             R$ {p.preco.toFixed(2).replace('.', ',')}
           </p>
@@ -56,11 +54,17 @@ export default function Vitrine() {
               <input type="number" value={quantidades[index]} readOnly className="qtd-seletor" />
               <button className="btn-qtd" onClick={() => altQtd(index, 1)}>+</button>
             </div>
-            <button className="btn-add" onClick={() => pedir(p.nome, p.preco, quantidades[index])}>
-              Pedir
+            {/* Botão agora adiciona ao carrinho em vez de dar alert */}
+            <button
+              className="btn-add"
+              onClick={() => adicionarItem(p, quantidades[index])}
+            >
+              + Carrinho
             </button>
           </div>
-          <button className="btn-info"
+
+          <button
+            className="btn-info"
             onClick={() => window.open(`https://wa.me/5511972011983?text=Olá, quero detalhes sobre: ${p.nome}`)}
           >
             WhatsApp

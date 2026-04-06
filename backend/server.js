@@ -4,6 +4,7 @@ import routes from './controllers/routes.js';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pkg from 'pg';
 import * as schema from './models/schema.js';
+import cors from 'cors';
 import { criarRotasProdutos } from './routes/produtos.js';
 import { criarRotasClientes } from './routes/clientes.js';
 import { criarRotasPedidos } from './routes/pedidos.js';
@@ -14,11 +15,23 @@ const { Pool } = pkg;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors({  // Permite que o frontend (localhost:8080) acesse a API (localhost:3000)
+  origin: 'http://localhost:8080',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true }));
 app.use(express.json());
-app.use('/api',routes);
+app.use('/uploads', express.static('uploads')); // Serve arquivos da pasta 'uploads'
+app.use('/api', routes);
 
+//const pool = new Pool({
+//  connectionString: process.env.DATABASE_URL,
+//});
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.,
+  database: process.env.DB_NAME,
 });
 
 const db = drizzle(pool, { schema });

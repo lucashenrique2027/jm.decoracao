@@ -1,26 +1,42 @@
 import express from 'express';
 import { eq } from 'drizzle-orm';
 import { produtos } from '../models/schema.js';
-
+import multer from 'multer'; // Para lidar com uploads de arquivos
+import path from 'path';
 
 export function criarRotasProdutos(db) {
   const router = express.Router();
 
-//Create -adicionar um novo produto
- router.post('/', async (req, res) => {
-    try {
-      const { nome, descricao, preco, imagemUrl, disponivel, estoque } = req.body;
+  const storage = multer.diskStorage({ // salva as imagens em pasta
+    destination: (req, file, callback) => {
+      callback(null, 'uploads/'); // Pasta onde as imagens serão salvas
+    },
+    filename: (req, file, callback) => {
+      const extensao = path.extname(file.originalname); //pega a extensão do arquivo para salvar com a extensão correta
+      const nome = Date.now() + extensao; // nomeia a imagem com base no tempo para evitar nomes iguais.
+      callback(null, nome);
+    }
+  });
+  const upload = multer({ storage });
 
+
+//Create -adicionar um novo produto
+ router.post('/', upload.single('imagemUpload'), async (req, res) => {
+    try {
+      const { nome, descricao, preco, disponivel, estoque, categoria} = req.body;
+      const imagemUpload = req.file ? `/uploads/${req.file.filename}` : null; // Salva o caminho da imagem se um arquivo foi enviado
+      
       // Validação básica
-      if (!nome || !preco) {
-        return res.status(400).json({ erro: 'Nome e preço são obrigatórios' });
+      if (!nome || !preco || !categoria) {
+        return res.status(400).json({ erro: 'Nome, preço e categoria são obrigatórios' });
       }
 
       const novoProduto = await db.insert(produtos).values({
         nome,
         descricao,
+        categoria,
         preco: preco.toString(),
-        imagemUrl,
+        imagemUpload,
         disponivel: disponivel !== false,
         estoque: estoque || 0,
       }).returning();
@@ -64,14 +80,15 @@ export function criarRotasProdutos(db) {
   router.put('/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { nome, descricao, preco, imagemUrl, disponivel, estoque } = req.body;
+      const { nome, descricao, preco, imagemUpload, disponivel, estoque, categoria } = req.body;
 
       const produtoAtualizado = await db.update(produtos)
         .set({
           nome,
           descricao,
+          categoria,
           preco: preco ? preco.toString() : undefined,
-          imagemUrl,
+          imagemUpload,
           disponivel,
           estoque,
         })

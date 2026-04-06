@@ -1,7 +1,5 @@
 import { Router } from 'express';
-import { listarProdutos,
-     buscarProdutoPorId,
-      buscarProdutoPorCategoria } from '../queries/produtos/produtos.js';
+import { listarProdutos, buscarProdutoPorId, buscarProdutoPorCategoria, criarProduto, atualizarProduto, deletarProduto } from '../queries/produtos/produtos.js';
 
 export default (function(){
     const router = Router();
@@ -15,6 +13,14 @@ export default (function(){
     // buscar produto por categoria
     router.get('/listar/categoria/:categoria',buscarProdutoPorCategoria);
 
+    // criar produto
+    router.post('/criar', criarProduto);
+
+    // atualizar produto
+    router.put('/atualizar/:id', atualizarProduto);
+
+    // deletar produto
+    router.delete('/deletar/:id', deletarProduto);
 
     return router;
 })()

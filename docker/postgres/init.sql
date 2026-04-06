@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS jm.produtos (
   nome TEXT NOT NULL,
   descricao TEXT,
   preco NUMERIC(10,2) NOT NULL DEFAULT 0,
-  imagem_url TEXT,
+  imagem_upload TEXT,
+  categoria TEXT NOT NULL,
   disponivel BOOLEAN DEFAULT true,
   estoque INTEGER DEFAULT 0,
   criado_em TIMESTAMPTZ DEFAULT NOW()

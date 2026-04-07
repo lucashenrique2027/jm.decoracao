@@ -23,7 +23,7 @@ export default function Admin() {
       formData.append("disponivel", true); // Define como disponível por padrão
       formData.append("imagemUpload", imagem);
 
-      const res = await fetch("http://localhost:3000/api/produtos", {
+      const res = await fetch("/api/produtos", {
         method: "POST",
         body: formData,
       });

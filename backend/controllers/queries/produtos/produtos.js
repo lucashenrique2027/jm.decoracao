@@ -3,8 +3,22 @@ import { produtos } from '../../../models/schema.js';
 import { eq } from 'drizzle-orm';
 
 export const listarProdutos = async (req, res) => {
-    const data = await db.select().from(produtos);
-    res.json(data);
+
+    try{
+
+        const data = await db.select({
+            id: produtos.id,
+            nome: produtos.nome,
+            descricao: produtos.descricao,
+            categoria: produtos.categoria,
+            preco: produtos.preco,
+            imagemUpload: produtos.imagemUpload, 
+            disponivel: produtos.disponivel
+        }).from(produtos);
+
+        res.json(data);
+
+    }catch(error){console.error(error); res.status(500).json({ erro: 'Erro ao listar produtos' }); return;}    
 }
 
 export const buscarProdutoPorId = async (req, res) => {

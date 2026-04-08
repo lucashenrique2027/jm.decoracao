@@ -1,5 +1,3 @@
-TRUNCATE TABLE jm.produtos RESTART IDENTITY;
-
 INSERT INTO jm.produtos (nome, descricao, preco, imagem_upload, categoria, disponivel, estoque)
 VALUES 
 ('Vaso Girassol', 'Vaso Girassol amarelo decorativo feito de cerâmica.', 89.90, 'vaso-girasol.jpeg', 'Decoração', true, 10),

@@ -1,5 +1,4 @@
 import { Router } from 'express';
-//import express from 'express';
 //import listarProdutos from './API/produtosController.js';
 import produtosRoutes from './API/produtosController.js';
 import teste from './queries/teste/teste.js';

@@ -1,8 +1,9 @@
 import express from 'express';
 import { eq } from 'drizzle-orm';
 import { pedidos, pedidoItens, produtos } from '../models/schema.js';
+import { db } from '../models/db.js';
 
-export function criarRotasPedidos(db) {
+export function criarRotasPedidos() {
   const router = express.Router();
 
   // CREATE - Cliente faz um pedido

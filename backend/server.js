@@ -47,8 +47,17 @@ app.get('/api', (req, res) => {
   res.json({ message: 'API funcionando' });
 });
 
+// Rota de Healthcheck (Fundamental para o seu Docker Compose)
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+    res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
+// Exemplo de como será a rota de Login (usando bcrypt futuramente)
+app.post('/api/login', (req, res) => {
+    const { email, senha } = req.body;
+    console.log(`Tentativa de login para: ${email}`);
+    // Aqui você faria a busca no Postgres e o bcrypt.compare
+    res.json({ message: "Recebido com sucesso no backend!" });
 });
 
 app.listen(PORT, () => {

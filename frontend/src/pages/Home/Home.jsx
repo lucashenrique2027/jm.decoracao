@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"; // Importe o Link aqui!
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import Vitrine from "../../components/Vitrine/Vitrine";
@@ -12,8 +13,10 @@ export default function Home() {
       <main className="container my-5">
         <div className="text-center mb-5">
         </div>
+        
         <Vitrine />
       </main>
+      
       <Footer />
     </>
   );

@@ -1,7 +1,6 @@
-import React, { useState } from 'react'; // Adicionado useState
+import React, { useState, useEffect } from 'react';
 
 export default function Admin() {
-  // Estado para controlar qual tela o administrador está vendo
   const [abaAtiva, setAbaAtiva] = useState("novo-produto");
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
@@ -54,7 +53,7 @@ export default function Admin() {
 return (
     <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
       
-      {/* Sidebar - Menu Lateral (JM ADMIN) */}
+      {/* Sidebar - Menu do Admin */}
       <div className="bg-dark text-white p-4 shadow" style={{ width: "260px" }}>
         <div className="text-center mb-4">
             <h4 className="fw-bold text-info">JM ADMIN</h4>
@@ -63,59 +62,37 @@ return (
         
         <ul className="nav flex-column gap-3">
           <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("novo-produto")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "novo-produto" ? "text-info fw-bold" : "text-white"}`}
-            >
+            <button onClick={() => setAbaAtiva("novo-produto")} className={`nav-link w-100 text-start border-0 bg-transparent ${abaAtiva === "novo-produto" ? "text-info fw-bold" : "text-white"}`}>
               <i className="bi bi-plus-circle-fill me-3"></i> Novo Produto
             </button>
           </li>
           <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("estoque")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "estoque" ? "text-info fw-bold" : "text-white"}`}
-            >
+            <button onClick={() => setAbaAtiva("estoque")} className={`nav-link w-100 text-start border-0 bg-transparent ${abaAtiva === "estoque" ? "text-info fw-bold" : "text-white"}`}>
               <i className="bi bi-box-seam me-3"></i> Estoque & Vitrine
-            </button>
-          </li>
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("pedidos")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "pedidos" ? "text-info fw-bold" : "text-white"}`}
-            >
-              <i className="bi bi-cart-check me-3"></i> Pedidos
-            </button>
-          </li>
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("clientes")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "clientes" ? "text-info fw-bold" : "text-white"}`}
-            >
-              <i className="bi bi-people me-3"></i> Clientes
             </button>
           </li>
         </ul>
 
-        {/* Botão para fechar a aba do sistema */}
         <div className="mt-5 pt-5">
-            <button className="btn btn-outline-danger w-100" onClick={() => window.close()}>
-              <i className="bi bi-box-arrow-right me-2"></i> Sair do Sistema
+            <button className="btn btn-outline-danger w-100" onClick={sairSistema}>
+              <i className="bi bi-box-arrow-right me-2"></i> Sair do Painel
             </button>
         </div>
       </div>
 
-      {/* Área de Conteúdo Principal Dinâmica */}
+      {/* Conteúdo Principal */}
       <div className="flex-grow-1 p-5">
-        <div className="container-fluid">
-          
-          {/* TELA: NOVO PRODUTO */}
-          {abaAtiva === "novo-produto" && (
-            <div className="card border-0 shadow-sm p-4 mb-4">
-              <h2 className="h4 fw-bold text-dark border-bottom pb-3 mb-4">
-                <i className="bi bi-pencil-square me-2 text-primary"></i> 
-                Cadastrar Novo Produto na Vitrine
-              </h2>
-              
+        <div className="d-flex justify-content-between align-items-center mb-4 bg-white p-3 shadow-sm rounded">
+          <span className="text-muted fw-bold">Painel de Gestão - JM Decorações</span>
+          <div className="badge bg-dark p-2 shadow-sm">
+            <i className="bi bi-clock me-2"></i> Tempo de Trabalho: {formatarTempo(segundos)}
+          </div>
+        </div>
+
+        {/* TELA DE CADASTRO DE PRODUTO */}
+        {abaAtiva === "novo-produto" && (
+            <div className="card border-0 shadow-sm p-4">
+              <h2 className="h4 fw-bold text-dark mb-4">Cadastrar Novo Vaso</h2>
               <form className="row g-3">
                 <div className="col-md-8">
                   <label className="form-label fw-bold">Nome do Vaso/Peça</label>
@@ -182,34 +159,7 @@ return (
                 </div>
               </form>
             </div>
-          )}
-
-          {/* TELA: ESTOQUE */}
-          {abaAtiva === "estoque" && (
-            <div className="card border-0 shadow-sm p-4">
-              <h2 className="h4 fw-bold">Estoque & Vitrine</h2>
-              <p className="text-muted">Lista de todos os produtos ativos na JM Decorações.</p>
-              {/* Aqui você pode mapear os produtos cadastrados futuramente */}
-            </div>
-          )}
-
-          {/* TELA: PEDIDOS */}
-          {abaAtiva === "pedidos" && (
-            <div className="card border-0 shadow-sm p-4">
-              <h2 className="h4 fw-bold">Pedidos Recebidos</h2>
-              <p>Gerencie as ordens de compra e envios.</p>
-            </div>
-          )}
-
-          {/* TELA: CLIENTES */}
-          {abaAtiva === "clientes" && (
-            <div className="card border-0 shadow-sm p-4">
-              <h2 className="h4 fw-bold">Base de Clientes</h2>
-              <p>Visualize os dados dos usuários que realizaram cadastro no site.</p>
-            </div>
-          )}
-
-        </div>
+        )}
       </div>
     </div>
   );

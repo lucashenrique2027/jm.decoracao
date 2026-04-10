@@ -34,20 +34,20 @@ export default function Vitrine() {
 
   return (
     <div id="vitrine" className="galeria-profissional">
-      {todosProdutos.map((p, index) => (
-        <div className="card-item" key={p.id ?? index} onClick={() => setProdutoSelecionado(p)}>
+      {todosProdutos.map((produtos, index) => (
+        <div className="card-item" key={produtos.id ?? index} onClick={() => setProdutoSelecionado(produtos)}>
           <div className="selo-status" style={{ background: "#25D366" }}>
             DISPONÍVEL
           </div>
 
           <div className="img-container">
-            <img src={p.img} alt={p.nome} />
+            <img src={produtos.img} alt={produtos.nome} />
           </div>
 
           <div className="produto-info">
-            <p className="mb-1"><b>{p.nome}</b></p>
+            <p className="mb-1"><b>{produtos.nome}</b></p>
             <p className="text-success fw-bold mb-2">
-              R$ {Number(p.preco || 0).toFixed(2).replace('.', ',')}
+              R$ {Number(produtos.preco || 0).toFixed(2).replace('.', ',')}
             </p>
           </div>
 
@@ -56,7 +56,7 @@ export default function Vitrine() {
               className="btn-add"
               onClick={(e) => {
                 e.stopPropagation();
-                adicionarItem(p, 1);
+                adicionarItem(produtos, 1);
               }}
             >
               Adicionar ao Carrinho
@@ -66,7 +66,7 @@ export default function Vitrine() {
               className="btn-info"
               onClick={(e) => {
                 e.stopPropagation();
-                const msg = encodeURIComponent(`Olá, quero detalhes sobre: ${p.nome}`);
+                const msg = encodeURIComponent(`Olá, quero detalhes sobre: ${produtos.nome}`);
                 window.open(`https://wa.me/5511972011983?text=${msg}`);
               }}
             >

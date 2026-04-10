@@ -8,6 +8,7 @@ import cors from 'cors';
 import { criarRotasProdutos } from './routes/produtos.js';
 import { criarRotasClientes } from './routes/clientes.js';
 import { criarRotasPedidos } from './routes/pedidos.js';
+import pagamentoRouter from './routes/pagamento.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(cors({  // Permite que o frontend (localhost:8080) acesse a API (localho
 app.use(express.json());
 app.use('/uploads', express.static('uploads')); // Serve arquivos da pasta 'uploads'
 app.use('/api', routes);
+app.use('/api/pagamento', pagamentoRouter);// Rota para pagamento para criar preferência de pagamento no Mercado Pago
 
 //const pool = new Pool({
 //  connectionString: process.env.DATABASE_URL,

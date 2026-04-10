@@ -12,6 +12,33 @@ export default function Carrinho() {
     total,
   } = useCarrinho();
 
+  const finalizarPedido = async () => {
+  try {
+    const res = await fetch('http://localhost:3000/api/pagamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clienteEmail: 'comprador@teste.com',
+        itens: itens.map(item => ({
+          nome: item.nome,
+          quantidade: item.quantidade,
+          preco: item.preco,
+        })),
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url; // redireciona para o Mercado Pago
+    } else {
+      alert('Erro ao iniciar pagamento!');
+    }
+  } catch {
+    alert('Erro ao conectar com o servidor!');
+  }
+};
+
   return (
     <>
       {/* Fundo escuro atrás da sidebar */}
@@ -95,7 +122,7 @@ export default function Carrinho() {
                 R$ {total.toFixed(2).replace(".", ",")}
               </span>
             </div>
-            <button className="btn btn-success w-100 fw-bold py-2 mb-2">
+            <button className="btn btn-success w-100 fw-bold py-2 mb-2" onClick={finalizarPedido}>
               Finalizar Pedido
             </button>
             <button

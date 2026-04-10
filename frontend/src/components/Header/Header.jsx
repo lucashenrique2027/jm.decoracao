@@ -1,91 +1,216 @@
-import { Link } from 'react-router-dom';
-import { useCarrinho } from '../../context/CarrinhoContext';
-import "./style.css";
-import logoJm from "../../assets/logo.jpeg";
+import React, { useState } from 'react'; // Adicionado useState
 
-export default function Header() {
-  const { totalItens, setAberto } = useCarrinho();
+export default function Admin() {
+  // Estado para controlar qual tela o administrador está vendo
+  const [abaAtiva, setAbaAtiva] = useState("novo-produto");
+  const [nome, setNome] = useState("");
+  const [preco, setPreco] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [estoque, setEstoque] = useState(0);
+  const [imagem, setImagem] = useState(null);
 
-  return (
+  //função para cadastrar produtos
+  const cadastrarProduto = async () => {
+    try {
+      const formData = new FormData();
 
-    <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm p-3">
-      <div className="container">
-        <Link className="navbar-brand fw-bold" to="/">
-          <img src="public/logo.jpeg" alt="icone" className="icone" />
-          Arte em Vidro
-        </Link>
+      formData.append("nome", nome);
+      formData.append("descricao", descricao);
+      formData.append("preco", preco);
+      formData.append("categoria", categoria);
+      formData.append("estoque", estoque);
+      formData.append("disponivel", true); // Define como disponível por padrão
+      formData.append("imagemUpload", imagem);
+
+      const res = await fetch("/api/produtos", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.erro || 'Erro ao cadastrar produto');
+        return;
+      }
+
+      alert("Produto cadastrado com sucesso!");
+
+      //Limpa os campos apos alterações
+      setNome("");
+      setPreco("");
+      setDescricao("");
+      setCategoria("");
+      setEstoque(0);
+      setImagem(null);
+
+    } catch (error) {
+      console.error('Erro ao cadastrar produto:', error);
+      alert("erro na requisição")
+    }
+  };
+  
+return (
+    <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
+      
+      {/* Sidebar - Menu Lateral (JM ADMIN) */}
+      <div className="bg-dark text-white p-4 shadow" style={{ width: "260px" }}>
+        <div className="text-center mb-4">
+            <h4 className="fw-bold text-info">JM ADMIN</h4>
+            <hr className="bg-secondary" />
+        </div>
         
-        {/* LINKS DA DIREITA */}
-        <div className="d-flex align-items-center">
-          <Link className="nav-link me-3 text-success" to="/">Home</Link>
-          <Link className="nav-link me-3 text-success" to="/sobre">Sobre</Link>
-          <Link className="nav-link me-3 text-danger fw-bold" to="/login">Admin</Link>
-          <Link className="btn btn-outline-primary btn-sm d-flex align-items-center me-3" to="/login">
-            Entrar/Cadastrar <i className="bi bi-person-circle ms-2"></i>
-          </Link>
+        <ul className="nav flex-column gap-3">
+          <li className="nav-item">
+            <button 
+              onClick={() => setAbaAtiva("novo-produto")}
+              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "novo-produto" ? "text-info fw-bold" : "text-white"}`}
+            >
+              <i className="bi bi-plus-circle-fill me-3"></i> Novo Produto
+            </button>
+          </li>
+          <li className="nav-item">
+            <button 
+              onClick={() => setAbaAtiva("estoque")}
+              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "estoque" ? "text-info fw-bold" : "text-white"}`}
+            >
+              <i className="bi bi-box-seam me-3"></i> Estoque & Vitrine
+            </button>
+          </li>
+          <li className="nav-item">
+            <button 
+              onClick={() => setAbaAtiva("pedidos")}
+              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "pedidos" ? "text-info fw-bold" : "text-white"}`}
+            >
+              <i className="bi bi-cart-check me-3"></i> Pedidos
+            </button>
+          </li>
+          <li className="nav-item">
+            <button 
+              onClick={() => setAbaAtiva("clientes")}
+              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "clientes" ? "text-info fw-bold" : "text-white"}`}
+            >
+              <i className="bi bi-people me-3"></i> Clientes
+            </button>
+          </li>
+        </ul>
 
-          {/* Botão do carrinho */}
-          <button className="btn-carrinho" onClick={() => setAberto(prev => !prev)}>
-            🛒
-            {totalItens > 0 && (
-              <span className="btn-carrinho-contador">{totalItens}</span>
-            )}
-          </button>
+        {/* Botão para fechar a aba do sistema */}
+        <div className="mt-5 pt-5">
+            <button className="btn btn-outline-danger w-100" onClick={() => window.close()}>
+              <i className="bi bi-box-arrow-right me-2"></i> Sair do Sistema
+            </button>
         </div>
       </div>
 
-      {/* --- O PAINEL DE ACESSO (MODAL) --- */}
-      {mostrarPainelAdmin && (
-        <div className="position-fixed top-50 start-50 translate-middle shadow-lg p-4 bg-white rounded border-0 text-center" 
-             style={{ width: "350px", zIndex: 2000 }}>
+      {/* Área de Conteúdo Principal Dinâmica */}
+      <div className="flex-grow-1 p-5">
+        <div className="container-fluid">
           
-          <img src={logoJm} alt="Logo" className="rounded-circle mx-auto mb-3 shadow-sm" style={{ width: "70px" }} />
-          <h4 className="fw-bold mb-4 text-danger">Acesso do Administrador</h4>
-          
-          <form onSubmit={handleEntrarAdmin}>
-            <div className="mb-3 text-start">
-              <label className="form-label fw-bold small">E-mail</label>
-              <input 
-                type="email" 
-                className="form-control" 
-                placeholder="admin@jm"
-                onChange={(e) => setEmail(e.target.value)}
-                required 
-              />
-            </div>
-            <div className="mb-3 text-start">
-              <label className="form-label fw-bold small">Senha</label>
-              <input 
-                type="password" 
-                className="form-control" 
-                placeholder="****"
-                onChange={(e) => setSenha(e.target.value)}
-                required 
-              />
-            </div>
-            
-            <button type="submit" className="btn btn-danger w-100 py-2 fw-bold shadow-sm mb-2">
-              Entrar no Painel
-            </button>
-            
-            <button 
-              type="button" 
-              className="btn btn-light btn-sm w-100 border" 
-              onClick={() => setMostrarPainelAdmin(false)}
-            >
-              Cancelar
-            </button>
-          </form>
-        </div>
-      )}
+          {/* TELA: NOVO PRODUTO */}
+          {abaAtiva === "novo-produto" && (
+            <div className="card border-0 shadow-sm p-4 mb-4">
+              <h2 className="h4 fw-bold text-dark border-bottom pb-3 mb-4">
+                <i className="bi bi-pencil-square me-2 text-primary"></i> 
+                Cadastrar Novo Produto na Vitrine
+              </h2>
+              
+              <form className="row g-3">
+                <div className="col-md-8">
+                  <label className="form-label fw-bold">Nome do Vaso/Peça</label>
+                  <input 
+                    className="form-control form-control-lg"
+                    placeholder="Ex: Vaso Girassol Lapidado"
+                    onChange={(e) => setNome(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-bold">Preço (R$)</label>
+                  <input 
+                    className="form-control form-control-lg"
+                    placeholder="0,00"
+                    onChange={(e) => setPreco(e.target.value)}
+                  />
+                </div>
+                <div className="col-12 mt-3">
+                  <label className="form-label fw-bold">Descrição e Detalhes</label>
+                  <textarea 
+                    className="form-control"
+                    rows="4"
+                    placeholder="Detalhes técnicos..."
+                    onChange={(e) => setDescricao(e.target.value)}
+                  ></textarea>
+                </div>
 
-      {/* Fundo escurecido quando o painel abrir */}
-      {mostrarPainelAdmin && (
-        <div 
-          onClick={() => setMostrarPainelAdmin(false)}
-          style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 1999 }}
-        ></div>
-      )}
-    </nav>
+                {/* Campo Categoria */}
+                <div className="col-md-6 mt-3">
+                  <input 
+                    className="form-control"
+                    placeholder="Categoria"
+                    onChange={(e) => setCategoria(e.target.value)}
+                  />
+                </div>
+
+                {/* Campo Estoque */}
+                <div className="col-md-6 mt-3">
+                  <input 
+                    type="number"
+                    className="form-control"
+                    placeholder="Estoque"
+                    onChange={(e) => setEstoque(e.target.value)}
+                  />
+                </div>
+
+                <div className="col-12 mt-3">
+                  <label className="form-label fw-bold">Imagem do Produto</label>
+                  <input 
+                    type="file" 
+                    className="form-control"
+                    onChange={(e) => setImagem(e.target.files[0])}
+                  />
+                </div>
+
+                <div className="col-12 mt-4">
+                  <button 
+                    type="button" 
+                    className="btn btn-success btn-lg px-5 shadow-sm"
+                    onClick={cadastrarProduto} // 🔹 ADICIONADO
+                  >
+                    <i className="bi bi-cloud-upload me-2"></i> Publicar na Loja
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* TELA: ESTOQUE */}
+          {abaAtiva === "estoque" && (
+            <div className="card border-0 shadow-sm p-4">
+              <h2 className="h4 fw-bold">Estoque & Vitrine</h2>
+              <p className="text-muted">Lista de todos os produtos ativos na JM Decorações.</p>
+              {/* Aqui você pode mapear os produtos cadastrados futuramente */}
+            </div>
+          )}
+
+          {/* TELA: PEDIDOS */}
+          {abaAtiva === "pedidos" && (
+            <div className="card border-0 shadow-sm p-4">
+              <h2 className="h4 fw-bold">Pedidos Recebidos</h2>
+              <p>Gerencie as ordens de compra e envios.</p>
+            </div>
+          )}
+
+          {/* TELA: CLIENTES */}
+          {abaAtiva === "clientes" && (
+            <div className="card border-0 shadow-sm p-4">
+              <h2 className="h4 fw-bold">Base de Clientes</h2>
+              <p>Visualize os dados dos usuários que realizaram cadastro no site.</p>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
   );
 }

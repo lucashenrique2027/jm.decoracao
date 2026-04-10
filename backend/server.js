@@ -39,15 +39,17 @@ const pool = new Pool({
 const db = drizzle(pool, { schema });
 
 // Rotas
+
+app.get('/api', (req, res) => {
+  res.json({ message: 'API funcionando' });
+});
+
 app.use('/api/produtos', criarRotasProdutos(db));
 
 app.use('/api/clientes', criarRotasClientes(db));
 
 app.use('/api/pedidos', criarRotasPedidos(db));
 
-app.get('/api', (req, res) => {
-  res.json({ message: 'API funcionando' });
-});
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

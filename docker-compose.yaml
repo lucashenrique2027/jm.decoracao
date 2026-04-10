@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     depends_on:
-      postgres: # Ajustado para bater com o nome do serviço abaixo
+      postgres: 
         condition: service_healthy
     ports:
       - "3000:3000"
@@ -45,7 +45,6 @@ services:
       - app-network
     restart: unless-stopped
 
-  # MUDADO DE 'database' PARA 'postgres' PARA COMBINAR COM SEU .ENV
   postgres: 
     image: postgres:16-alpine
     env_file:
@@ -54,8 +53,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${}
       POSTGRES_DB: ${DB_NAME}  
-    ports:
-      - "5433:5432" # Mantive 5433 fora para não dar erro de porta ocupada no seu PC
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -69,8 +66,30 @@ services:
         retries: 5
     restart: unless-stopped
 
+  minio:
+    image: minio/minio
+    container_name: jm_storage_images
+    ports:
+      - "9001:9001"
+    expose:
+      - "9000"
+    env_file:
+      - .env
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      : ${}
+    volumes:
+      - minio_data:/data
+      - ./scripts/entryMinio.sh:/usr/bin/entryMinio.sh
+    entrypoint: /bin/sh
+    command: /usr/bin/entryMinio.sh
+    networks:
+      - app-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  minio_data:
 
 networks:
   app-network:

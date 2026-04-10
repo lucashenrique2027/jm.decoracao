@@ -71,8 +71,6 @@ services:
     container_name: jm_storage_images
     ports:
       - "9001:9001"
-    expose:
-      - "9000"
     env_file:
       - .env
     environment:
@@ -86,6 +84,20 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+
+  storage-migrator:
+    build:
+    context: .
+    dockerfile: docker/storage-migrator/Dockerfile
+    container_name: jm_migrator
+    working_dir: /app
+    env_file: .env
+    depends_on:
+      minio:
+        condition: service_healthy
+    command: 
+    networks:
+      - app-network
 
 volumes:
   postgres_data:

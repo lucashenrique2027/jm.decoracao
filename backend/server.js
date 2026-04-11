@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import routes from './controllers/routes.js';
+import routes from './router/produtosController.js';
 import cors from 'cors';
 import { criarRotasProdutos } from './routes/produtosAdmin.js';
 import { criarRotasClientes } from './routes/clientes.js';

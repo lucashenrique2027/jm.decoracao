@@ -1,5 +1,5 @@
-import { db } from '../../../models/db.js';
-import { produtos } from '../../../models/schema.js';
+import { db } from '../models/db.js';
+import { produtos } from '../models/schema.js';
 import { eq } from 'drizzle-orm';
 
 export const listarProdutos = async (req, res) => {

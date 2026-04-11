@@ -17,7 +17,7 @@ export default function Header() {
         <div className="d-flex align-items-center">
           <Link className="nav-link me-3 text-success" to="/">Home</Link>
           <Link className="nav-link me-3 text-success" to="/sobre">Sobre</Link>
-          <Link className="nav-link me-3 text-danger fw-bold" to="/login">Admin</Link>
+          <Link className="nav-link me-3 text-danger fw-bold" to="/authAdmin">Admin</Link>
           <Link className="btn btn-outline-primary btn-sm d-flex align-items-center me-3" to="/login">
             Entrar/Cadastrar <i className="bi bi-person-circle ms-2"></i>
           </Link>

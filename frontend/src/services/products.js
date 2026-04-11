@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/produtos/listar";
+const API_URL = "http://localhost:8080/api/listar";
 const ASSETS_PATH = "/assets/";
 
 export const buscarProdutos = async () => {

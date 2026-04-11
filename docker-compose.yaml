@@ -87,17 +87,17 @@ services:
 
   storage-migrator:
     build:
-    context: .
-    dockerfile: docker/storage-migrator/Dockerfile
+      context: .
+      dockerfile: docker/migrator-images/Dockerfile
     container_name: jm_migrator
     working_dir: /app
     env_file: .env
-    depends_on:
-      minio:
-        condition: service_healthy
     command: 
     networks:
       - app-network
+    volumes:
+      - ./uploads:/app/uploads
+      - ./infra:/app/infra
 
 volumes:
   postgres_data:

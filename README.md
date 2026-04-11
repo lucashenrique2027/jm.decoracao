@@ -36,3 +36,4 @@ docker compose up --build
 - frontend express          http://localhost:8080
 - backend nginx direto      http://localhost:3000/api (usar para testes)
 - backend nginx via proxy   http://localhost:8080/api (usar para chamada de api real)
+- Minio imagens produtos    http://localhost:9001      

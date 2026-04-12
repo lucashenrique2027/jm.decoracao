@@ -37,16 +37,17 @@ export default function ProdutoDetalhes({ produto, fechar }) {
   if (!produto) return null;
 
   return (
+    
     <div className="modal-overlay" onClick={fechar}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
 
         <button className="btn-fechar" onClick={fechar}>✕</button>
 
         <div className="grid-detalhes">
-
+        
           {/* ÁREA DA IMAGEM */}
           <div className="col-img">
-            <img  src={`http://localhost:3000${produto.imagemUpload}`} alt={produto.nome} />
+            <img  src={produto.img} alt={produto.nome} />
           </div>
 
           {/* ÁREA DE INFORMAÇÕES */}

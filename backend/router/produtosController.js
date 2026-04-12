@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { listarProdutos, buscarProdutoPorId, buscarProdutoPorCategoria, criarProduto, atualizarProduto, deletarProduto } from '../queries/produtos/produtos.js';
+import { listarProdutos, buscarProdutoPorId, buscarProdutoPorCategoria, criarProduto, atualizarProduto, deletarProduto } from '../routes/produtos.js';
 
 export default (function(){
     const router = Router();

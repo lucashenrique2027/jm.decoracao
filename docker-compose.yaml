@@ -11,7 +11,9 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - app-network
+      - app
+      - services
+      - storage
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
       interval: 10s
@@ -27,7 +29,7 @@ services:
       - /app/node_modules
       - ./frontend:/app/frontend
     networks:
-      - app-network
+      - app
     restart: unless-stopped
 
   nginx:
@@ -42,7 +44,7 @@ services:
       vite-app:
         condition: service_started
     networks:
-      - app-network
+      - app
     restart: unless-stopped
 
   postgres: 
@@ -58,7 +60,7 @@ services:
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./docker/postgres/seed.sql:/docker-entrypoint-initdb.d/seed.sql
     networks:
-      - app-network
+      - services
     healthcheck:
         test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
         interval: 10s
@@ -89,7 +91,8 @@ services:
     entrypoint: /bin/sh
     command: /usr/bin/entryMinio.sh
     networks:
-      - app-network
+      - app
+      - storage
     restart: unless-stopped
 
   storage-migrator:
@@ -103,7 +106,7 @@ services:
       minio:
           condition: service_healthy
     networks:
-      - app-network
+      - storage
     volumes:
       - ./uploads:/app/uploads
       - ./infra:/app/infra
@@ -114,5 +117,9 @@ volumes:
   minio_data:
 
 networks:
-  app-network:
+  app:
+    driver: bridge
+  services:
+    driver: bridge
+  storage:
     driver: bridge

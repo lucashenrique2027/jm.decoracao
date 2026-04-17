@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({  // Permite que o frontend (localhost:8080) acesse a API (localhost:3000)
+app.use(cors({ 
   origin: 'http://localhost:8080',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true }));
@@ -24,7 +24,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.use('/uploads', express.static('uploads')); // Serve arquivos da pasta 'uploads'
+app.use('/uploads', express.static('uploads')); 
 
 app.use('/api', routes);
 

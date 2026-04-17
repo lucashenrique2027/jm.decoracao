@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS jm.teste(
 );
 
 -- ─── USUÁRIOS (admin e colaboradores) ───────────────────
-CREATE TABLE IF NOT EXISTS jm.usuarios (
+CREATE TABLE IF NOT EXISTS jm.admin (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,

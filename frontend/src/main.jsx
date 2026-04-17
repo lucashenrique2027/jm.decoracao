@@ -10,6 +10,8 @@ import Login from "./pages/Login/Login.jsx";
 import Admin from "./admin/Admin.jsx";
 import LoginAdmin from './pages/Login/LoginAdmin.jsx';
 
+import "../styles/global.css";
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>

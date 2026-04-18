@@ -34,6 +34,7 @@ docker compose up --build
 ```
 ## Acessar aplicação
 - frontend express          http://localhost:8080
+- Swagger Docs              http://localhost:8080/api/info
 - backend nginx direto      http://localhost:3000/api (usar para testes)
 - backend nginx via proxy   http://localhost:8080/api (usar para chamada de api real)
 - Minio imagens produtos    http://localhost:9001      

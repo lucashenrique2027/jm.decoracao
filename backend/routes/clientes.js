@@ -1,126 +1,103 @@
-import express from 'express';
 import { eq } from 'drizzle-orm';
 import { clientes } from '../models/schema.js';
 import { db } from '../models/db.js';
 
-export function criarRotasClientes() {
-  const router = express.Router();
+export const cadastrarCliente = async (req, res) => {
+  try {
+    const { nome, email, senha, telefone, cep, endereco, bairro, cidade, estado } = req.body;
 
-  // CREATE - Cadastrar novo cliente 
-  router.post('/', async (req, res) => {
-    try {
-      const { nome, email, senha, telefone, cep, endereco, bairro, cidade, estado } = req.body;
-
-      // Validação básica de campos obrigatórios
-      if (!nome || !email || !senha || !telefone) {
-        return res.status(400).json({ erro: 'Nome, email, senha e telefone são obrigatórios' });
-      }
-
-      // Salvando a senha diretamente no campo senhaHash (Texto Puro)
-      const novoCliente = await db.insert(clientes).values({
-        nome,
-        email,
-        senhaHash: senha, 
-        telefone,
-        cep,
-        endereco,
-        bairro,
-        cidade,
-        estado: estado || 'SP',
-      }).returning();
-
-      // Removemos o campo senhaHash do retorno por segurança visual no JSON
-      const { senhaHash: _, ...clienteSemSenha } = novoCliente[0];
-      res.status(201).json({ mensagem: 'Cliente cadastrado com sucesso', cliente: clienteSemSenha });
-    } catch (erro) {
-      console.error('Erro ao cadastrar cliente:', erro);
-      if (erro.code === '23505') {
-        return res.status(400).json({ erro: 'Este e-mail já está cadastrado' });
-      }
-      res.status(500).json({ erro: 'Erro ao cadastrar cliente' });
+    if (!nome || !email || !senha || !telefone) {
+      return res.status(400).json({ erro: 'Nome, email, senha e telefone são obrigatórios' });
     }
-  });
 
-  // READ - Listar todos os clientes
-  router.get('/', async (req, res) => {
-    try {
-      const todosClientes = await db.select().from(clientes);
-      const clientesSemSenha = todosClientes.map(({ senhaHash, ...c }) => c);
-      res.json(clientesSemSenha);
-    } catch (erro) {
-      console.error('Erro ao buscar clientes:', erro);
-      res.status(500).json({ erro: 'Erro ao buscar clientes' });
+    const novoCliente = await db.insert(clientes).values({
+      nome,
+      email,
+      senhaHash: senha,
+      telefone,
+      cep,
+      endereco,
+      bairro,
+      cidade,
+      estado: estado || 'SP',
+    }).returning();
+
+    const { senhaHash: _, ...clienteSemSenha } = novoCliente[0];
+    res.status(201).json({ mensagem: 'Cliente cadastrado com sucesso', cliente: clienteSemSenha });
+  } catch (erro) {
+    console.error('Erro ao cadastrar cliente:', erro);
+    if (erro.code === '23505') {
+      return res.status(400).json({ erro: 'Este e-mail já está cadastrado' });
     }
-  });
+    res.status(500).json({ erro: 'Erro ao cadastrar cliente' });
+  }
+};
 
-  // READ - Buscar um cliente por ID
-  router.get('/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const cliente = await db.select().from(clientes).where(eq(clientes.id, parseInt(id)));
+export const listarClientes = async (req, res) => {
+  try {
+    const todosClientes = await db.select().from(clientes);
+    const clientesSemSenha = todosClientes.map(({ senhaHash, ...c }) => c);
+    res.json(clientesSemSenha);
+  } catch (erro) {
+    console.error('Erro ao buscar clientes:', erro);
+    res.status(500).json({ erro: 'Erro ao buscar clientes' });
+  }
+};
 
-      if (cliente.length === 0) {
-        return res.status(404).json({ erro: 'Cliente não encontrado' });
-      }
+export const buscarClientePorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cliente = await db.select().from(clientes).where(eq(clientes.id, parseInt(id)));
 
-      const { senhaHash, ...clienteSemSenha } = cliente[0];
-      res.json(clienteSemSenha);
-    } catch (erro) {
-      console.error('Erro ao buscar cliente:', erro);
-      res.status(500).json({ erro: 'Erro ao buscar cliente' });
+    if (cliente.length === 0) {
+      return res.status(404).json({ erro: 'Cliente não encontrado' });
     }
-  });
 
-  // UPDATE - Atualizar dados do cliente
-  router.put('/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { nome, telefone, cep, endereco, bairro, cidade, estado } = req.body;
+    const { senhaHash, ...clienteSemSenha } = cliente[0];
+    res.json(clienteSemSenha);
+  } catch (erro) {
+    console.error('Erro ao buscar cliente:', erro);
+    res.status(500).json({ erro: 'Erro ao buscar cliente' });
+  }
+};
 
-      const clienteAtualizado = await db.update(clientes)
-        .set({
-          nome,
-          telefone,
-          cep,
-          endereco,
-          bairro,
-          cidade,
-          estado,
-        })
-        .where(eq(clientes.id, parseInt(id)))
-        .returning();
+export const atualizarCliente = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome, telefone, cep, endereco, bairro, cidade, estado } = req.body;
 
-      if (clienteAtualizado.length === 0) {
-        return res.status(404).json({ erro: 'Cliente não encontrado' });
-      }
+    const clienteAtualizado = await db.update(clientes)
+      .set({ nome, telefone, cep, endereco, bairro, cidade, estado })
+      .where(eq(clientes.id, parseInt(id)))
+      .returning();
 
-      const { senhaHash, ...cSemSenha } = clienteAtualizado[0];
-      res.json({ mensagem: 'Dados atualizados com sucesso', cliente: cSemSenha });
-    } catch (erro) {
-      console.error('Erro ao atualizar cliente:', erro);
-      res.status(500).json({ erro: 'Erro ao atualizar cliente' });
+    if (clienteAtualizado.length === 0) {
+      return res.status(404).json({ erro: 'Cliente não encontrado' });
     }
-  });
 
-  // DELETE - Remover um cliente
-  router.delete('/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
+    const { senhaHash, ...cSemSenha } = clienteAtualizado[0];
+    res.json({ mensagem: 'Dados atualizados com sucesso', cliente: cSemSenha });
+  } catch (erro) {
+    console.error('Erro ao atualizar cliente:', erro);
+    res.status(500).json({ erro: 'Erro ao atualizar cliente' });
+  }
+};
 
-      const clienteDeletado = await db.delete(clientes)
-        .where(eq(clientes.id, parseInt(id)))
-        .returning();
+export const deletarCliente = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-      if (clienteDeletado.length === 0) {
-        return res.status(404).json({ erro: 'Cliente não encontrado' });
-      }
+    const clienteDeletado = await db.delete(clientes)
+      .where(eq(clientes.id, parseInt(id)))
+      .returning();
 
-      res.json({ mensagem: 'Cliente removido com sucesso' });
-    } catch (erro) {
-      console.error('Erro ao remover cliente:', erro);
-      res.status(500).json({ erro: 'Erro ao remover cliente' });
+    if (clienteDeletado.length === 0) {
+      return res.status(404).json({ erro: 'Cliente não encontrado' });
     }
-  });
 
-  return router;
-}
+    res.json({ mensagem: 'Cliente removido com sucesso' });
+  } catch (erro) {
+    console.error('Erro ao remover cliente:', erro);
+    res.status(500).json({ erro: 'Erro ao remover cliente' });
+  }
+};

@@ -1,26 +1,65 @@
 import { Router } from 'express';
-import { listarProdutos, buscarProdutoPorId, buscarProdutoPorCategoria, criarProduto, atualizarProduto, deletarProduto } from '../routes/produtos.js';
+import {
+  listarProdutos,
+  buscarProdutoPorId,
+  buscarProdutoPorCategoria
+} from '../routes/produtos.js';
 
-export default (function(){
-    const router = Router();
+const router = Router();
 
-    //  Listar Produtos
-    router.get('/listar',listarProdutos);
+/**
+ * @openapi
+ * /api/listar:
+ *   get:
+ *     summary: Retorna todos os produtos e suas informações
+ *     tags:
+ *       - Vitrine
+ *     responses:
+ *       200:
+ *         description: Lista de produtos retornada com sucesso
+ */
+router.get('/listar', listarProdutos);
 
-    // buscar produto por id
-    router.get('/listar/:id',buscarProdutoPorId);
+/**
+ * @openapi
+ * /api/listar/{id}:
+ *   get:
+ *     summary: Retorna o produto pelo ID
+ *     tags:
+ *       - Vitrine
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do produto
+ *     responses:
+ *       200:
+ *         description: Produto encontrado
+ *       404:
+ *         description: Produto não encontrado
+ */
+router.get('/listar/:id', buscarProdutoPorId);
 
-    // buscar produto por categoria
-    router.get('/listar/categoria/:categoria',buscarProdutoPorCategoria);
+/**
+ * @openapi
+ * /api/listar/categoria/{categoria}:
+ *   get:
+ *     summary: Lista todos os produtos de uma categoria
+ *     tags:
+ *       - Vitrine
+ *     parameters:
+ *       - in: path
+ *         name: categoria
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Nome da categoria
+ *     responses:
+ *       200:
+ *         description: Produtos da categoria retornados com sucesso
+ */
+router.get('/listar/categoria/:categoria', buscarProdutoPorCategoria);
 
-    // criar produto
-    router.post('/criar', criarProduto);
-
-    // atualizar produto
-    router.put('/atualizar/:id', atualizarProduto);
-
-    // deletar produto
-    router.delete('/deletar/:id', deletarProduto);
-
-    return router;
-})()
+export default router;

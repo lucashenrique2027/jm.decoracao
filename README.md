@@ -32,6 +32,14 @@ Docker Compose moderno:
 ```sh
 docker compose up --build
 ```
+
+## Enviar imagens para a aplicação:
+### Se for a primeira vez iniciando o projeto rode isto para popular o estoque de imagens do projeto:
+
+```sh
+docker compose -f docker-compose.upload.yml run --rm storage-migrator
+```
+
 ## Acessar aplicação
 - frontend express          http://localhost:8080
 - Swagger Docs              http://localhost:8080/api/info

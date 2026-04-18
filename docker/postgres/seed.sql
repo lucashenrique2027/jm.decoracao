@@ -6,3 +6,15 @@ VALUES
 ('Vaso Design Geométrico', 'Vaso de design geométrico moderno.', 120.00, 'vaso-design-geometrico.png', 'Decoração', true, 8),
 ('Taça de Cristal Premium', 'Taça de cristal premium elegante.', 200.00, 'taça-cristal.png', 'Cozinha', true, 12),
 ('Vaso Coloriquadra', 'Vaso decorativo colorido.', 95.00, 'vaso-coloriquadra.png', 'Decoração', true, 15);
+
+INSERT INTO jm.admin (nome,email,senha_hash,user_role,cpf_endereco_fiscal)
+VALUES (
+    'Admin',
+    'example@gmail.com',
+    '$2b$10$xwT/CzqMVA.uPaVa9ifnjuMV0n7NnjSwTq8atSay50WpzHe2dCWSi',
+    '123456789',
+    '12345-678',
+    'Alvinopolis',
+     'Atibaia',
+       'SP'
+);

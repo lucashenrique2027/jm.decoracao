@@ -80,7 +80,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       : ${}
     healthcheck:
-        test: ["CMD", "mc", "ls", "local/loja-jm"]
+        test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
         interval: 10s
         timeout: 5s
         retries: 10
@@ -94,23 +94,6 @@ services:
       - app
       - storage
     restart: unless-stopped
-
-  storage-migrator:
-    build:
-      context: .
-      dockerfile: docker/migrator-images/Dockerfile
-    container_name: jm_migrator
-    working_dir: /app
-    env_file: .env
-    depends_on:
-      minio:
-          condition: service_healthy
-    networks:
-      - storage
-    volumes:
-      - ./uploads:/app/uploads
-      - ./infra:/app/infra
-    restart: "no"
 
 volumes:
   postgres_data:

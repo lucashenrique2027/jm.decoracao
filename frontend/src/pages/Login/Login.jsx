@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-import logoJm from "../../../public/logo.jpeg"; // Importe a imagem do logo
+import logoJm from "../../../public/logo.jpeg";
+
+import { loginCliente } from '../../services/authCliente.js';
 
 export default function Login() {
   const [tela, setTela]               = useState("escolha");
@@ -29,21 +31,23 @@ export default function Login() {
     return erros;
   };
 
-  const handleEntrar = (e) => {
-    e.preventDefault();
-    const erros = validarLogin();
-    if (Object.keys(erros).length > 0) {
-      setErrosLogin(erros);
-      return;
-    }
-    setErrosLogin({});
-    if (email === "admin@jm" && senha === "123") {
-      window.open("/admin", "_blank");
-    } else {
-      alert("Login de usuário realizado!");
-      navigate("/");
-    }
-  };
+ const handleEntrar = async (e) => {
+  e.preventDefault();
+  const erros = validarLogin();
+  if (Object.keys(erros).length > 0) {
+    setErrosLogin(erros);
+    return;
+  }
+  setErrosLogin({});
+
+  try {
+    const dados = await loginCliente(email, senha);
+    localStorage.setItem('cliente', JSON.stringify(dados.cliente));
+    navigate('/');
+  } catch (error) {
+    setErrosLogin({ senha: 'Email ou senha inválidos' });
+  }
+};
 
   // ── Validação do Cadastro ───────────────────────────────────────────────────
   const validarCadastro = () => {

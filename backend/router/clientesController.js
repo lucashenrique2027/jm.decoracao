@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  autenticarCliente,
   cadastrarCliente,
   listarClientes,
   buscarClientePorId,
@@ -8,6 +9,38 @@ import {
 } from '../routes/clientes.js';
 
 const router = express.Router();
+/**
+ * @openapi
+ * /api/clientes/login:
+ *   post:
+ *     summary: Autentica um cliente
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - senha
+ *             properties:
+ *               email:
+ *                 type: string
+ *               senha:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login realizado com sucesso
+ *       400:
+ *         description: Email e senha são obrigatórios
+ *       401:
+ *         description: Email ou senha inválidos
+ *       500:
+ *         description: Erro interno ao autenticar cliente
+ */
+  router.post('/login', autenticarCliente);
 
 /**
  * @openapi

@@ -12,6 +12,7 @@ VALUES (
     'Admin',
     'example@gmail.com',
     '$2b$10$xwT/CzqMVA.uPaVa9ifnjuMV0n7NnjSwTq8atSay50WpzHe2dCWSi',
+    'admin',
     '123456789',
     '12345-678',
     'Alvinopolis',

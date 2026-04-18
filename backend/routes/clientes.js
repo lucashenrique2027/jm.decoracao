@@ -2,6 +2,38 @@ import { eq } from 'drizzle-orm';
 import { clientes } from '../models/schema.js';
 import { db } from '../models/db.js';
 
+export const autenticarCliente = async (req, res) => {
+  try {
+    const { email, senha } = req.body;
+
+    if (!email || !senha) {
+      return res.status(400).json({ erro: 'Email e senha são obrigatórios' });
+    }
+
+    const resultado = await db.select().from(clientes).where(eq(clientes.email, email));
+
+    if (resultado.length === 0) {
+      return res.status(401).json({ erro: 'Email ou senha inválidos' });
+    }
+
+    const cliente = resultado[0];
+
+    const senhaValida = await bcrypt.compare(senha, cliente.senhaHash);
+
+    if (!senhaValida) {
+      return res.status(401).json({ erro: 'Email ou senha inválidos' });
+    }
+
+    const { senhaHash, ...clienteSemSenha } = cliente;
+    res.json({ mensagem: 'Login realizado com sucesso', cliente: clienteSemSenha });
+
+  } catch (error) {
+    console.error('Erro ao autenticar cliente:', error);
+    res.status(500).json({ erro: 'Erro ao autenticar cliente' });
+  }
+};
+
+
 export const cadastrarCliente = async (req, res) => {
   try {
     const { nome, email, senha, telefone, cep, endereco, bairro, cidade, estado } = req.body;

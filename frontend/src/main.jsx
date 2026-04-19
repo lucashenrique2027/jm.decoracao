@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import Carrinho from "./components/carrinho/Carrinho.jsx";
 import { CarrinhoProvider } from "./context/CarrinhoContext";
 
 import Home from "./pages/Home/Home.jsx";

@@ -5,6 +5,7 @@ import Footer from "../../components/Footer/Footer";
 import logoJm from "../../../public/logo.jpeg";
 
 import { loginCliente } from '../../services/authCliente.js';
+import { cadastrarCliente } from '../../services/cadastraCliente.js';
 
 export default function Login() {
   const [tela, setTela]               = useState("escolha");
@@ -63,16 +64,20 @@ export default function Login() {
     return erros;
   };
 
-  const handleCadastro = (e) => {
+  const handleCadastro = async (e) => {
     e.preventDefault();
     const erros = validarCadastro();
     if (Object.keys(erros).length > 0) {
       setErrosCad(erros);
       return;
     }
-    setErrosCad({});
-    alert("Cadastro realizado com sucesso!");
-    navigate("/");
+    try{
+      setErrosCad({});
+      const resultado = await cadastrarCliente({ body: cad });
+      navigate("/");
+    }catch(error){
+      setErrosCad({ email: 'Erro ao cadastrar. Tente novamente.' });
+    }
   };
 
   // Atalho para atualizar campo do cadastro

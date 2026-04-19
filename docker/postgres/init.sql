@@ -8,11 +8,6 @@ CREATE TYPE jm.user_role AS ENUM ('admin', 'colaborador', 'cliente');
 -- ─── STATUS DO PEDIDO ───────────────────────────────────
 CREATE TYPE jm.status_pedido AS ENUM ('pendente', 'confirmado', 'rejeitado', 'entregue');
 
--- ─── TESTES ───────────────────────────────────
-CREATE TABLE IF NOT EXISTS jm.teste(
-  id SERIAL PRIMARY KEY,
-  nome TEXT NOT NULL
-);
 
 -- ─── USUÁRIOS (admin e colaboradores) ───────────────────
 CREATE TABLE IF NOT EXISTS jm.admin (
@@ -34,10 +29,10 @@ CREATE TABLE IF NOT EXISTS jm.clientes (
   senha_hash TEXT NOT NULL,
   telefone TEXT NOT NULL,
   cep TEXT NOT NULL,
-  endereco TEXT NOT NULL,
-  bairro TEXT NOT NULL,
-  cidade TEXT NOT NULL,
-  estado TEXT NOT NULL DEFAULT 'SP',
+  endereco TEXT ,
+  bairro TEXT ,
+  cidade TEXT ,
+  estado TEXT  DEFAULT 'SP',
   criado_em TIMESTAMPTZ DEFAULT NOW()
 );
 

@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { clientes } from '../models/schema.js';
 import { db } from '../models/db.js';
+import bcrypt from 'bcrypt';
 
 export const autenticarCliente = async (req, res) => {
   try {
@@ -42,10 +43,12 @@ export const cadastrarCliente = async (req, res) => {
       return res.status(400).json({ erro: 'Nome, email, senha e telefone são obrigatórios' });
     }
 
+    const hashedPassword = await bcrypt.hash(senha, 10);
+
     const novoCliente = await db.insert(clientes).values({
       nome,
       email,
-      senhaHash: senha,
+      senhaHash: hashedPassword,
       telefone,
       cep,
       endereco,

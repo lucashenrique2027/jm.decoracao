@@ -30,7 +30,7 @@ app.use('/uploads', express.static('uploads'));
 
 app.use('/api', routesProdutos);
 
-app.use('/api/produtos', routesAdmin);
+app.use('/api/admin', routesAdmin);
 
 app.use('/api/clientes', routesClientes);
 

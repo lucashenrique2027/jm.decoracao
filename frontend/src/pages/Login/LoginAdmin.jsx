@@ -4,6 +4,8 @@ import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import logoJm from "../../../public/logo.jpeg";
 
+import { loginAdmin } from "../../services/authAdmin.js";
+
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -20,7 +22,7 @@ export default function AdminLogin() {
     return erros;
   };
 
-  const handleEntrarAdmin = (e) => {
+  const handleEntrarAdmin = async (e) => {
     e.preventDefault();
     const erros = validarLogin();
     
@@ -31,11 +33,11 @@ export default function AdminLogin() {
 
     setErrosLogin({});
 
-    // Lógica de autenticação centralizada
-    if (email === "admin@jm" && senha === "123") {
-      alert("Acesso Administrativo Autorizado!");
-      navigate("/admin-dashboard");
-    } else {
+    try{
+      const dados = await loginAdmin( email, senha );
+      localStorage.setItem("adminToken", dados.token);
+      navigate("/admin");
+    } catch (error) {
       setErrosLogin({ auth: "Credenciais administrativas inválidas." });
     }
   };

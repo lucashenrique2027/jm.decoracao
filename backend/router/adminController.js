@@ -8,11 +8,57 @@ import {
   upload
 } from '../routes/produtosAdmin.js';
 
+import { authAdmin } from '../routes/admin.js';
+
 const router = express.Router();
 
 /**
  * @openapi
- * /api/produtos:
+ * /api/admin/auth:
+ *   post:
+ *     summary: Autentica um administrador
+ *     tags:
+ *       - Autenticação
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - senha
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               senha:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Login realizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Erro nos dados enviados
+ *       401:
+ *         description: Credenciais inválidas
+ *       500:
+ *         description: Erro interno no servidor
+ */
+router.post('/auth', authAdmin);
+
+/**
+ * @openapi
+ * /api/admin/produtos:
  *   post:
  *     summary: Cria um novo produto
  *     tags:
@@ -51,11 +97,11 @@ const router = express.Router();
  *       500:
  *         description: Erro interno ao criar produto
  */
-router.post('/', upload.single('imagemUpload'), criarProduto);
+router.post('/produtos', upload.single('imagemUpload'), criarProduto);
 
 /**
  * @openapi
- * /api/produtos:
+ * /api/admin/produtos:
  *   get:
  *     summary: Lista todos os produtos
  *     tags:
@@ -66,11 +112,11 @@ router.post('/', upload.single('imagemUpload'), criarProduto);
  *       500:
  *         description: Erro interno ao buscar produtos
  */
-router.get('/', listarProdutos);
+router.get('/produtos', listarProdutos);
 
 /**
  * @openapi
- * /api/produtos/{id}:
+ * /api/admin/produtos/{id}:
  *   get:
  *     summary: Busca um produto pelo ID
  *     tags:
@@ -90,11 +136,11 @@ router.get('/', listarProdutos);
  *       500:
  *         description: Erro interno ao buscar produto
  */
-router.get('/:id', buscarProdutoPorId);
+router.get('/produtos/:id', buscarProdutoPorId);
 
 /**
  * @openapi
- * /api/produtos/{id}:
+ * /api/admin/produtos/{id}:
  *   put:
  *     summary: Atualiza um produto pelo ID
  *     tags:
@@ -135,11 +181,11 @@ router.get('/:id', buscarProdutoPorId);
  *       500:
  *         description: Erro interno ao atualizar produto
  */
-router.put('/:id', atualizarProduto);
+router.put('/produtos/:id', atualizarProduto);
 
 /**
  * @openapi
- * /api/produtos/{id}:
+ * /api/admin/produtos/{id}:
  *   delete:
  *     summary: Deleta um produto pelo ID
  *     tags:
@@ -159,6 +205,6 @@ router.put('/:id', atualizarProduto);
  *       500:
  *         description: Erro interno ao deletar produto
  */
-router.delete('/:id', deletarProduto);
+router.delete('/produtos/:id', deletarProduto);
 
 export default router;

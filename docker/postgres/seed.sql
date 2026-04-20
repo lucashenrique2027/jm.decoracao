@@ -20,7 +20,7 @@ INSERT INTO jm.admin (nome,email,senha_hash,role,cpf_cnpj,endereco_fiscal)
 VALUES (
     'Admin',
     'example@gmail.com',
-    '$2b$10$xwT/CzqMVA.uPaVa9ifnjuMV0n7NnjSwTq8atSay50WpzHe2dCWSi',
+    '$2b$10$zaYuOY0BSpY9c6N7Oiytsuwo/RoRuBAdjJmSOrbtNwMu.783owQJy',/*senha123*/
     'admin',
     '12345678911',
     '12345678'

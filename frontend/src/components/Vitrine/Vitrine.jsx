@@ -45,11 +45,11 @@ export default function Vitrine() {
           </div>
 
           <div className="produto-info">
-            <p className="mb-1"><b>{produtos.nome}</b></p>
-            <p className="text-success fw-bold mb-2">
-              R$ {Number(produtos.preco || 0).toFixed(2).replace('.', ',')}
-            </p>
-          </div>
+  <p><b>{produtos.nome}</b></p>
+  <p className="preco">
+    R$ {Number(produtos.preco || 0).toFixed(2).replace('.', ',')}
+  </p>
+</div>
 
           <div className="compra-acoes">
             <button

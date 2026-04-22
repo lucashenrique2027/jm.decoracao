@@ -1,6 +1,5 @@
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-// IMPORTANTE: Importe a imagem aqui
 import logoJm from "../../../public/logo.jpeg"; 
 
 import "./style.css";

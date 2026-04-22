@@ -1,127 +1,79 @@
-header {
-    background: #fff;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+:root {
+  --primary: #077dac;
+  --primary-dark: #2f8fb6;
+  --text-dark: #1f2a33;
+  --bg: #f7fafc;
 }
 
-.titulo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+header {
+  background: linear-gradient(to bottom, #8ebef5, #cbeefa);
+  padding: 10px 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-brand {
+  color: var(--primary) !important;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.links,
+.navegacao,
+.nav-link {
+  color: var(--text-dark) !important;
+  font-weight: 600;
+}
+
+.navegacao a:hover,
+.menu-mobile .nav-link:hover {
+  color: var(--primary) !important;
+  background: rgba(74, 172, 211, 0.12);
+  border-radius: 6px;
 }
 
 .icone {
-    width: 30px;
-    height: 30px;
-    margin: 5px;
-    object-fit: cover;
-}
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  object-fit: cover;
 }
 
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: relative;
-    cursor: pointer;
-}
-
-.links {
-    text-decoration: none;
-    color: #25D366;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.navegacao {
-    display: flex;
-    justify-content: space-between;
-    gap: 50px;
-    font-size: 14px;
-    color: #25D366;
-    font-weight: bold;
-}
-
-.navegacao a {
-    text-decoration: none;
-    color: inherit;
-}
-
-.navegacao a:hover {
-    text-decoration: underline;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 40px;
-    background: white;
-    min-width: 250px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    z-index: 100;
-    border-radius: 8px;
-    padding: 15px;
-    border: 1px solid #eee;
-}
-
-.btn-acao {
-    background: #25D366;
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-/* ── Botão do Carrinho ── */
 .btn-carrinho {
-    position: relative;
-    background: none;
-    border: 2px solid #25D366;
-    border-radius: 10px;
-    padding: 6px 14px;
-    cursor: pointer;
-    font-size: 20px;
-    color: #25D366;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: background 0.2s;
+  position: relative;
+  background: none;
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s;
 }
 
 .btn-carrinho:hover {
-    background: #f0fff4;
+  background: rgba(74, 172, 211, 0.1);
 }
 
-/* Contador de itens no carrinho */
 .btn-carrinho-contador {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #25D366;
-    color: #fff;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-mobile {
@@ -130,38 +82,29 @@ header {
   right: 0;
   width: 260px;
   height: 100vh;
-  background: #fff;
-  box-shadow: -4px 0 16px rgba(0,0,0,0.15);
+  background: #ffffff;
+  box-shadow: -4px 0 16px rgba(0,0,0,0.12);
   z-index: 1001;
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 24px 16px;
-  border-left: 3px solid #25D366;
+  border-left: 3px solid var(--primary);
 }
 
 .menu-mobile .nav-link {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-dark) !important;
   padding: 12px 16px;
   border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
 }
 
 .menu-mobile .nav-link:hover {
-  background: #f0fff4;
-  color: #25D366;
+  background: rgba(74, 172, 211, 0.12);
+  color: var(--primary) !important;
 }
 
-.menu-mobile .btn-outline-primary {
-  margin-top: 8px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-}
-
-.menu-mobile .btn-carrinho {
-  margin-top: auto;
-  align-self: flex-start;
+.text-danger {
+  color: #e5484d !important;
 }

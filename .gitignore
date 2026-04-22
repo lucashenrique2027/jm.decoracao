@@ -3,3 +3,7 @@ dist/
 build/
 .env
 docs/
+docs/
+scan-tree.js
+tree-map.json
+package*

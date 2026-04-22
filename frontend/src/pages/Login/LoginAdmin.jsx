@@ -50,12 +50,7 @@ export default function AdminLogin() {
       <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
         <div className="w-100 px-3" style={{ maxWidth: 460 }}>
           
-          {/* Badge de Alerta mantido para sinalizar o cargo alto/restrito */}
-          <div className="text-center mb-3">
-             <span className="badge rounded-pill bg-danger px-3 py-2 text-uppercase shadow-sm" style={{fontSize: '0.7rem'}}>
-                <i className="bi bi-shield-lock-fill me-2"></i>Acesso Restrito: Administrador
-             </span>
-          </div>
+          
 
           <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
             <div className="card-body p-4 p-md-5 text-center">
@@ -126,6 +121,11 @@ export default function AdminLogin() {
                   <i className="bi bi-house-door me-1"></i>Voltar para o Início
                 </Link>
               </div>
+              <div className="mt-4">
+                    <Link to="/login" className="text-primary fw-semibold text-decoration-none">
+                      Login do Cliente
+                    </Link>
+                </div>
             </div>
           </div>
           

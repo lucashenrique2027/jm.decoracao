@@ -118,6 +118,11 @@ export default function Login() {
                       <i className="bi bi-arrow-left me-1"></i>Voltar para a Loja
                     </Link>
                   </div>
+                  <div className="mt-4">
+                    <Link to="/authAdmin" className="text-primary fw-semibold text-decoration-none">
+                      Área do Administrador
+                    </Link>
+                  </div>
                 </div>
               )}
 

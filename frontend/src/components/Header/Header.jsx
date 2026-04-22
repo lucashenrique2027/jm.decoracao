@@ -22,7 +22,7 @@ export default function Header() {
         <div className="container">
           <Link className="navbar-brand fw-bold" to="/">
             <img src="public/logo.jpeg" alt="icone" className="icone" />
-            Arte em Vidro
+            JM Decoração
           </Link>
 
           <div className="d-flex align-items-center d-lg-none gap-2">
@@ -34,7 +34,6 @@ export default function Header() {
           <div className="d-none d-lg-flex align-items-center gap-2 ms-auto">
             <Link className="nav-link text-success" to="/">Home</Link>
             <Link className="nav-link text-success" to="/sobre">Sobre</Link>
-            <Link className="nav-link text-danger fw-bold" to="/authAdmin">Admin</Link>
             {cliente ? (
               <div className="d-flex align-items-center gap-2">
                 <span className="fw-semibold text-success">
@@ -79,7 +78,6 @@ export default function Header() {
 
   <Link className="nav-link text-success" to="/" onClick={() => setMenuAberto(false)}>Home</Link>
   <Link className="nav-link text-success" to="/sobre" onClick={() => setMenuAberto(false)}>Sobre</Link>
-  <Link className="nav-link text-danger fw-bold" to="/authAdmin" onClick={() => setMenuAberto(false)}>Admin</Link>
   <button className="btn-carrinho mt-auto" onClick={() => setAberto(prev => !prev)}>
     🛒
     {totalItens > 0 && <span className="btn-carrinho-contador">{totalItens}</span>}

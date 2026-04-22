@@ -35,7 +35,6 @@ export default function AdminLogin() {
 
     try{
       const dados = await loginAdmin( email, senha );
-      localStorage.setItem("adminToken", dados.token);
       navigate("/admin");
     } catch (error) {
       setErrosLogin({ auth: "Credenciais administrativas inválidas." });

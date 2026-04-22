@@ -43,7 +43,6 @@ export default function Login() {
 
   try {
     const dados = await loginCliente(email, senha);
-    localStorage.setItem('cliente', JSON.stringify(dados.cliente));
     navigate('/');
   } catch (error) {
     setErrosLogin({ senha: 'Email ou senha inválidos' });

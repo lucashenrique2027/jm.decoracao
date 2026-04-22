@@ -11,6 +11,12 @@ export const loginAdmin = async (email, senha) => {
             body: JSON.stringify({ email, senha })
         });
         const data = await response.json();
+
+        
+        if (data && data.token) {
+            localStorage.setItem("adminToken", data.token);
+        }
+        
         return data;
     } catch (error) {
         console.error('Erro ao autenticar administrador:', error);

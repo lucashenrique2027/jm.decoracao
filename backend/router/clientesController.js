@@ -1,12 +1,14 @@
 import express from 'express';
 import {
   autenticarCliente,
+  dadosCliente,
   cadastrarCliente,
   listarClientes,
   buscarClientePorId,
   atualizarCliente,
   deletarCliente
 } from '../routes/clientes.js';
+import { verificarToken } from '../middlewares/validarTokenClient.js';
 
 const router = express.Router();
 /**
@@ -41,6 +43,45 @@ const router = express.Router();
  *         description: Erro interno ao autenticar cliente
  */
   router.post('/login', autenticarCliente);
+
+/**
+ * @openapi
+ * /api/clientes/data:
+ *   get:
+ *     summary: Obtém dados sensíveis do cliente autenticado
+ *     description: Retorna informações como CPF, endereço e telefone baseando-se no cookie de sessão httpOnly.
+ *     tags:
+ *       - Cliente
+ *     responses:
+ *       200:
+ *         description: Dados do cliente retornados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 telefone:
+ *                   type: string
+ *                 cep:
+ *                   type: string
+ *                 endereco:
+ *                   type: string
+ *                 bairro:
+ *                   type: string
+ *                 cidade:
+ *                   type: string
+ *                 estado:
+ *                   type: string
+ *       401:
+ *         description: Não autorizado - Cookie ausente ou expirado
+ *       404:
+ *         description: Cliente não encontrado no banco de dados
+ *       500:
+ *         description: Erro interno ao processar os dados
+ */
+router.get('/data', verificarToken, dadosCliente);
 
 /**
  * @openapi

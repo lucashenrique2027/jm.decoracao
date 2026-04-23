@@ -8,14 +8,16 @@ export const loginAdmin = async (email, senha) => {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({ email, senha })
         });
-        const data = await response.json();
 
-        
-        if (data && data.token) {
-            localStorage.setItem("adminToken", data.token);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Erro HTTP! status: ${response.status}`);
         }
+
+        const data = await response.json();
         
         return data;
     } catch (error) {

@@ -8,7 +8,8 @@ import {
   upload
 } from '../routes/produtosAdmin.js';
 
-import { authAdmin } from '../routes/admin.js';
+import { authAdmin,dadosAdmin } from '../routes/admin.js';
+import { verificarToken } from '../middlewares/validarTokenAdmin.js';
 
 const router = express.Router();
 
@@ -55,6 +56,41 @@ const router = express.Router();
  *         description: Erro interno no servidor
  */
 router.post('/auth', authAdmin);
+
+/**
+ * @openapi
+ * /api/admin/data:
+ *   get:
+ *     summary: Obtém dados do administrador autenticado
+ *     description: Verifica o cookie 'admin_token' e retorna as informações do perfil administrativo. Utilizado para reidratação da sessão no painel.
+ *     tags:
+ *       - Painel Administrativo
+ *     responses:
+ *       200:
+ *         description: Dados do administrador recuperados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 nome:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 nivel_acesso:
+ *                   type: string
+ *                   example: "admin_total"
+ *       401:
+ *         description: Não autorizado - Cookie de administrador ausente ou inválido
+ *       403:
+ *         description: Proibido - O token existe mas não possui privilégios de administrador
+ *       500:
+ *         description: Erro interno ao processar a solicitação
+ */
+
+router.get('/data', verificarToken, dadosAdmin);
 
 /**
  * @openapi

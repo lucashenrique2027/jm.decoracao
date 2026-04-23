@@ -1,7 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { clientes } from '../models/schema.js';
 import { db } from '../models/db.js';
+import jwt from  'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { validarToken } from '../middlewares/validarTokenClient.js';
 
 export const autenticarCliente = async (req, res) => {
   try {
@@ -24,15 +26,59 @@ export const autenticarCliente = async (req, res) => {
     if (!senhaValida) {
       return res.status(401).json({ erro: 'Email ou senha inválidos' });
     }
+    
+    const token = jwt.sign({ id: cliente.id,
+       email: cliente.email },
+        process.env.,
+         { expiresIn: '4h' });
 
-    const { senhaHash, ...clienteSemSenha } = cliente;
-    res.json({ mensagem: 'Login realizado com sucesso', cliente: clienteSemSenha });
+      res.cookie('cliente_token', token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 4 * 60 * 60 * 1000
+      });
+
+    
+    return res.status(200).json({ 
+      mensagem: 'Autenticado com sucesso'
+      ,nome: cliente.nome,
+       email: cliente.email
+    });
 
   } catch (error) {
     console.error('Erro ao autenticar cliente:', error);
     res.status(500).json({ erro: 'Erro ao autenticar cliente' });
   }
 };
+
+export const dadosCliente = async (req,res) => {
+
+  try{
+
+    const id = req.clienteId;
+
+    const resultado = await db.select({
+      id: clientes.id,
+      telefone: clientes.telefone,
+      cep: clientes.cep,
+      endereco: clientes.endereco,
+      bairro: clientes.bairro,
+      cidade: clientes.cidade,
+      estado: clientes.estado
+    }).from(clientes).where(eq(clientes.id, id));
+
+    if(resultado.length === 0){
+      return res.status(404).json({ erro: 'Cliente não encontrado' });
+    }
+
+    return res.status(200).json(resultado[0]);
+
+  }catch(error){
+    console.error('Erro ao buscar dados privados:', error);
+    res.status(500).json({ erro: 'Erro interno ao processar dados' });}
+
+}
 
 
 export const cadastrarCliente = async (req, res) => {

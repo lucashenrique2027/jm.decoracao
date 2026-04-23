@@ -7,6 +7,7 @@ export const loginCliente = async (email, senha) => {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({ email, senha })
         });
 
@@ -17,7 +18,7 @@ export const loginCliente = async (email, senha) => {
         const dados = await response.json();
 
         if (dados && dados.cliente) {
-            localStorage.setItem('cliente', JSON.stringify(dados.cliente));
+            localStorage.setItem('clienteJM', JSON.stringify(dados.cliente));
         }
 
         return dados;

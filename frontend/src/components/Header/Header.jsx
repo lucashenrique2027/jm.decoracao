@@ -1,106 +1,34 @@
-import React, { useState } from 'react'; // Adicionado useState
+import { Link } from 'react-router-dom';
+import { useCarrinho } from '../../context/CarrinhoContext';
+import "./style.css";
 
-export default function Admin() {
-  // Estado para controlar qual tela o administrador está vendo
-  const [abaAtiva, setAbaAtiva] = useState("novo-produto");
-  const [nome, setNome] = useState("");
-  const [preco, setPreco] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [estoque, setEstoque] = useState(0);
-  const [imagem, setImagem] = useState(null);
+export default function Header() {
+  const { totalItens, setAberto } = useCarrinho();
 
-  //função para cadastrar produtos
-  const cadastrarProduto = async () => {
-    try {
-      const formData = new FormData();
+  return (
 
-      formData.append("nome", nome);
-      formData.append("descricao", descricao);
-      formData.append("preco", preco);
-      formData.append("categoria", categoria);
-      formData.append("estoque", estoque);
-      formData.append("disponivel", true); // Define como disponível por padrão
-      formData.append("imagemUpload", imagem);
+    <header className="navbar navbar-expand-lg navbar-light bg-white shadow-sm p-3">
+      <div className="container">
+        <Link className="navbar-brand fw-bold" to="/">
+          <img src="public/logo.jpeg" alt="icone" className="icone" />
+          Arte em Vidro
+        </Link>
 
-      const res = await fetch("/api/produtos", {
-        method: "POST",
-        body: formData,
-      });
+        <div className="d-flex align-items-center">
+          <Link className="nav-link me-3 text-success" to="/">Home</Link>
+          <Link className="nav-link me-3 text-success" to="/sobre">Sobre</Link>
+          <Link className="nav-link me-3 text-danger fw-bold" to="/authAdmin">Admin</Link>
+          <Link className="btn btn-outline-primary btn-sm d-flex align-items-center me-3" to="/login">
+            Entrar/Cadastrar <i className="bi bi-person-circle ms-2"></i>
+          </Link>
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.erro || 'Erro ao cadastrar produto');
-        return;
-      }
-
-      alert("Produto cadastrado com sucesso!");
-
-      //Limpa os campos apos alterações
-      setNome("");
-      setPreco("");
-      setDescricao("");
-      setCategoria("");
-      setEstoque(0);
-      setImagem(null);
-
-    } catch (error) {
-      console.error('Erro ao cadastrar produto:', error);
-      alert("erro na requisição")
-    }
-  };
-  
-return (
-    <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
-      
-      {/* Sidebar - Menu Lateral (JM ADMIN) */}
-      <div className="bg-dark text-white p-4 shadow" style={{ width: "260px" }}>
-        <div className="text-center mb-4">
-            <h4 className="fw-bold text-info">JM ADMIN</h4>
-            <hr className="bg-secondary" />
-        </div>
-        
-        <ul className="nav flex-column gap-3">
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("novo-produto")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "novo-produto" ? "text-info fw-bold" : "text-white"}`}
-            >
-              <i className="bi bi-plus-circle-fill me-3"></i> Novo Produto
-            </button>
-          </li>
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("estoque")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "estoque" ? "text-info fw-bold" : "text-white"}`}
-            >
-              <i className="bi bi-box-seam me-3"></i> Estoque & Vitrine
-            </button>
-          </li>
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("pedidos")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "pedidos" ? "text-info fw-bold" : "text-white"}`}
-            >
-              <i className="bi bi-cart-check me-3"></i> Pedidos
-            </button>
-          </li>
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("clientes")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "clientes" ? "text-info fw-bold" : "text-white"}`}
-            >
-              <i className="bi bi-people me-3"></i> Clientes
-            </button>
-          </li>
-        </ul>
-
-        {/* Botão para fechar a aba do sistema */}
-        <div className="mt-5 pt-5">
-            <button className="btn btn-outline-danger w-100" onClick={() => window.close()}>
-              <i className="bi bi-box-arrow-right me-2"></i> Sair do Sistema
-            </button>
+          {/* Botão do carrinho */}
+          <button className="btn-carrinho" onClick={() => setAberto(prev => !prev)}>
+            🛒
+            {totalItens > 0 && (
+              <span className="btn-carrinho-contador">{totalItens}</span>
+            )}
+          </button>
         </div>
       </div>
 

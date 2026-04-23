@@ -1,8 +1,9 @@
 import express from 'express';
 import { eq } from 'drizzle-orm';
 import { clientes } from '../models/schema.js';
+import { db } from '../models/db.js';
 
-export function criarRotasClientes(db) {
+export function criarRotasClientes() {
   const router = express.Router();
 
   // CREATE - Cadastrar novo cliente 

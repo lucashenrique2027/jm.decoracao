@@ -1,4 +1,4 @@
-import { db } from '../../../models/db.js';
+import { db } from '../models/db.js';
 import { eq } from 'drizzle-orm';
 
 // criar produto

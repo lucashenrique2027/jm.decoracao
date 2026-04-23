@@ -1,6 +1,7 @@
 const API_URL = "http://localhost:8080/api/listar";
 const MINIO_URL = "http://localhost:8080/storageImages/";
 
+
 export const buscarProdutos = async () => {
   try {
     const response = await fetch(API_URL);

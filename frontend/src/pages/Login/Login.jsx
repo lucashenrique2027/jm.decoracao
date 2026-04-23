@@ -134,6 +134,11 @@ export default function Login() {
                         )}
                       </div>
                     </div>
+                    <div className="text-end mt-1">
+          <Link to="/recuperar-senha" style={{ fontSize: '0.85rem', color: '#198754', textDecoration: 'none' }}>
+            Esqueceu a senha?
+          </Link>
+        </div>
 
                     <div className="mb-4 text-start">
                       <label className="form-label small fw-semibold">Senha</label>

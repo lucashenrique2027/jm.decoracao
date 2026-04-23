@@ -13,7 +13,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35,7 +35,7 @@ services:
       context: .
       dockerfile: docker/nginx/Dockerfile
     ports:
-      - "8081:80"
+      - "8080:80"
     depends_on:
       app:
         condition: service_healthy

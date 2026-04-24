@@ -44,10 +44,13 @@ export default function Home() {
 
       <SubHeader />
 
-      <main id="vitrine" className="container-vitrine">
+      <main className="container my-5">
+        <div className="text-center mb-5">
+        </div>
+        
         <Vitrine />
       </main>
-
+    
       <Footer />
     </>
   );

@@ -12,6 +12,11 @@ import LoginAdmin from './pages/Login/LoginAdmin.jsx';
 
 import "../styles/global.css";
 
+
+import Privacidade from './pages/Privacidade';
+import Termos from './pages/Termos'; 
+import RecuperarSenha from "./pages/Login/RecuperarSenha";
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
@@ -22,6 +27,9 @@ createRoot(document.getElementById("root")).render(
           <Route path="/login" element={<Login />} />
           <Route path="/authAdmin" element={<LoginAdmin />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/privacidade" element={<Privacidade />} />
+        <Route path="/termos" element={<Termos />} />
+        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         </Routes>
       </CarrinhoProvider>
     </BrowserRouter>

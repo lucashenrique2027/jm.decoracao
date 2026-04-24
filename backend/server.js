@@ -13,7 +13,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ 
+app.use(cors({  
   origin: 'http://localhost:8080',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true }));
@@ -21,7 +21,7 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+    res.status(200).json({ status: 'ok', uptime: process.uptime() });
 });
 
 app.use('/api/info', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -35,6 +35,7 @@ app.use('/api/admin', routesAdmin);
 app.use('/api/clientes', routesClientes);
 
 app.use('/api/pedidos', routesPedidos);
+
 
 app.listen(PORT, () => {
   console.log(`Backend rodando na porta ${PORT}`);

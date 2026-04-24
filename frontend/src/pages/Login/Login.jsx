@@ -12,11 +12,13 @@ export default function Login() {
   const [verSenhaCad, setVerSenhaCad] = useState(false);
   const [errosLogin, setErrosLogin]   = useState({});
   const [errosCad, setErrosCad]       = useState({});
+  const [aceitouTermos, setAceitouTermos] = useState(false);
 
   // Campos do cadastro
   const [cad, setCad] = useState({
     nome: "", email: "", telefone: "", cep: "", senha: ""
   });
+  
 
   const navigate = useNavigate();
 
@@ -45,19 +47,26 @@ export default function Login() {
     }
   };
 
-  // ── Validação do Cadastro ───────────────────────────────────────────────────
-  const validarCadastro = () => {
-    const erros = {};
-    if (!cad.nome)                            erros.nome     = "Nome é obrigatório";
-    if (!cad.email)                           erros.email    = "E-mail é obrigatório";
-    else if (!/\S+@\S+\.\S+/.test(cad.email)) erros.email   = "E-mail inválido";
-    if (!cad.telefone)                        erros.telefone = "Telefone é obrigatório";
-    if (!cad.cep)                             erros.cep      = "CEP é obrigatório";
-    else if (cad.cep.replace(/\D/g, "").length !== 8) erros.cep = "CEP inválido";
-    if (!cad.senha)                           erros.senha    = "Senha é obrigatória";
-    else if (cad.senha.length < 6)            erros.senha    = "Senha deve ter pelo menos 6 caracteres";
-    return erros;
-  };
+ // ── Validação do Cadastro Atualizada ─────────────────────────────────────────
+const validarCadastro = () => {
+  const erros = {};
+  
+  if (!cad.nome)                            erros.nome     = "Nome é obrigatório";
+  if (!cad.email)                           erros.email    = "E-mail é obrigatório";
+  else if (!/\S+@\S+\.\S+/.test(cad.email)) erros.email   = "E-mail inválido";
+  if (!cad.telefone)                        erros.telefone = "Telefone é obrigatório";
+  if (!cad.cep)                             erros.cep      = "CEP é obrigatório";
+  else if (cad.cep.replace(/\D/g, "").length !== 8) erros.cep = "CEP inválido";
+  if (!cad.senha)                           erros.senha    = "Senha é obrigatória";
+  else if (cad.senha.length < 6)            erros.senha    = "Senha deve ter pelo menos 6 caracteres";
+
+  // ESTA É A PARTE QUE FALTAVA:
+  if (!aceitouTermos) {
+    erros.termos = "Você precisa aceitar os termos para continuar";
+  }
+
+  return erros;
+};
 
   const handleCadastro = (e) => {
     e.preventDefault();
@@ -176,6 +185,7 @@ export default function Login() {
                 <div>
                   <h3 className="fw-bold mb-4">Novo Cadastro</h3>
                   <form onSubmit={handleCadastro} noValidate>
+                    
 
                     <div className="mb-3 text-start">
                       <label className="form-label small fw-semibold">Nome</label>
@@ -255,6 +265,23 @@ export default function Login() {
                         {errosCad.senha && <div className="invalid-feedback">{errosCad.senha}</div>}
                       </div>
                     </div>
+                    <div className="mb-4 text-start">
+        <div className="form-check">
+          <input 
+            className={`form-check-input ${errosCad.termos ? "is-invalid" : ""}`} 
+            type="checkbox" 
+            id="checkTermos"
+            checked={aceitouTermos}
+            onChange={(e) => setAceitouTermos(e.target.checked)}
+          />
+          <label className="form-check-label small text-muted" htmlFor="checkTermos">
+            Eu li e aceito os <Link to="/termos" className="text-success fw-bold text-decoration-none">Termos de Uso</Link> e a <Link to="/privacidade" className="text-success fw-bold text-decoration-none">Política de Privacidade</Link>.
+          </label>
+          {errosCad.termos && (
+            <div className="invalid-feedback d-block">{errosCad.termos}</div>
+          )}
+        </div>
+      </div>
 
                     <button type="submit" className="btn btn-success w-100 fw-bold py-2 mb-3">
                       <i className="bi bi-person-check me-2"></i>Cadastrar

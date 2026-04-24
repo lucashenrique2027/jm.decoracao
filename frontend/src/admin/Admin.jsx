@@ -1,7 +1,8 @@
-import React, { useState } from 'react'; // Adicionado useState
+import React, { useState } from 'react';
+import './login_admin.css';
 
 export default function Admin() {
-  // Estado para controlar qual tela o administrador está vendo
+  const admin = JSON.parse(localStorage.getItem('adminJM') || 'null');
   const [abaAtiva, setAbaAtiva] = useState("novo-produto");
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
@@ -10,17 +11,15 @@ export default function Admin() {
   const [estoque, setEstoque] = useState(0);
   const [imagem, setImagem] = useState(null);
 
-  //função para cadastrar produtos
   const cadastrarProduto = async () => {
     try {
       const formData = new FormData();
-
       formData.append("nome", nome);
       formData.append("descricao", descricao);
       formData.append("preco", preco);
       formData.append("categoria", categoria);
       formData.append("estoque", estoque);
-      formData.append("disponivel", true); // Define como disponível por padrão
+      formData.append("disponivel", true); 
       formData.append("imagemUpload", imagem);
 
       const res = await fetch("http://localhost:3000/api/produtos", {
@@ -36,8 +35,6 @@ export default function Admin() {
       }
 
       alert("Produto cadastrado com sucesso!");
-
-      //Limpa os campos apos alterações
       setNome("");
       setPreco("");
       setDescricao("");
@@ -47,18 +44,24 @@ export default function Admin() {
 
     } catch (error) {
       console.error('Erro ao cadastrar produto:', error);
-      alert("erro na requisição")
+      alert("erro na requisição");
     }
   };
   
-return (
+  return (
     <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
       
-      {/* Sidebar - Menu Lateral (JM ADMIN) */}
       <div className="bg-dark text-white p-4 shadow" style={{ width: "260px" }}>
         <div className="text-center mb-4">
-            <h4 className="fw-bold text-info">JM ADMIN</h4>
-            <hr className="bg-secondary" />
+          <h4 className="fw-bold text-info">JM ADMIN</h4>
+          {admin && (
+            <div className="mt-2">
+              <i className="bi bi-person-circle text-info" style={{ fontSize: '2rem' }}></i>
+              <p className="mb-0 fw-semibold text-white mt-1">{admin.nome}</p>
+              <p className="text-secondary small mb-0">{admin.email}</p>
+            </div>
+          )}
+          <hr className="bg-secondary" />
         </div>
         
         <ul className="nav flex-column gap-3">
@@ -96,19 +99,19 @@ return (
           </li>
         </ul>
 
-        {/* Botão para fechar a aba do sistema */}
         <div className="mt-5 pt-5">
-            <button className="btn btn-outline-danger w-100" onClick={() => window.close()}>
-              <i className="bi bi-box-arrow-right me-2"></i> Sair do Sistema
-            </button>
+          <button className="btn btn-outline-danger w-100" onClick={() => {
+            localStorage.removeItem('adminJM');
+            window.location.href = '/authAdmin';
+          }}>
+            <i className="bi bi-box-arrow-right me-2"></i> Sair do Sistema
+          </button>
         </div>
       </div>
 
-      {/* Área de Conteúdo Principal Dinâmica */}
       <div className="flex-grow-1 p-5">
         <div className="container-fluid">
           
-          {/* TELA: NOVO PRODUTO */}
           {abaAtiva === "novo-produto" && (
             <div className="card border-0 shadow-sm p-4 mb-4">
               <h2 className="h4 fw-bold text-dark border-bottom pb-3 mb-4">
@@ -143,7 +146,6 @@ return (
                   ></textarea>
                 </div>
 
-                {/* Campo Categoria */}
                 <div className="col-md-6 mt-3">
                   <input 
                     className="form-control"
@@ -152,7 +154,6 @@ return (
                   />
                 </div>
 
-                {/* Campo Estoque */}
                 <div className="col-md-6 mt-3">
                   <input 
                     type="number"
@@ -175,7 +176,7 @@ return (
                   <button 
                     type="button" 
                     className="btn btn-success btn-lg px-5 shadow-sm"
-                    onClick={cadastrarProduto} // 🔹 ADICIONADO
+                    onClick={cadastrarProduto}
                   >
                     <i className="bi bi-cloud-upload me-2"></i> Publicar na Loja
                   </button>
@@ -184,16 +185,13 @@ return (
             </div>
           )}
 
-          {/* TELA: ESTOQUE */}
           {abaAtiva === "estoque" && (
             <div className="card border-0 shadow-sm p-4">
               <h2 className="h4 fw-bold">Estoque & Vitrine</h2>
               <p className="text-muted">Lista de todos os produtos ativos na JM Decorações.</p>
-              {/* Aqui você pode mapear os produtos cadastrados futuramente */}
             </div>
           )}
 
-          {/* TELA: PEDIDOS */}
           {abaAtiva === "pedidos" && (
             <div className="card border-0 shadow-sm p-4">
               <h2 className="h4 fw-bold">Pedidos Recebidos</h2>
@@ -201,7 +199,6 @@ return (
             </div>
           )}
 
-          {/* TELA: CLIENTES */}
           {abaAtiva === "clientes" && (
             <div className="card border-0 shadow-sm p-4">
               <h2 className="h4 fw-bold">Base de Clientes</h2>

@@ -47,4 +47,4 @@ docker compose -f docker-compose.upload.yml run --rm storage-migrator
 - backend nginx via proxy   http://localhost:8080/api (usar para chamada de api real)
 - Minio imagens produtos    http://localhost:9001      
 
-psql -h localhost -U jm -d jm_decoracao
+docker exec -it loja-jm-decoracao-postgres-1 psql -U jm -d jm_decoracao

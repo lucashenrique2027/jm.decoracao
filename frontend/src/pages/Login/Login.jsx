@@ -18,7 +18,7 @@ export default function Login() {
 
   // Campos do cadastro
   const [cad, setCad] = useState({
-    nome: "", email: "", telefone: "", cep: "", senha: ""
+    nome: "", email: "", telefone: "", cep: "", senha: "",confirmarSenha:""
   });
 
   const navigate = useNavigate();
@@ -57,6 +57,7 @@ export default function Login() {
     else if (!/\S+@\S+\.\S+/.test(cad.email)) erros.email   = "E-mail inválido";
     if (!cad.telefone)                        erros.telefone = "Telefone é obrigatório";
     if (!cad.cep)                             erros.cep      = "CEP é obrigatório";
+    if (cad.senha !== cad.confirmarSenha) erros.confirmarSenha = "As senhas não coincidem";
     else if (cad.cep.replace(/\D/g, "").length !== 8) erros.cep = "CEP inválido";
     if (!cad.senha)                           erros.senha    = "Senha é obrigatória";
     else if (cad.senha.length < 6)            erros.senha    = "Senha deve ter pelo menos 6 caracteres";
@@ -72,7 +73,7 @@ export default function Login() {
     }
     try{
       setErrosCad({});
-      const resultado = await cadastrarCliente({ body: cad });
+      const resultado = await cadastrarCliente(cad );
       navigate("/");
     }catch(error){
       setErrosCad({ email: 'Erro ao cadastrar. Tente novamente.' });
@@ -264,6 +265,20 @@ export default function Login() {
                       </div>
                     </div>
 
+                    <div className="mb-4 text-start">
+                        <label className="form-label small fw-semibold">Confirmar Senha</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="bi bi-lock-fill"></i></span>
+                          <input
+                            type={verSenhaCad ? "text" : "password"}
+                            className={`form-control ${errosCad.confirmarSenha ? "is-invalid" : ""}`}
+                            placeholder="••••••"
+                            value={cad.confirmarSenha}
+                            onChange={fc("confirmarSenha")}
+                          />
+                          {errosCad.confirmarSenha && <div className="invalid-feedback">{errosCad.confirmarSenha}</div>}
+                        </div>
+                      </div>
                     <button type="submit" className="btn btn-success w-100 fw-bold py-2 mb-3">
                       <i className="bi bi-person-check me-2"></i>Cadastrar
                     </button>

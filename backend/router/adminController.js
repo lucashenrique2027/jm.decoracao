@@ -8,7 +8,7 @@ import {
   upload
 } from '../routes/produtosAdmin.js';
 
-import { authAdmin,dadosAdmin } from '../routes/admin.js';
+import { authAdmin,dadosAdmin,logOutAdmin } from '../routes/admin.js';
 import { verificarToken } from '../middlewares/validarTokenAdmin.js';
 
 const router = express.Router();
@@ -56,6 +56,20 @@ const router = express.Router();
  *         description: Erro interno no servidor
  */
 router.post('/auth', authAdmin);
+
+/**
+ * @openapi
+ * /api/admin/logout:
+ *   post:
+ *     summary: Encerra a sessão do administrador
+ *     tags:
+ *       - Autenticação
+ *     responses:
+ *       200:
+ *         description: Sessão encerrada com sucesso
+ */
+
+router.post('/logout',logOutAdmin)
 
 /**
  * @openapi

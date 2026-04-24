@@ -1,5 +1,7 @@
 import { db } from '../models/db.js';
 import { eq } from 'drizzle-orm';
+import { admin } from '../models/schema.js';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 
@@ -41,15 +43,24 @@ export const authAdmin = async (req,res) => {
 
   return res.status(200).json({ 
       message: 'Autenticado com sucesso',
-      admin: {
         nome: adminEncontrado.nome,
         email: adminEncontrado.email
-      }
     });
 
   }catch(error){
     return res.status(500).json({ message: 'Erro interno ao autenticar admin' });
   }
+}
+
+export const logOutAdmin = (req,res) => {
+
+  res.clearCookie('admin_token', {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'strict',
+    path: '/'
+  });
+  return res.status(200).json({ mensagem: 'Sessão encerrada com sucesso' });
 }
 
 export const dadosAdmin = async (req,res) => {

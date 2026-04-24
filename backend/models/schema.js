@@ -2,9 +2,10 @@ import { pgSchema, serial, text, numeric, boolean, integer, timestamp } from 'dr
 
 export const jm = pgSchema('jm');
 
-// ENUMS
-export const userRoleEnum = jm.enum('user_role', ['admin', 'colaborador', 'cliente']);
 export const statusPedidoEnum = jm.enum('status_pedido', ['pendente', 'confirmado', 'rejeitado', 'entregue']);
+
+export const userRoleEnum = jm.enum('user_role', ['colaborador', 'admin', 'superadmin']);
+
 
 // TESTE
 export const teste = jm.table("teste", {
@@ -12,8 +13,7 @@ export const teste = jm.table("teste", {
   nome: text("nome").notNull(),
 });
 
-// USUÁRIOS 
-export const usuarios = jm.table('usuarios', {
+export const admin = jm.table('admin', {
   id: serial('id').primaryKey(),
   nome: text('nome').notNull(),
   email: text('email').notNull().unique(),

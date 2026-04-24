@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCarrinho } from '../../context/CarrinhoContext';
 import "./style.css";
+import { logoutCliente } from '../../services/authCliente.js'
 
 export default function Header() {
   const { totalItens, setAberto } = useCarrinho();
   const [menuAberto, setMenuAberto] = useState(false);
   const navigate = useNavigate();
 
-  const cliente = JSON.parse(localStorage.getItem('cliente') || 'null');
+  const cliente = JSON.parse(localStorage.getItem('clienteJM') || 'null');
 
   const handleLogout = () => {
-    localStorage.removeItem('cliente');
+    logoutCliente();
     navigate('/');
     window.location.reload();
   };

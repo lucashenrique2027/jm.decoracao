@@ -45,6 +45,18 @@ const router = express.Router();
  */
   router.post('/login', autenticarCliente);
 
+/**
+ * @openapi
+ * /api/clientes/logout:
+ *   post:
+ *     summary: Encerra a sessão do cliente
+ *     tags:
+ *       - Auth
+ *     responses:
+ *       200:
+ *         description: Sessão encerrada com sucesso
+ */
+
   router.post('/logout', logoutCliente);
 /**
  * @openapi

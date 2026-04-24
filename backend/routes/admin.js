@@ -2,6 +2,7 @@ import { db } from '../models/db.js';
 import { eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 
+
 export const authAdmin = async (req,res) => {
 
   try{

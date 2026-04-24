@@ -4,7 +4,7 @@ export const verificarToken = (req, res, next) => {
 
     const token = req.cookies.cliente_token;
 
-    if (!token) {
+    if (!token) { 
         return res.status(401).json({ erro: 'Token de autenticação não encontrado' });
     }
     try{

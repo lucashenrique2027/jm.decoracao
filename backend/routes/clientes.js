@@ -3,7 +3,6 @@ import { clientes } from '../models/schema.js';
 import { db } from '../models/db.js';
 import jwt from  'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { validarToken } from '../middlewares/validarTokenClient.js';
 
 export const autenticarCliente = async (req, res) => {
   try {
@@ -50,6 +49,16 @@ export const autenticarCliente = async (req, res) => {
     console.error('Erro ao autenticar cliente:', error);
     res.status(500).json({ erro: 'Erro ao autenticar cliente' });
   }
+};
+
+export const logoutCliente = (req, res) => {
+  res.clearCookie('cliente_token', {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'strict',
+    path: '/'
+  });
+  return res.status(200).json({ mensagem: 'Sessão encerrada com sucesso' });
 };
 
 export const dadosCliente = async (req,res) => {

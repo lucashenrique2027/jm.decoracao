@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   autenticarCliente,
+  logoutCliente,
   dadosCliente,
   cadastrarCliente,
   listarClientes,
@@ -44,6 +45,7 @@ const router = express.Router();
  */
   router.post('/login', autenticarCliente);
 
+  router.post('/logout', logoutCliente);
 /**
  * @openapi
  * /api/clientes/data:

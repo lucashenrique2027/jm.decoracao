@@ -9,7 +9,7 @@ export const buscarProdutos = async () => {
     const dados = await response.json();
 
     return dados
-      .map(produto => ({
+      .map(produto => ({ 
         ...produto,
         img: `${MINIO_URL}${produto.imagemUpload}`,
       }))

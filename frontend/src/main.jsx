@@ -16,20 +16,23 @@ import "../styles/global.css";
 import Privacidade from './pages/Privacidade';
 import Termos from './pages/Termos'; 
 import RecuperarSenha from "./pages/Login/RecuperarSenha";
+import ProdutoDetalhes from "./components/ProdutoDetalhes/ProdutoDetalhes.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <CarrinhoProvider>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/sobre" element={<Sobre />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/authAdmin" element={<LoginAdmin />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/" element={<Home />} /> {/*http://localhost:8080/*/}
+          <Route path="/sobre" element={<Sobre />} />{/*http://localhost:8080/sobre*/}
+          <Route path="/login" element={<Login />} />{/*http://localhost:8080/Login*/}
+          <Route path="/authAdmin" element={<LoginAdmin />} />{/*http://localhost:8080/authAdmin*/}
+          <Route path="/admin" element={<Admin />} />{/*http://localhost:8080/admin*/}
+          <Route path="/carrinho" element={<Carrinho />} />
           <Route path="/privacidade" element={<Privacidade />} />
-        <Route path="/termos" element={<Termos />} />
-        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+          <Route path="/termos" element={<Termos />} />
+          <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+          <Route path="/produto/:id" element={<ProdutoDetalhes />} />
         </Routes>
       </CarrinhoProvider>
     </BrowserRouter>

@@ -7,6 +7,8 @@ import routesClientes from './router/clientesController.js';
 import routesPedidos from './router/pedidosController.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
+import pagamentoRouter from  './router/paymentsController.js';
+
 
 dotenv.config();
 
@@ -36,6 +38,7 @@ app.use('/api/clientes', routesClientes);
 
 app.use('/api/pedidos', routesPedidos);
 
+app.use('/api/pagamento',pagamentoRouter);
 
 app.listen(PORT, () => {
   console.log(`Backend rodando na porta ${PORT}`);

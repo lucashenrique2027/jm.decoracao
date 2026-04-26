@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCarrinho } from '../../context/CarrinhoContext';
-import "./style.css";
 import { logoutCliente } from '../../services/authCliente.js'
+import { ShoppingCart, Trash2 } from 'lucide-react';
+import "./style.css";
 
 export default function Header() {
   const { totalItens, setAberto } = useCarrinho();
@@ -23,7 +24,7 @@ export default function Header() {
         <div className="container">
           <Link className="navbar-brand fw-bold" to="/">
             <img src="public/logo.jpeg" alt="icone" className="icone" />
-            JM Decoração
+            JM Decorações
           </Link>
           
           <div className="d-flex align-items-center">
@@ -49,8 +50,8 @@ export default function Header() {
                   Entrar/Cadastrar <i className="bi bi-person-circle ms-2"></i>
                 </Link>
               )}
-              <button className="btn-carrinho" onClick={() => setAberto(prev => !prev)}>
-                🛒
+              <button className="btn-carrinho" onClick={() => {navigate('/carrinho');setMenuAberto(false);}}>
+                <ShoppingCart />
                 {totalItens > 0 && <span className="btn-carrinho-contador">{totalItens}</span>}
               </button>
             </div>
@@ -82,8 +83,8 @@ export default function Header() {
 
             <Link className="nav-link text-success" to="/" onClick={() => setMenuAberto(false)}>Home</Link>
             <Link className="nav-link text-success" to="/sobre" onClick={() => setMenuAberto(false)}>Sobre</Link>
-            <button className="btn-carrinho mt-auto" onClick={() => setAberto(prev => !prev)}>
-              🛒
+            <button className="btn-carrinho" onClick={() => {navigate('/carrinho');setMenuAberto(false);}}>
+              <ShoppingCart />
               {totalItens > 0 && <span className="btn-carrinho-contador">{totalItens}</span>}
             </button>
           </nav>

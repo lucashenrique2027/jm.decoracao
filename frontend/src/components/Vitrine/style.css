@@ -126,5 +126,20 @@
 
   .produto-info p {
     font-size: 12px;
-  }
+    width: 100%;
+    margin-top: 8px;
+    background-color: #f8f9fa;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
 }
+
+.link-produto {
+  text-decoration: none;
+  color: inherit;
+  display: block; 
+}}

@@ -1,112 +1,95 @@
 import { useCarrinho } from "../../context/CarrinhoContext";
+import { efetuarPagamento } from '../../services/payment.js';
+import { useNavigate } from "react-router-dom";
 import "./style.css";
 
 export default function Carrinho() {
+  const navigate = useNavigate();
   const {
     itens,
-    aberto,
-    setAberto,
     removerItem,
     alterarQuantidade,
     limparCarrinho,
     total,
   } = useCarrinho();
 
+  const finalizarPedido = async () => {
+    try {
+      const data = await efetuarPagamento('comprador@teste.com', itens);
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      alert(error.message || 'Erro ao conectar com o servidor!');
+    }
+  };
+
   return (
-    <>
-      {/* Fundo escuro atrás da sidebar */}
-      {aberto && (
-        <div
-          className="carrinho-overlay"
-          onClick={() => setAberto(false)}
-        />
-      )}
+    <div className="container py-5">
+      <div className="carrinho-header mb-4">
+        <h2 className="fw-bold">🛒 Meu Carrinho</h2>
+        <button className="btn-voltar" onClick={() => navigate("/")}>
+          Continuar Comprando
+        </button>
+      </div>
 
-      {/* Sidebar do carrinho */}
-      <div className={`carrinho-sidebar ${aberto ? "aberto" : ""}`}>
-
-        {/* Cabeçalho */}
-        <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
-          <h5 className="mb-0 fw-bold">🛒 Meu Carrinho</h5>
-          <button
-            className="btn btn-sm btn-outline-secondary"
-            onClick={() => setAberto(false)}
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Lista de itens */}
-        <div className="carrinho-itens p-3">
-          {itens.length === 0 ? (
-            <div className="text-center text-muted py-5">
-              <p className="fs-5 fw-semibold">Seu carrinho está vazio!</p>
-              <span>Adicione produtos para continuar 🛍️</span>
-            </div>
-          ) : (
-            itens.map((item, index) => (
-              <div key={index} className="d-flex align-items-center gap-3 py-3 border-bottom">
-                {/* Imagem */}
-                <img
-                  src={item.img}
-                  alt={item.nome}
-                  className="carrinho-item-img rounded"
-                />
-
-                {/* Informações */}
-                <div className="flex-grow-1">
-                  <p className="mb-1 fw-semibold small">{item.nome}</p>
-                  <p className="mb-2 fw-bold text-success small">
-                    R$ {(item.preco * item.quantidade).toFixed(2).replace(".", ",")}
-                  </p>
-
-                  {/* Controle de quantidade */}
-                  <div className="d-flex align-items-center gap-2">
-                    <button
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => alterarQuantidade(item.nome, -1)}
-                    >-</button>
-                    <span className="fw-bold">{item.quantidade}</span>
-                    <button
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => alterarQuantidade(item.nome, 1)}
-                    >+</button>
-                  </div>
-                </div>
-
-                {/* Botão remover */}
-                <button
-                  className="btn btn-sm btn-outline-danger"
-                  onClick={() => removerItem(item.nome)}
-                >
-                  🗑️
-                </button>
+      <div className="row">
+        <div className="col-lg-8">
+          <div className="carrinho-lista">
+            {itens.length === 0 ? (
+              <div className="vazio-container">
+                <p className="fs-5 fw-semibold">Seu carrinho está vazio!</p>
+                <span>Escolha produtos incríveis na nossa loja 🛍️</span>
               </div>
-            ))
-          )}
+            ) : (
+              itens.map((item, index) => (
+                <div key={index} className="carrinho-item-card">
+                  <div className="carrinho-img-wrapper">
+                    <img src={item.img} alt={item.nome} />
+                  </div>
+
+                  <div className="carrinho-item-info">
+                    <p className="item-nome">{item.nome}</p>
+                    <p className="item-preco">
+                      R$ {(item.preco * item.quantidade).toFixed(2).replace(".", ",")}
+                    </p>
+
+                    <div className="carrinho-controles">
+                      <button onClick={() => alterarQuantidade(item.nome, -1)}>-</button>
+                      <span>{item.quantidade}</span>
+                      <button onClick={() => alterarQuantidade(item.nome, 1)}>+</button>
+                    </div>
+                  </div>
+
+                  <button className="btn-remover" onClick={() => removerItem(item.nome)}>
+                    🗑️
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* Rodapé */}
         {itens.length > 0 && (
-          <div className="p-3 border-top">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <span className="fs-6">Total:</span>
-              <span className="fw-bold text-success fs-5">
-                R$ {total.toFixed(2).replace(".", ",")}
-              </span>
+          <div className="col-lg-4">
+            <div className="carrinho-resumo-card">
+              <h5 className="fw-bold mb-3">Resumo do Pedido</h5>
+              <div className="resumo-linha">
+                <span>Total:</span>
+                <span className="resumo-total">
+                  R$ {total.toFixed(2).replace(".", ",")}
+                </span>
+              </div>
+              <button className="btn-finalizar" onClick={finalizarPedido}>
+                Finalizar Compra
+              </button>
+              <button className="btn-limpar" onClick={limparCarrinho}>
+                Esvaziar Carrinho
+              </button>
             </div>
-            <button className="btn btn-success w-100 fw-bold py-2 mb-2">
-              Finalizar Pedido
-            </button>
-            <button
-              className="btn btn-outline-danger w-100"
-              onClick={limparCarrinho}
-            >
-              Limpar Carrinho
-            </button>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

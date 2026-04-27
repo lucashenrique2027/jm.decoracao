@@ -10,8 +10,8 @@ import Carrinho from "./components/carrinho/Carrinho.jsx";
 import Home from "./pages/Home/Home.jsx";
 import Sobre from "./pages/Sobre/Sobre.jsx";
 import Login from "./pages/Login/Login.jsx";
-import Admin from "./admin/Admin.jsx";
-import LoginAdmin from './pages/Login/LoginAdmin.jsx';
+import Admin from "./admin/dashboard/Admin.jsx";
+import LoginAdmin from './admin/login/LoginAdmin.jsx';
 
 import "../styles/global.css";
 

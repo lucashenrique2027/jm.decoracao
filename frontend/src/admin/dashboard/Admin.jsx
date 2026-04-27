@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { logoutAdmin } from '../services/authAdmin';
+import { logoutAdmin } from '../../services/authAdmin';
 import './login_admin.css';
 
 export default function Admin() {

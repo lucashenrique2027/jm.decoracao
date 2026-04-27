@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
+import Header from "../../components/Header/Header.jsx";
+import Footer from "../../components/Footer/Footer.jsx";
 import logoJm from "../../../public/logo.jpeg";
 
 import { loginAdmin } from "../../services/authAdmin.js";
@@ -88,26 +88,34 @@ export default function AdminLogin() {
                   </div>
                 </div>
 
-                <div className="mb-4 text-start">
-                  <label className="form-label small fw-semibold">Senha de Acesso</label>
-                  <div className="input-group">
-                    {/* Alterado para o verde do tema btn-success */}
-                    <span className="input-group-text bg-success text-white"><i className="bi bi-key"></i></span>
-                    <input
-                      type={verSenha ? "text" : "password"}
-                      className={`form-control ${errosLogin.senha ? "is-invalid" : ""}`}
-                      placeholder="••••••"
-                      value={senha}
-                      onChange={e => setSenha(e.target.value)}
-                    />
-                    <button type="button" className="btn btn-outline-secondary" onClick={() => setVerSenha(p => !p)}>
-                      <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"}`}></i>
-                    </button>
-                    {errosLogin.senha && (
-                      <div className="invalid-feedback">{errosLogin.senha}</div>
-                    )}
-                  </div>
-                </div>
+                <div className="input-group">
+  <span className="input-group-text bg-success text-white">
+    <i className="bi bi-key"></i>
+  </span>
+  
+  <div className="position-relative flex-grow-1">
+    <input
+      type={verSenha ? "text" : "password"}
+      className={`form-control ${errosLogin.senha ? "is-invalid" : ""}`}
+      placeholder="••••••"
+      value={senha}
+      onChange={e => setSenha(e.target.value)}
+      style={{ paddingRight: '40px' }} // Abre espaço para o ícone não sobrepor o texto
+    />
+    
+    <span 
+      className="position-absolute top-50 end-0 translate-middle-y me-3" 
+      style={{ cursor: 'pointer', zIndex: 10 }}
+      onClick={() => setVerSenha(p => !p)}
+    >
+      <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"} text-secondary`}></i>
+    </span>
+  </div>
+
+  {errosLogin.senha && (
+    <div className="invalid-feedback d-block">{errosLogin.senha}</div>
+  )}
+</div>
 
                 {/* Botão agora segue o padrão btn-success do sistema */}
                 <button type="submit" className="btn btn-success w-100 fw-bold py-2 mb-3 shadow-sm">

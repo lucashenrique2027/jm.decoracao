@@ -112,7 +112,7 @@ const validarCadastro = () => {
               {tela === "escolha" && (
                 <div>
                   <h3 className="fw-bold mb-1">Bem-vindo!</h3>
-                  <p className="text-muted small mb-4">Seja bem-vindo à JM Arte em Vidro</p>
+                  <p className="text-muted small mb-4">Seja bem-vindo à JM Decorações</p>
                   <div className="d-grid gap-3">
                     <button className="btn btn-success btn-lg fw-bold py-3" onClick={() => setTela("login")}>
                       <i className="bi bi-box-arrow-in-right me-2"></i>Fazer Login
@@ -156,31 +156,42 @@ const validarCadastro = () => {
                         )}
                       </div>
                     </div>
-                    <div className="text-end mt-1">
-          <Link to="/recuperar-senha" style={{ fontSize: '0.85rem', color: '#198754', textDecoration: 'none' }}>
-            Esqueceu a senha?
-          </Link>
-        </div>
 
                     <div className="mb-4 text-start">
-                      <label className="form-label small fw-semibold">Senha</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="bi bi-lock"></i></span>
-                        <input
-                          type={verSenha ? "text" : "password"}
-                          className={`form-control ${errosLogin.senha ? "is-invalid" : ""}`}
-                          placeholder="••••••"
-                          value={senha}
-                          onChange={e => setSenha(e.target.value)}
-                        />
-                        <button type="button" className="btn btn-outline-secondary" onClick={() => setVerSenha(p => !p)}>
-                          <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"}`}></i>
-                        </button>
-                        {errosLogin.senha && (
-                          <div className="invalid-feedback">{errosLogin.senha}</div>
-                        )}
-                      </div>
-                    </div>
+  <label className="form-label small fw-semibold">Senha</label>
+  <div className="input-group">
+    <span className="input-group-text"><i className="bi bi-lock"></i></span>
+    
+    <div className="position-relative flex-grow-1">
+      <input
+        type={verSenha ? "text" : "password"}
+        className={`form-control ${errosLogin.senha ? "is-invalid" : ""}`}
+        placeholder="••••••"
+        value={senha}
+        onChange={e => setSenha(e.target.value)}
+        style={{ paddingRight: '40px', borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+      />
+      
+      <span 
+        className="position-absolute top-50 end-0 translate-middle-y me-3" 
+        style={{ cursor: 'pointer', zIndex: 10 }}
+        onClick={() => setVerSenha(p => !p)}
+      >
+        <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"} text-secondary`}></i>
+      </span>
+    </div>
+
+    {errosLogin.senha && (
+      <div className="invalid-feedback d-block">{errosLogin.senha}</div>
+    )}
+  </div>
+
+  <div className="text-end mt-1">
+    <Link to="/recuperar-senha" style={{ fontSize: '0.85rem', color: '#198754', textDecoration: 'none' }}>
+      Esqueceu a senha?
+    </Link>
+  </div>
+</div>
 
                     <button type="submit" className="btn btn-success w-100 fw-bold py-2 mb-3">
                       <i className="bi bi-box-arrow-in-right me-2"></i>Entrar

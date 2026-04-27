@@ -67,15 +67,15 @@ export const dadosAdmin = async (req,res) => {
 
   try{
 
-    const adminId = req.admin.id;
+    const adminId = req.adminId;
 
     const resultado = await  db.select({
       id: admin.id,
       nome: admin.nome,
       email: admin.email,
       role: admin.role,
-      cpf_cnpj: admin.cpf_cnpj,
-      endereco: endereco_fiscal
+      cpf_cnpj: admin.cpfCnpj,
+      endereco: admin.enderecoFiscal
     }).from(admin).where(eq(admin.id, adminId));
 
     if(resultado.length === 0) {
@@ -85,6 +85,7 @@ export const dadosAdmin = async (req,res) => {
     return res.status(200).json({ admin: resultado[0] });
 
   }catch(error){
+    console.error("Erro em dadosAdmin:", error);
     return res.status(500).json({ message: 'Erro interno ao buscar dados do admin' });
   }
 

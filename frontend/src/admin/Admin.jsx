@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logoutAdmin } from '../services/authAdmin';
 import './login_admin.css';
 
 export default function Admin() {
@@ -10,6 +11,19 @@ export default function Admin() {
   const [categoria, setCategoria] = useState("");
   const [estoque, setEstoque] = useState(0);
   const [imagem, setImagem] = useState(null);
+
+  const handleLogout = async () => {
+
+      try {
+          await logoutAdmin();
+          localStorage.removeItem('adminJM');
+          window.location.href = '/authAdmin';
+      }catch(error){
+          console.error('Erro ao fazer logout:', error);
+          console.alert('Erro ao fazer logout. Tente novamente.');
+      }
+  }
+
 
   const cadastrarProduto = async () => {
     try {
@@ -101,7 +115,7 @@ export default function Admin() {
 
         <div className="mt-5 pt-5">
           <button className="btn btn-outline-danger w-100" onClick={() => {
-            localStorage.removeItem('adminJM');
+            handleLogout();
             window.location.href = '/authAdmin';
           }}>
             <i className="bi bi-box-arrow-right me-2"></i> Sair do Sistema

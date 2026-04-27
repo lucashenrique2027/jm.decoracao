@@ -37,11 +37,21 @@ export const buscarDadosAdmin = async () => {
     return response.json();
 }
 
+export const validarSessaoAdmin = async () => {
+
+    try{
+        const dados = await buscarDadosAdmin();
+        return { autenticado: true, dados };
+
+    }catch(error){
+        return { autenticado: false };
+    }
+}
+
+
 export const logoutAdmin = async () => {
         await fetch(API_URL+'/logout', {
             method: 'POST',
             credentials: 'include'
         });
-
-        localStorage.removeItem('adminJM');
 }

@@ -9,10 +9,12 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 import pagamentoRouter from  './router/paymentsController.js';
 
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
 const app = express();
+app.use(cookieParser());
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({  

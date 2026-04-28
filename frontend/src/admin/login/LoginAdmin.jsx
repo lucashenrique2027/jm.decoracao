@@ -78,7 +78,7 @@ export default function AdminLogin() {
                     <input
                       type="email"
                       className={`form-control ${errosLogin.email ? "is-invalid" : ""}`}
-                      placeholder="admin@jm"
+                      placeholder="admin@gmail.com"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                     />
@@ -97,7 +97,7 @@ export default function AdminLogin() {
     <input
       type={verSenha ? "text" : "password"}
       className={`form-control ${errosLogin.senha ? "is-invalid" : ""}`}
-      placeholder="••••••"
+      placeholder="senha123"
       value={senha}
       onChange={e => setSenha(e.target.value)}
       style={{ paddingRight: '40px' }} // Abre espaço para o ícone não sobrepor o texto

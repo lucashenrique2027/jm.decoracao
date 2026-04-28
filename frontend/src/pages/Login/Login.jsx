@@ -126,11 +126,14 @@ const validarCadastro = () => {
                       <i className="bi bi-arrow-left me-1"></i>Voltar para a Loja
                     </Link>
                   </div>
-                  <div className="mt-4">
-                    <Link to="/authAdmin" className="text-primary fw-semibold text-decoration-none">
-                      Área do Administrador
-                    </Link>
-                  </div>
+                  <div className="mt-4 text-center">
+  <Link 
+    to="/authAdmin" 
+    className="text-danger fw-bold text-decoration-none fs-5"
+  >
+    Área do Administrador
+  </Link>
+</div>
                 </div>
               )}
 

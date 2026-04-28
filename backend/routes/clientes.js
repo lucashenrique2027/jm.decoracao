@@ -69,6 +69,8 @@ export const dadosCliente = async (req,res) => {
 
     const resultado = await db.select({
       id: clientes.id,
+      nome: clientes.nome,
+      email: clientes.email,
       telefone: clientes.telefone,
       cep: clientes.cep,
       endereco: clientes.endereco,

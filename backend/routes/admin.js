@@ -1,5 +1,5 @@
 import { db } from '../models/db.js';
-import { admin,produtos } from '../models/schema.js';
+import { admin,produtos,clientes } from '../models/schema.js';
 import { uploadImageToMinio } from '../src/services/uploadService.js';
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import s3Client from '../src/config/s3.js';
@@ -237,5 +237,32 @@ export const deletarProduto = async (req, res) => {
   } catch (error) {
     console.error("Erro ao deletar produto:", error.message);
     res.status(500).json({ "Erro": "Falha interna ao excluir o produto." });
+  }
+};
+
+export const listarClientes = async (req, res) => {
+  try {
+    const data = await db.select({
+      id: clientes.id,
+      nome: clientes.nome,
+      email: clientes.email,
+      telefone: clientes.telefone,
+      cep: clientes.cep,
+      endereco: clientes.endereco,
+      bairro: clientes.bairro,
+      cidade: clientes.cidade,
+      estado: clientes.estado,
+      criadoEm: clientes.criadoEm
+    }).from(clientes);
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: 'Nenhum cliente encontrado' });
+    }
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: 'Erro interno ao buscar clientes' });
   }
 };

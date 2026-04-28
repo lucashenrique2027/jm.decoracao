@@ -7,6 +7,7 @@ import { authAdmin,
   atualizarProduto,
   cadastrarProduto,
   deletarProduto,
+  listarClientes,
 } from '../routes/admin.js';
 import { upload  }  from  '../middlewares/multer.js'
 import { verificarToken } from '../middlewares/validarTokenAdmin.js';
@@ -21,5 +22,6 @@ router.get('/produtos/buscar', verificarToken, buscarProduto);
 router.post('/produtos', verificarToken, upload.single('imagem'), cadastrarProduto);
 router.put('/produtos/:id', verificarToken, atualizarProduto);
 router.delete('/produtos/:id', verificarToken, deletarProduto);
+router.get('/clientes', verificarToken, listarClientes);
 
 export default router;

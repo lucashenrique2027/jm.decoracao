@@ -19,9 +19,31 @@ VALUES
 INSERT INTO jm.admin (nome,email,senha_hash,role,cpf_cnpj,endereco_fiscal)
 VALUES (
     'Admin',
-    'example@gmail.com',
+    'admin@gmail.com',
     '$2b$10$zaYuOY0BSpY9c6N7Oiytsuwo/RoRuBAdjJmSOrbtNwMu.783owQJy',/*senha123*/
     'admin',
     '12345678911',
     '12345678'
 );
+INSERT INTO jm.clientes 
+(nome, email, senha_hash, telefone, cep, endereco, bairro, cidade, estado)
+VALUES
+('Carlos Eduardo Silva', 'carlos.silva@gmail.com', '$2b$10$Uq9OfSVDm0p45LItRTBhwukrDt9dVRr483j/zMHjA9FSqy/0Oxv5S', '(15) 99876-1234', '18010-000', 'Rua das Flores, 123', 'Centro', 'Sorocaba', 'SP'), -- senha: 123456
+
+('Mariana Oliveira Santos', 'mariana.oliveira@hotmail.com', '$2b$10$kYFIYqf4RuTLADqd.KnT9.KvE9aR37O6BmkobCxQDPGfHZdhdbE/.', '(11) 98765-4321', '01020-000', 'Av. Paulista, 1500', 'Bela Vista', 'São Paulo', 'SP'), -- senha: senha123
+
+('João Pedro Almeida', 'joao.almeida@yahoo.com', '$2b$10$Gb.sWYmh9rOIHEy1y8bI8.CDX43QJyWwiLGE45AO7WOJ.S1KnH472', '(19) 99123-5678', '13015-000', 'Rua Barão de Jaguara, 89', 'Centro', 'Campinas', 'SP'), -- senha: cliente@123
+
+('Fernanda Costa Ribeiro', 'fernanda.ribeiro@gmail.com', '$2b$10$GW81Kpa.E4aClQ6RoK1lQeUZVdBbixawVXDpd9TQIDnWM13qENP.W', '(21) 98877-6655', '20040-000', 'Rua do Ouvidor, 45', 'Centro', 'Rio de Janeiro', 'RJ'), -- senha: bemvindo123
+
+('Lucas Martins Souza', 'lucas.souza@gmail.com', '$2b$10$OKbVzRhdSI1wPf1WxwFPdOHVqkw5UuVkFjvuRpJuxEJYGVbIraOAy', '(31) 99711-2233', '30130-000', 'Av. Afonso Pena, 700', 'Centro', 'Belo Horizonte', 'MG'), -- senha: usuario123
+
+('Patrícia Gomes Fernandes', 'patricia.gomes@outlook.com', '$2b$10$EC99k1x7xCXGLZ51w9kOoOR/e3ZcyHeJlSFFDzIuP0PZZs5WRSyfO', '(41) 99655-8899', '80010-000', 'Rua XV de Novembro, 320', 'Centro', 'Curitiba', 'PR'), -- senha: teste123
+
+('Rafael Henrique Lopes', 'rafael.lopes@gmail.com', '$2b$10$epoqsi9rsbXg1pAl9aeOb.limQ/i/RjFzeG.aDbQaIP6rCJoSaDMW', '(51) 99144-5566', '90010-000', 'Av. Borges de Medeiros, 210', 'Centro Histórico', 'Porto Alegre', 'RS'), -- senha: minhasenha
+
+('Juliana Teixeira Rocha', 'juliana.rocha@gmail.com', '$2b$10$5dxNC.6l0ibiARBnV9etU.KfXl76Y8G1pZCUbVgz4AjPV/kWKTxUW', '(71) 99222-3344', '40020-000', 'Av. Sete de Setembro, 980', 'Dois de Julho', 'Salvador', 'BA'), -- senha: jmdecor123
+
+('Bruno Carvalho Nunes', 'bruno.nunes@gmail.com', '$2b$10$QcFeBpYLcU3xAOdP53jQ3OmhSAmFIWZspAbvXDg5cC1YuCknQ7mqq', '(61) 99333-4455', '70040-010', 'Esplanada dos Ministérios, Bloco A', 'Zona Cívico-Administrativa', 'Brasília', 'DF'), -- senha: compras123
+
+('Camila Barbosa Freitas', 'camila.freitas@gmail.com', '$2b$10$DvWXyHtZlB4.V3iUXKdla.rcpw/CyA8bNsC14wv5SxrKSBT3wd0Ty', '(85) 99444-5566', '60060-000', 'Av. Beira Mar, 150', 'Meireles', 'Fortaleza', 'CE'); -- senha: senha@2026

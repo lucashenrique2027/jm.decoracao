@@ -8,7 +8,7 @@ import AbaClientes from '../modules/abaClientes';
 
 export default function Admin() {
   const admin = JSON.parse(localStorage.getItem('adminJM') || 'null');
-  const [abaAtiva, setAbaAtiva] = useState("novo-produto");
+  const [abaAtiva, setAbaAtiva] = useState("estoque");
 
   const renderConteudo = () => {
     switch (abaAtiva) {
@@ -16,7 +16,7 @@ export default function Admin() {
       case "estoque":      return <ListaEstoque />;
       case "pedidos":      return <PainelPedidos />;
       case "clientes":     return <AbaClientes />;
-      default:             return <FormularioCadastro />;
+      default:             return <ListaEstoque />;
     }
   };
 
@@ -48,16 +48,17 @@ export default function Admin() {
         </div>
         
         <ul className="nav flex-column gap-3">
-          <li className="nav-item">
-            <button onClick={() => setAbaAtiva("novo-produto")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "novo-produto" ? "text-info fw-bold" : "text-white"}`}>
-              <i className="bi bi-plus-circle-fill me-3"></i> Novo Produto
-            </button>
-          </li>
+          
           <li className="nav-item">
             <button onClick={() => setAbaAtiva("estoque")}
               className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "estoque" ? "text-info fw-bold" : "text-white"}`}>
               <i className="bi bi-box-seam me-3"></i> Estoque & Vitrine
+            </button>
+          </li>
+          <li className="nav-item">
+            <button onClick={() => setAbaAtiva("clientes")}
+              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "clientes" ? "text-info fw-bold" : "text-white"}`}>
+              <i className="bi bi-people me-3"></i> Clientes
             </button>
           </li>
           <li className="nav-item">
@@ -66,10 +67,11 @@ export default function Admin() {
               <i className="bi bi-cart-check me-3"></i> Pedidos
             </button>
           </li>
+          
           <li className="nav-item">
-            <button onClick={() => setAbaAtiva("clientes")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "clientes" ? "text-info fw-bold" : "text-white"}`}>
-              <i className="bi bi-people me-3"></i> Clientes
+            <button onClick={() => setAbaAtiva("novo-produto")}
+              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "novo-produto" ? "text-info fw-bold" : "text-white"}`}>
+              <i className="bi bi-plus-circle-fill me-3"></i> Novo Produto
             </button>
           </li>
         </ul>

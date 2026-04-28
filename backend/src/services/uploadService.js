@@ -1,7 +1,6 @@
 import { PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import s3Client from "../config/s3.js";
 import crypto from "crypto";
-const response = await fetch('http://localhost:3001/api/listar');
 
 // Função auxiliar para verificar existência (Idempotência)
 export const imageExistsInMinio = async (fileName) => {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMensagem } from '../../context/MensagemContext';
+import { cadastrarProduto as cadastrarProdutoService } from '../../services/adminProducts.js';
 
 export default function AbaProdutos() {
 
@@ -13,43 +14,25 @@ export default function AbaProdutos() {
     const [imagem, setImagem]       = useState(null);
 
     const cadastrarProduto = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("nome", nome);
-      formData.append("descricao", descricao);
-      formData.append("preco", preco);
-      formData.append("categoria", categoria);
-      formData.append("estoque", estoque);
-      formData.append("disponivel", true); 
-      formData.append("imagemUpload", imagem);
+  try {
+    await cadastrarProdutoService(
+      { nome, descricao, preco, categoria, estoque, disponivel: true },
+      imagem
+    );
 
-      const res = await fetch("/api/produtos", {
-        method: "POST",
-        body: formData,
-      });
+    mostrarMensagem("Produto cadastrado com sucesso!", "sucesso");
+    setNome("");
+    setPreco("");
+    setDescricao("");
+    setCategoria("");
+    setEstoque(0);
+    setImagem(null);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        mostrarMensagem(data.erro || 'Erro ao cadastrar produto', "erro");
-        return;
-      }
-
-      mostrarMensagem("Produto cadastrado com sucesso!", "sucesso");
-
-      alert("Produto cadastrado com sucesso!");
-      setNome("");
-      setPreco("");
-      setDescricao("");
-      setCategoria("");
-      setEstoque(0);
-      setImagem(null);
-
-    } catch (error) {
-      console.error('Erro ao cadastrar produto:', error);
-      alert("erro na requisição");
-    }
-  };
+  } catch (error) {
+    mostrarMensagem(error.message || 'Erro ao cadastrar produto', "erro");
+    console.error('Erro ao cadastrar produto:', error);
+  }
+};
 
 return (
         <div className="card border-0 shadow-sm p-4 mb-4">

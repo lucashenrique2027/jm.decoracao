@@ -8,7 +8,7 @@ import { authAdmin,
   cadastrarProduto,
   deletarProduto,
 } from '../routes/admin.js';
-import { upload }  from  '../middlewares/multer.js'
+import { upload  }  from  '../middlewares/multer.js'
 import { verificarToken } from '../middlewares/validarTokenAdmin.js';
 
 const router = express.Router();

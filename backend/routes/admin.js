@@ -1,6 +1,9 @@
 import { db } from '../models/db.js';
-import { eq } from 'drizzle-orm';
-import { admin } from '../models/schema.js';
+import { admin,produtos } from '../models/schema.js';
+import { uploadImageToMinio } from '../src/services/uploadService.js';
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import s3Client from '../src/config/s3.js';
+import { ilike, eq, and } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -91,19 +94,148 @@ export const dadosAdmin = async (req,res) => {
 
 };
 
-// criar produto
-export const criarProduto = async (dados) => {
-  const resultado = await db.insert(produtos).values(dados).returning();
-  return resultado[0];
+export const listarProdutosAdmin = async(req,res) => {
+
+  try{
+    const data = await db.select({
+      id: produtos.id,
+      nome: produtos.nome,
+      descricao: produtos.descricao,
+      categoria: produtos.categoria,
+      preco: produtos.preco,
+      imagemUpload: produtos.imagemUpload,
+      disponivel: produtos.disponivel,
+      estoque: produtos.estoque
+    }).from(produtos);
+
+    if(data.length === 0) {
+      return res.status(404).json({ message: 'Admin não encontrado' });
+    }
+
+    return res.status(200).json(data);
+
+  }catch(error){
+    console.error(error.message);
+    return res.status(500).json({ message: 'Erro interno ao buscar produtos para o admin' })
+  }
 }
 
-// editar produto
-export const atualizarProduto = async (id, dados) => {
-  const resultado = await db.update(produtos).set(dados).where(eq(produtos.id, id)).returning();
-  return resultado[0];
-}
+export const buscarProduto = async(req,res) => {
 
-// deletar produto
-export const deletarProduto = async (id) => {
-  await db.delete(produtos).where(eq(produtos.id, id));
-}
+  const {id,nome,descricao,categoria,preco,disponivel} = req.query;
+
+  try{
+    const filtros = [];
+
+    if (id)         filtros.push(eq(produtos.id, parseInt(id)));
+    if (nome)       filtros.push(ilike(produtos.nome, `%${nome}%`));
+    if (descricao)  filtros.push(ilike(produtos.descricao, `%${descricao}%`));
+    if (categoria)  filtros.push(eq(produtos.categoria, categoria));
+    if (preco)      filtros.push(eq(produtos.preco, preco.toString()));
+    if (disponivel !== undefined) filtros.push(eq(produtos.disponivel, disponivel === 'true'));
+
+    const data = await filtros.length > 0 
+    ? await db.select().from(produtos).where(and(...filtros))
+    : await db.select().from(produtos);
+
+    return res.json(data);
+
+  }catch(error){
+    console.error(error.message);
+    res.status(500).json({"Erro":'Erro ao buscar produto'})
+  }
+};
+
+export const atualizarProduto = async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  try {
+    const produtoExiste = await db.select()
+      .from(produtos)
+      .where(eq(produtos.id, parseInt(id)));
+
+    if (produtoExiste.length === 0) {
+      return res.status(404).json({ "Erro": "Produto não encontrado no sistema" });
+    }
+    
+    const data = await db.update(produtos)
+      .set(updates)
+      .where(eq(produtos.id, parseInt(id)))
+      .returning();
+
+    return res.json({ "Sucesso": "Produto modificado", "produto": data[0] });
+
+  } catch (error) {
+    res.status(500).json({ "Erro": "Falha na atualização" });
+  }
+};
+
+export const cadastrarProduto = async (req,res) => {
+
+    const { nome, descricao, categoria, preco, disponivel } = req.body;
+
+    try{
+
+      const file = req.file;
+
+      if(!file){
+        return res.status(400).json({"Error":"Imagem obrigatória"});
+      }
+
+      const produtoImg = await uploadImageToMinio(file);
+
+      const [novoProduto] = await db.insert(produtos).values({
+        nome,
+        descricao,
+        categoria,
+        preco: preco.toString(),
+        disponivel: disponivel === 'true' || disponivel === true,
+        imagemUpload: produtoImg
+      }).returning();
+
+      return res.status(201).json({
+        "Sucesso":"Produto Cadastrado",
+        "produto":novoProduto
+      });
+
+    }catch(error){
+      console.error("Erro no controlador:", error.message);
+      res.status(500).json({ "Erro": "Falha ao cadastrar produto." });
+    }
+
+};
+
+
+export const deletarProduto = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [produto] = await db.select()
+      .from(produtos)
+      .where(eq(produtos.id, parseInt(id)));
+
+    if (!produto) {
+      return res.status(404).json({ "Erro": "Produto não encontrado." });
+    }
+    if (produto.imagemUpload) {
+      try {
+        await s3Client.send(new DeleteObjectCommand({
+          Bucket: "loja-jm",
+          Key: produto.imagemUpload,
+        }));
+        console.log(`[+] Imagem removida do MinIO: ${produto.imagemUpload}`);
+      } catch (s3Error) {
+        console.error("Erro ao apagar imagem no MinIO:", s3Error.message);
+      }
+    }
+    await db.delete(produtos)
+      .where(eq(produtos.id, parseInt(id)));
+
+    return res.json({ "Sucesso": "Produto e imagem removidos com sucesso." });
+
+  } catch (error) {
+    console.error("Erro ao deletar produto:", error.message);
+    res.status(500).json({ "Erro": "Falha interna ao excluir o produto." });
+  }
+};

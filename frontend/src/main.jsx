@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CarrinhoProvider } from "./context/CarrinhoContext";
+import { MensagemProvider } from "./context/MensagemContext.jsx";
 
 import RotaProtegida from './components/rotaPriveCliente/rotaProtegida.jsx';
 import RotaProtegidaAdmin from './components/rotaPriveAdmin/rotaProtegidaAdmin.jsx';
@@ -24,24 +25,26 @@ import ProdutoDetalhes from "./components/ProdutoDetalhes/ProdutoDetalhes.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <CarrinhoProvider>
-        <Routes>
-          <Route path="/" element={<Home />} /> {/*http://localhost:8080/*/}
-          <Route path="/sobre" element={<Sobre />} />{/*http://localhost:8080/sobre*/}
-          <Route path="/login" element={<Login />} />{/*http://localhost:8080/Login*/}
-          <Route path="/authAdmin" element={<LoginAdmin />} />{/*http://localhost:8080/authAdmin*/}
-          <Route path="/privacidade" element={<Privacidade />} />
-          <Route path="/termos" element={<Termos />} />
-          <Route path="/recuperar-senha" element={<RecuperarSenha />} />
-          <Route element={<RotaProtegidaAdmin />}>
-            <Route path="/admin" element={<Admin />} />{/*http://localhost:8080/admin*/}
-          </Route>
-          <Route element={<RotaProtegida />}>
-            <Route path="/carrinho" element={<Carrinho />} />
-            <Route path="/produto/:id" element={<ProdutoDetalhes />} />
-          </Route>
-        </Routes>
-      </CarrinhoProvider>
+    <MensagemProvider>
+        <CarrinhoProvider>
+          <Routes>
+            <Route path="/" element={<Home />} /> {/*http://localhost:8080/*/}
+            <Route path="/sobre" element={<Sobre />} />{/*http://localhost:8080/sobre*/}
+            <Route path="/login" element={<Login />} />{/*http://localhost:8080/Login*/}
+            <Route path="/authAdmin" element={<LoginAdmin />} />{/*http://localhost:8080/authAdmin*/}
+            <Route path="/privacidade" element={<Privacidade />} />
+            <Route path="/termos" element={<Termos />} />
+            <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+            <Route element={<RotaProtegidaAdmin />}>
+              <Route path="/admin" element={<Admin />} />{/*http://localhost:8080/admin*/}
+            </Route>
+            <Route element={<RotaProtegida />}>
+              <Route path="/carrinho" element={<Carrinho />} />
+              <Route path="/produto/:id" element={<ProdutoDetalhes />} />
+            </Route>
+          </Routes>
+        </CarrinhoProvider>
+      </MensagemProvider>
     </BrowserRouter>
   </StrictMode>
 );

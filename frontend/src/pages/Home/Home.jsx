@@ -7,11 +7,27 @@ import Vitrine from "../../components/Vitrine/Vitrine";
 export default function Home() {
   const [menuAberto, setMenuAberto] = useState(false);
 
+  const [busca, setBusca] = useState(""); 
+  const [categoriaAtiva, setCategoriaAtiva] = useState("Todos");
+  const [categorias, setCategorias] = useState([]);
+
   return (
     <>
-      <Header menuAberto={menuAberto} setMenuAberto={setMenuAberto} />
+      <Header 
+        menuAberto={menuAberto} 
+        setMenuAberto={setMenuAberto}
+        busca={busca}
+        setBusca={setBusca}
+        categorias={categorias}
+        categoriaAtiva={categoriaAtiva}
+        setCategoriaAtiva={setCategoriaAtiva}
+      />      
       <SubHeader />
-      <Vitrine />
+      <Vitrine 
+        busca={busca}
+        categoriaAtiva={categoriaAtiva}
+        onCategoriasCarregadas={setCategorias} 
+      />
       <Footer />
     </>
   );

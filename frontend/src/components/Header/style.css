@@ -78,7 +78,7 @@ header {
 
 .menu-mobile {
   position: fixed;
-  top: 0;
+  top: var(--header-height);
   right: 0;
   width: 260px;
   height: 100vh;

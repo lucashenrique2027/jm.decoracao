@@ -36,6 +36,12 @@ CREATE TABLE IF NOT EXISTS jm.clientes (
   criado_em TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS jm.categorias (
+    id SERIAL PRIMARY KEY,
+    nome TEXT NOT NULL UNIQUE,
+    criado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ─── PRODUTOS ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS jm.produtos (
   id SERIAL PRIMARY KEY,
@@ -43,7 +49,7 @@ CREATE TABLE IF NOT EXISTS jm.produtos (
   descricao TEXT,
   preco NUMERIC(10,2) NOT NULL DEFAULT 0,
   imagem_upload TEXT,
-  categoria TEXT NOT NULL,
+  categoria_id INTEGER REFERENCES jm.categorias(id) ON DELETE RESTRICT,
   disponivel BOOLEAN DEFAULT true,
   estoque INTEGER DEFAULT 0,
   criado_em TIMESTAMPTZ DEFAULT NOW()

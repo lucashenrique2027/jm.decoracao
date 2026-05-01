@@ -52,7 +52,7 @@ export default function Admin() {
           <li className="nav-item">
             <button onClick={() => setAbaAtiva("estoque")}
               className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "estoque" ? "text-info fw-bold" : "text-white"}`}>
-              <i className="bi bi-box-seam me-3"></i> Estoque & Vitrine
+              <i className="bi bi-box-seam me-3"></i> Estoque
             </button>
           </li>
           <li className="nav-item">

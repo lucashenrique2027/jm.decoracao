@@ -4,7 +4,7 @@ export const jm = pgSchema('jm');
 
 export const statusPedidoEnum = jm.enum('status_pedido', ['pendente', 'confirmado', 'rejeitado', 'entregue']);
 
-export const userRoleEnum = jm.enum('user_role', ['colaborador', 'admin', 'superadmin']);
+export const userRoleEnum = jm.enum('user_role', ['admin', 'colaborador', 'cliente']);
 
 
 // TESTE
@@ -24,6 +24,7 @@ export const admin = jm.table('admin', {
   criadoEm: timestamp('criado_em').defaultNow(),
 });
 
+
 // CLIENTES 
 export const clientes = jm.table('clientes', {
   id: serial('id').primaryKey(),
@@ -39,13 +40,20 @@ export const clientes = jm.table('clientes', {
   criadoEm: timestamp('criado_em').defaultNow(),
 });
 
+// CATEGORIAS
+export const categorias = jm.table('categorias', {
+  id: serial('id').primaryKey(),
+  nome: text('nome').notNull().unique(),
+  criadoEm: timestamp('criado_em', { withTimezone: true }).defaultNow(),
+});
+
 // PRODUTOS 
 export const produtos = jm.table('produtos', {
   id: serial('id').primaryKey(),
   nome: text('nome').notNull(),
   descricao: text('descricao'),
-  categoria: text('categoria').notNull(),
   preco: numeric('preco', { precision: 10, scale: 2 }).notNull().default('0'),
+  categoriaId: integer('categoria_id').references(() => categorias.id, { onDelete: 'restrict' }),
   imagemUpload: text('imagem_upload'),
   disponivel: boolean('disponivel').default(true),
   estoque: integer('estoque').default(0),

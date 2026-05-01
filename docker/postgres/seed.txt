@@ -1,11 +1,13 @@
--- ─── 1. GARANTIR CATEGORIAS ─────────────────────────────
+-- ─── SEED: CATEGORIAS ───────────────────────────────────
 INSERT INTO jm.categorias (nome) VALUES 
-('Decoração'), 
+('Balcão'), 
+('Prateleira'), 
 ('Cozinha'), 
+('Decoração'),
 ('Iluminação')
 ON CONFLICT (nome) DO NOTHING;
 
--- ─── 2. PRODUTOS COM SUBCONSULTA ───────────────────────
+-- ─── SEED: PRODUTOS (VINCULADOS POR ID) ──────────────────
 INSERT INTO jm.produtos (nome, descricao, preco, imagem_upload, categoria_id, disponivel, estoque)
 VALUES 
 ('Vaso Girassol', 'Vaso Girassol amarelo decorativo feito de cerâmica.', 89.90, 'vaso-girasol.jpeg', (SELECT id FROM jm.categorias WHERE nome = 'Decoração'), true, 10),
@@ -24,19 +26,12 @@ VALUES
 ('Vaso Moderno', 'Vaso moderno em vidro para decoração de interiores.', 145.00, 'vaso Image 1 de set. de 2025, 14_01_22.png', (SELECT id FROM jm.categorias WHERE nome = 'Decoração'), true, 6),
 ('Vaso Design D', 'Vaso com design exclusivo em vidro artesanal.', 160.00, 'vaso-D Image 9 de set. de 2025, 18_12_38.png', (SELECT id FROM jm.categorias WHERE nome = 'Decoração'), true, 5);
 
--- ─── 3. ADMIN ──────────────────────────────────────────
+-- ─── SEED: ADMIN ────────────────────────────────────────
 INSERT INTO jm.admin (nome, email, senha_hash, role, cpf_cnpj, endereco_fiscal)
-VALUES (
-    'Admin',
-    'admin@gmail.com',
-    '$2b$10$zaYuOY0BSpY9c6N7Oiytsuwo/RoRuBAdjJmSOrbtNwMu.783owQJy',
-    'admin',
-    '12345678911',
-    '12345678'
-) ON CONFLICT (email) DO NOTHING;
+VALUES ('Admin', 'admin@gmail.com', '$2b$10$zaYuOY0BSpY9c6N7Oiytsuwo/RoRuBAdjJmSOrbtNwMu.783owQJy', 'admin', '12345678911', '12345678');
 /*senha123*/
 
--- ─── 4. CLIENTES ────────────────────────────────────────
+-- ─── SEED: CLIENTES ─────────────────────────────────────
 INSERT INTO jm.clientes (nome, email, senha_hash, telefone, cep, endereco, bairro, cidade, estado)
 VALUES
 ('Carlos Eduardo Silva', 'carlos.silva@gmail.com', '$2b$10$Uq9OfSVDm0p45LItRTBhwukrDt9dVRr483j/zMHjA9FSqy/0Oxv5S', '(15) 99876-1234', '18010-000', 'Rua das Flores, 123', 'Centro', 'Sorocaba', 'SP'),
@@ -48,5 +43,4 @@ VALUES
 ('Rafael Henrique Lopes', 'rafael.lopes@gmail.com', '$2b$10$epoqsi9rsbXg1pAl9aeOb.limQ/i/RjFzeG.aDbQaIP6rCJoSaDMW', '(51) 99144-5566', '90010-000', 'Av. Borges de Medeiros, 210', 'Centro Histórico', 'Porto Alegre', 'RS'),
 ('Juliana Teixeira Rocha', 'juliana.rocha@gmail.com', '$2b$10$5dxNC.6l0ibiARBnV9etU.KfXl76Y8G1pZCUbVgz4AjPV/kWKTxUW', '(71) 99222-3344', '40020-000', 'Av. Sete de Setembro, 980', 'Dois de Julho', 'Salvador', 'BA'),
 ('Bruno Carvalho Nunes', 'bruno.nunes@gmail.com', '$2b$10$QcFeBpYLcU3xAOdP53jQ3OmhSAmFIWZspAbvXDg5cC1YuCknQ7mqq', '(61) 99333-4455', '70040-010', 'Esplanada dos Ministérios, Bloco A', 'Zona Cívico-Administrativa', 'Brasília', 'DF'),
-('Camila Barbosa Freitas', 'camila.freitas@gmail.com', '$2b$10$DvWXyHtZlB4.V3iUXKdla.rcpw/CyA8bNsC14wv5SxrKSBT3wd0Ty', '(85) 99444-5566', '60060-000', 'Av. Beira Mar, 150', 'Meireles', 'Fortaleza', 'CE')
-ON CONFLICT (email) DO NOTHING;
+('Camila Barbosa Freitas', 'camila.freitas@gmail.com', '$2b$10$DvWXyHtZlB4.V3iUXKdla.rcpw/CyA8bNsC14wv5SxrKSBT3wd0Ty', '(85) 99444-5566', '60060-000', 'Av. Beira Mar, 150', 'Meireles', 'Fortaleza', 'CE');

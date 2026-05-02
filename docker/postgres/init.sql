@@ -57,16 +57,6 @@ CREATE TABLE IF NOT EXISTS jm.produtos (
   criado_em TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS jm.produto_variacoes (
-  id SERIAL PRIMARY KEY,
-  produto_id INTEGER REFERENCES jm.produtos(id) ON DELETE CASCADE,
-  descricao TEXT NOT NULL,
-  preco_varejo NUMERIC(10,2) NOT NULL DEFAULT 0,
-  preco_atacado NUMERIC(10,2),
-  estoque INTEGER DEFAULT 0,
-  criado_em TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- ─── ZONAS DE ENTREGA ───────────────────────────────────
 CREATE TABLE IF NOT EXISTS jm.zonas_entrega (
   id SERIAL PRIMARY KEY,

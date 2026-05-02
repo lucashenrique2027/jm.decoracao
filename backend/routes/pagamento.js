@@ -1,15 +1,85 @@
-import express from 'express';
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { db } from '../models/db.js';
+import { produtos, pedidos, pedidoItens } from '../models/schema.js';
+import { gerarImagemQRCode }from '../src/qrcode/qrcode.js';
+import { eq } from 'drizzle-orm';
+import client from '../src/mercadoPago/mercadopago.js';
 
-const router = express.Router();
+export const pagamentoSimulado = async (req, res) => {
 
-// Configura o cliente do Mercado Pago com o token do .env
-const client = new MercadoPagoConfig({
-  accessToken: process.env.,
-});
+  const { itens } = req.body;
+  const clienteId = req.clienteId;
 
-// POST /api/pagamento — cria uma preferência de pagamento
-router.post('/', async (req, res) => {
+  if (!itens || itens.length === 0) {
+    return res.status(400).json({ erro: 'Carrinho vazio' });
+  }
+  try {
+    let total = 0;
+    const itensProdutos = [];
+
+    for (const item of itens) {
+      const [produto] = await db.select()
+        .from(produtos)
+        .where(eq(produtos.id, item.produtoId));
+
+      if (!produto) {
+        return res.status(404).json({ erro: `Produto ${item.produtoId} não encontrado` });
+      }
+
+      if (!produto.disponivel) {
+        return res.status(400).json({ erro: `Produto "${produto.nome}" não está disponível` });
+      }
+
+      const precoUnitario =
+        produto.quantidadeMinimaAtacado &&
+        item.quantidade >= produto.quantidadeMinimaAtacado &&
+        produto.precoAtacado
+          ? Number(produto.precoAtacado)
+          : Number(produto.precoVarejo);
+
+      total += precoUnitario * item.quantidade;
+
+      itensProdutos.push({
+        produtoId: produto.id,
+        quantidade: item.quantidade,
+        precoUnitario: precoUnitario.toFixed(2)
+      });
+    }
+
+    // 2. Gravar pedido
+    const [pedido] = await db.insert(pedidos).values({
+      clienteId: clienteId ?? null,
+      total: total.toFixed(2),
+      status: 'pendente'
+    }).returning();
+
+    // 3. Gravar itens do pedido
+    await db.insert(pedidoItens).values(
+      itensProdutos.map(i => ({
+        pedidoId: pedido.id,
+        produtoId: i.produtoId,
+        quantidade: i.quantidade,
+        precoUnitario: i.precoUnitario
+      }))
+    );
+
+    // 4. Gerar QR code com ID do pedido
+    const qrCodeBase64 = await gerarImagemQRCode(`pedido:${pedido.id}`);
+
+    res.json({
+      success: true,
+      pedidoId: pedido.id,
+      total: total.toFixed(2),
+      qrCodeVisual: qrCodeBase64,
+      mensagem: "Pedido registrado. Escaneie o QR code para confirmar o pagamento."
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ erro: 'Erro ao processar pedido' });
+  }
+};
+
+export const mercadoPago = async (req, res) => {
   try {
     const { itens, clienteEmail } = req.body;
 
@@ -58,6 +128,4 @@ router.post('/', async (req, res) => {
     console.error('Erro ao criar preferência:', erro);
     res.status(500).json({ erro: 'Erro ao processar pagamento' });
   }
-});
-
-export default router;
+}

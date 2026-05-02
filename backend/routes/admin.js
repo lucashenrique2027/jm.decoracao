@@ -1,12 +1,8 @@
 import { db } from '../models/db.js';
-import { admin,produtos,clientes,categorias } from '../models/schema.js';
-import { uploadImageToMinio } from '../src/services/uploadService.js';
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import s3Client from '../src/config/s3.js';
+import { admin,clientes } from '../models/schema.js';
 import { ilike, eq, and } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
 
 export const authAdmin = async (req,res) => {
 

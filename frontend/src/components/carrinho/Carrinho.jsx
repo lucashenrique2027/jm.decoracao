@@ -55,9 +55,9 @@ export default function Carrinho() {
                     </p>
 
                     <div className="carrinho-controles">
-                      <button onClick={() => alterarQuantidade(item.nome, -1)}>-</button>
+                      <button onClick={() => alterarQuantidade(item.id, -1)}>-</button>
                       <span>{item.quantidade}</span>
-                      <button onClick={() => alterarQuantidade(item.nome, 1)}>+</button>
+                      <button onClick={() => alterarQuantidade(item.id, 1)}>+</button>
                     </div>
                   </div>
 

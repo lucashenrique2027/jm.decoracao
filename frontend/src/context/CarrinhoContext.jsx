@@ -9,33 +9,34 @@ export function useCarrinho() {
 export function CarrinhoProvider({ children }) {
   const [itens, setItens] = useState([]);
 
-  const adicionarItem = (produto, quantidade) => {
-    setItens(prev => {
-      const existe = prev.find(i => i.nome === produto.nome);
-      if (existe) {
-        return prev.map(i =>
-          i.nome === produto.nome
-            ? { ...i, quantidade: i.quantidade + quantidade }
-            : i
-        );
-      }
-      return [...prev, { ...produto, quantidade }];
-    });
-  };
-
-  const removerItem = (nome) => {
-    setItens(prev => prev.filter(i => i.nome !== nome));
-  };
-
-  const alterarQuantidade = (nome, delta) => {
-    setItens(prev =>
-      prev.map(i =>
-        i.nome === nome
-          ? { ...i, quantidade: Math.max(1, i.quantidade + delta) }
+const adicionarItem = (produto, quantidade) => {
+  setItens(prev => {
+    const existe = prev.find(i => i.id === produto.id);
+    if (existe) {
+      return prev.map(i =>
+        i.id === produto.id
+          ? { ...i, quantidade: i.quantidade + quantidade }
           : i
-      )
-    );
-  };
+      );
+    }
+    return [...prev, { ...produto, quantidade }];
+  });
+};
+
+const removerItem = (id) => {
+  setItens(prev => prev.filter(i => i.id !== id));
+};
+
+const alterarQuantidade = (id, delta) => {
+  setItens(prev =>
+    prev.map(i =>
+      i.id === id
+        ? { ...i, quantidade: Math.max(1, i.quantidade + delta) }
+        : i
+    )
+  );
+};
+
 
   const limparCarrinho = () => setItens([]);
 

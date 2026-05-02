@@ -1,5 +1,8 @@
 import { db } from '../models/db.js';
 import { produtos, categorias } from '../models/schema.js';
+import { uploadImageToMinio } from '../src/services/uploadService.js';
+import s3Client from '../src/config/s3.js';
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { eq, ilike, and } from 'drizzle-orm';
 
 

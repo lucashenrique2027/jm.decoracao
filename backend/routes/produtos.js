@@ -2,6 +2,8 @@ import { db } from '../models/db.js';
 import { produtos, categorias } from '../models/schema.js';
 import { eq, ilike, and } from 'drizzle-orm';
 
+
+// Listar todos os produtos em abaProduto.jsx
 export const listarProdutos = async (req, res) => {
 
     try{
@@ -9,8 +11,10 @@ export const listarProdutos = async (req, res) => {
             id: produtos.id,
             nome: produtos.nome,
             descricao: produtos.descricao,
+            precoVarejo: produtos.precoprecoVarejo,
+            precoAtacado: produtos.precoAtacado,
+            quantidadeMinimaAtacado: produtos.quantidadeMinimaAtacado,
             categoriaId: produtos.categoriaId,
-            preco: produtos.preco,
             imagemUpload: produtos.imagemUpload, 
             disponivel: produtos.disponivel,
             estoque: produtos.estoque
@@ -26,6 +30,7 @@ export const listarProdutos = async (req, res) => {
     }    
 }
 
+// Buscar um Produto específico
 export const buscarProdutoPorId = async (req, res) => {
     try {
         const { id } = req.params;
@@ -37,6 +42,7 @@ export const buscarProdutoPorId = async (req, res) => {
     }
 }
 
+// Retornar todos os produtos de uma categoria fornecida
 export const buscarProdutoPorCategoria = async (req, res) => {
     try {
         const { categoriaId } = req.params;
@@ -50,12 +56,12 @@ export const buscarProdutoPorCategoria = async (req, res) => {
     }
 }
 
-// CREATE
+// Criar produto
 export const criarProduto = async (req, res) => {
     try {
-        const { nome, descricao, preco, categoriaId, estoque, imagem_upload } = req.body;
+        const { nome, descricao, precoVarejo, precoAtacado, quantidadeMinimaAtacado,categoriaId, estoque, imagem_upload } = req.body;
 
-        if (!nome || !preco || !categoriaId) {
+        if (!nome || !precoVarejo || !categoriaId) {
             return res.status(400).json({ erro: 'Nome, preço e categoria são obrigatórios' });
         }
 
@@ -63,8 +69,11 @@ export const criarProduto = async (req, res) => {
             nome,
             descricao,
             categoriaId: Number(categoriaId),
-            preco: preco.toString(), 
-            estoque: estoque || 0,
+            precoVarejo: String(precoVarejo), 
+            precoAtacado: quantidadeMinimaAtacado > 0? precoAtacado:0,
+            quantidadeMinimaAtacado:quantidadeMinimaAtacado>0?quantidadeMinimaAtacado:null,
+            estoque: Number(estoque) || 0,
+            disponivel: Number(estoque)>0,
             imagemUpload: imagem_upload
         }).returning();
 
@@ -75,33 +84,33 @@ export const criarProduto = async (req, res) => {
     }
 };
 
-// UPDATE
+// Modificar dados de um produto fornecendo seu ID
 export const atualizarProduto = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { nome, descricao, preco, categoriaId, estoque } = req.body;
+  const { id } = req.params;
+  const updates = req.body;
 
-        const data = await db.update(produtos)
-            .set({
-                nome,
-                descricao,
-                categoriaId: categoriaId ? Number(categoriaId) : undefined,
-                preco: preco ? preco.toString() : undefined,
-                estoque
-            })
-            .where(eq(produtos.id, Number(id)))
-            .returning();
+  if (updates.estoque !== undefined) {
+    updates.disponivel = Number(updates.estoque) > 0;
+  }
 
-        if (data.length === 0) {
-            return res.status(404).json({ erro: 'Produto não encontrado' });
-        }
+  try {
+    const data = await db.update(produtos)
+      .set(updates)
+      .where(eq(produtos.id, parseInt(id)))
+      .returning();
 
-        res.json(data[0]);
-    } catch (erro) {
-        console.error(erro);
-        res.status(500).json({ erro: 'Erro ao atualizar produto' });
+    if (data.length === 0) {
+      return res.status(404).json({ "Erro": "Produto não encontrado" });
     }
+
+    return res.json({ "Sucesso": "Produto modificado", "produto": data[0] });
+
+  } catch (error) {
+    res.status(500).json({ "Erro": "Falha na atualização" });
+  }
 };
+
+// Atualizar a imagem do produto modificando o nome do arquivo no S3
 export const atualizarImagemProduto = async (req, res) => {
     try {
         const { id } = req.params;
@@ -126,15 +135,16 @@ export const atualizarImagemProduto = async (req, res) => {
     }
 };
 
+// Retorna um produto verificando qualquer dado relacionado em uma de suas colunas, endpoint flexivel
 export const buscarProduto = async (req, res) => {
     try {
-        const { id, nome, categoriaId, preco, disponivel } = req.query;
+        const { id, nome, categoriaId, precoVarejo, disponivel } = req.query;
         
         const conditions = [];
         
         if (id)          conditions.push(eq(produtos.id, Number(id)));
         if (categoriaId) conditions.push(eq(produtos.categoriaId, Number(categoriaId)));
-        if (preco)       conditions.push(eq(produtos.preco, preco));
+        if (precoVarejo)       conditions.push(eq(produtos.precoVarejo, precoVarejo));
         if (disponivel !== undefined) conditions.push(eq(produtos.disponivel, disponivel === 'true'));
         if (nome)        conditions.push(ilike(produtos.nome, `%${nome}%`));
 
@@ -142,7 +152,7 @@ export const buscarProduto = async (req, res) => {
             id: produtos.id,
             nome: produtos.nome,
             descricao: produtos.descricao,
-            preco: produtos.preco,
+            precoVarejo: produtos.precoVarejo,
             imagemUpload: produtos.imagemUpload,
             disponivel: produtos.disponivel,
             estoque: produtos.estoque,
@@ -159,32 +169,90 @@ export const buscarProduto = async (req, res) => {
     }
 };
 
-// DELETE
+// Excluir Produto
 export const deletarProduto = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const data = await db.delete(produtos)
-            .where(eq(produtos.id, Number(id)))
-            .returning();
+  const { id } = req.params;
 
-        if (data.length === 0) {
-            return res.status(404).json({ erro: 'Produto não encontrado' });
-        }
+  try {
+    const [produto] = await db.select()
+      .from(produtos)
+      .where(eq(produtos.id, parseInt(id)));
 
-        res.json({ mensagem: 'Produto deletado', produto: data[0] });
-    } catch (erro) {
-        console.error(erro);
-        res.status(500).json({ erro: 'Erro ao deletar produto' });
+    if (!produto) {
+      return res.status(404).json({ "Erro": "Produto não encontrado." });
+    }
+    if (produto.imagemUpload) {
+      try {
+        await s3Client.send(new DeleteObjectCommand({
+          Bucket: "loja-jm",
+          Key: produto.imagemUpload,
+        }));
+        console.log(`[+] Imagem removida do MinIO: ${produto.imagemUpload}`);
+      } catch (s3Error) {
+        console.error("Erro ao apagar imagem no MinIO:", s3Error.message);
+      }
+    }
+    await db.delete(produtos)
+      .where(eq(produtos.id, parseInt(id)));
+
+    return res.json({ "Sucesso": "Produto e imagem removidos com sucesso." });
+
+  } catch (error) {
+    console.error("Erro ao deletar produto:", error.message);
+    res.status(500).json({ "Erro": "Falha interna ao excluir o produto." });
+  }
+};
+
+// Adicionar novo Produto
+export const cadastrarProduto = async (req,res) => {
+    const { nome, descricao, categoria, precoVarejo,precoAtacado,quantidadeMinimaAtacado,estoque,disponivel} = req.body;
+    try{
+      const file = req.file;
+
+      if(!file){
+        return res.status(400).json({"Error":"Imagem obrigatória"});
+      }
+      const produtoImg = await uploadImageToMinio(file);
+
+      const [categoriaEncontrada] = await db.select({id:categorias.id})
+      .from(categorias).where(eq(categorias.nome,categoria)).limit(1);
+
+      if (!categoriaEncontrada) {
+        return res.status(400).json({ "Erro": `Categoria '${categoria}' não encontrada no sistema.` });
+      }
+
+      const [novoProduto] = await db.insert(produtos).values({
+        nome,
+        descricao,
+        categoriaId:categoriaEncontrada.id,
+        precoVarejo: String(precoVarejo),
+        precoAtacado: quantidadeMinimaAtacado > 0 ? String(precoAtacado) : null,
+        quantidadeMinimaAtacado: quantidadeMinimaAtacado > 0 ? Number(quantidadeMinimaAtacado) : null,
+        estoque: Number(estoque) || 0,
+        disponivel:disponivel,
+        imagemUpload: produtoImg
+      }).returning();
+
+      return res.status(201).json({
+        "Sucesso":"Produto Cadastrado",
+        "produto":novoProduto
+      });
+    }catch(error){
+      console.error("Erro no controlador:", error.message);
+      res.status(500).json({ "Erro": "Falha ao cadastrar produto." });
     }
 };
 
+// Adicionar nova categoria aos produtos
 export const criarCategoria = async (req, res) => {
     try {
         const { nome } = req.body;
         if (!nome || nome.trim() === "") return res.status(400).json({ erro: 'Nome da categoria é obrigatório' });
 
+        const nomeFormatado = nome.trim().toLowerCase();
+
         const data = await db.insert(categorias)
-        .values({ nome: nome.trim() }).returning();
+        .values({ nome: nomeFormatado.trim() }).returning();
         res.status(201).json(data[0]);
     } catch (error) {
         if (error.code === '23505') {
@@ -194,6 +262,8 @@ export const criarCategoria = async (req, res) => {
     }
 };
 
+
+// Expor todas as classificações de produtos
 export const listarCategorias = async (req, res) => {
     try {
         const data = await db.select({

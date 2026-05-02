@@ -46,12 +46,25 @@ export const produtos = jm.table('produtos', {
   id: serial('id').primaryKey(),
   nome: text('nome').notNull(),
   descricao: text('descricao'),
-  preco: numeric('preco', { precision: 10, scale: 2 }).notNull().default('0'),
+  precoVarejo: numeric('preco_varejo', { precision: 10, scale: 2 }).notNull().default('0'),
+  precoAtacado: numeric('preco_atacado', { precision: 10, scale: 2 }),
+  quantidadeMinimaAtacado: integer('quantidade_minima_atacado'),
   categoriaId: integer('categoria_id').references(() => categorias.id, { onDelete: 'restrict' }),
   imagemUpload: text('imagem_upload'),
   disponivel: boolean('disponivel').default(true),
   estoque: integer('estoque').default(0),
   criadoEm: timestamp('criado_em').defaultNow(),
+});
+
+
+export const produto_variacoes = jm.table('produto_variacoes',{
+  id: serial('id').primaryKey(),
+  produtoId: integer('produto_id').references(() => produtos.id, { onDelete: 'cascade' }),
+  descricao: text('descricao').notNull(),
+  precoVarejo: numeric('preco_varejo', { precision: 10, scale: 2 }).notNull().default('0'),
+  precoAtacado: numeric('preco_atacado',{precision:10,scale:2}),
+  estoque: integer('estoque').default(0),
+  criadoEm: timestamp('criado_em', { withTimezone: true }).defaultNow()
 });
 
 // ENTREGA

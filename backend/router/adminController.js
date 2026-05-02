@@ -3,19 +3,19 @@ import {
   authAdmin,
   dadosAdmin,
   logOutAdmin,
-  listarProdutos,
-  buscarProduto,
-  atualizarProduto,
-  deletarProduto,
   listarClientes,
-  cadastrarProduto,
 } from '../routes/admin.js';
 import {
   criarCategoria,
   listarCategorias, 
   buscarProdutoPorId,
   buscarProdutoPorCategoria,
-  atualizarImagemProduto
+  atualizarImagemProduto,
+  listarProdutos,
+  buscarProduto,
+  atualizarProduto,
+  deletarProduto,
+  cadastrarProduto,
 } from '../routes/produtos.js';
 import { upload  }  from  '../middlewares/multer.js'
 import { verificarToken } from '../middlewares/validarTokenAdmin.js';

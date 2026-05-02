@@ -47,10 +47,22 @@ CREATE TABLE IF NOT EXISTS jm.produtos (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   descricao TEXT,
-  preco NUMERIC(10,2) NOT NULL DEFAULT 0,
+  preco_varejo NUMERIC(10,2) NOT NULL DEFAULT 0,
+  preco_atacado NUMERIC(10,2),
+  quantidade_minima_atacado INTEGER,
   imagem_upload TEXT,
   categoria_id INTEGER REFERENCES jm.categorias(id) ON DELETE RESTRICT,
   disponivel BOOLEAN DEFAULT true,
+  estoque INTEGER DEFAULT 0,
+  criado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS jm.produto_variacoes (
+  id SERIAL PRIMARY KEY,
+  produto_id INTEGER REFERENCES jm.produtos(id) ON DELETE CASCADE,
+  descricao TEXT NOT NULL,
+  preco_varejo NUMERIC(10,2) NOT NULL DEFAULT 0,
+  preco_atacado NUMERIC(10,2),
   estoque INTEGER DEFAULT 0,
   criado_em TIMESTAMPTZ DEFAULT NOW()
 );

@@ -65,7 +65,6 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
 
       <div id="vitrine" className="galeria-profissional">
         {produtosFiltrados.map((produto, index) => {
-          // Lógica de estoque do colaborador integrada ao seu card
           const disponivel = produto.disponivel !== false && (produto.estoque > 0 || produto.estoque === undefined);
 
           return (

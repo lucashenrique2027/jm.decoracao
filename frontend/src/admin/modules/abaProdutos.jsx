@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMensagem } from '../../context/MensagemContext';
-import { cadastrarProduto as cadastrarProdutoService } from '../../services/adminProducts.js';
+import { cadastrarProduto as cadastrarProdutoService, listarCategorias } from '../../services/adminProducts.js';
 
 export default function AbaProdutos() {
 
@@ -9,36 +9,45 @@ export default function AbaProdutos() {
     const [nome, setNome]           = useState("");
     const [preco, setPreco]         = useState("");
     const [descricao, setDescricao] = useState("");
-    const [categoria, setCategoria] = useState("");
+    const [categoriaId, setCategoriaId] = useState(null);
     const [estoque, setEstoque]     = useState(0);
     const [imagem, setImagem]       = useState(null);
+    const [categorias, setCategorias] = useState([]);
+
+    useEffect(() => {
+        listarCategorias()
+            .then(setCategorias)
+            .catch(() => mostrarMensagem("Erro ao carregar categorias", "erro"));
+    }, []);
 
     const cadastrarProduto = async () => {
-  try {
-    await cadastrarProdutoService(
-      { nome, descricao, preco, categoria, estoque, disponivel: true },
-      imagem
-    );
+        if (!categoriaId) {
+            mostrarMensagem("Selecione uma categoria", "erro");
+            return;
+        }
+        try {
+            await cadastrarProdutoService(
+                { nome, descricao, preco, categoriaId, estoque, disponivel: true },
+                imagem
+            );
+            mostrarMensagem("Produto cadastrado com sucesso!", "sucesso");
+            setNome("");
+            setPreco("");
+            setDescricao("");
+            setCategoriaId(null);
+            setEstoque(0);
+            setImagem(null);
+        } catch (error) {
+            mostrarMensagem(error.message || 'Erro ao cadastrar produto', "erro");
+            console.error('Erro ao cadastrar produto:', error);
+        }
+    };
 
-    mostrarMensagem("Produto cadastrado com sucesso!", "sucesso");
-    setNome("");
-    setPreco("");
-    setDescricao("");
-    setCategoria("");
-    setEstoque(0);
-    setImagem(null);
-
-  } catch (error) {
-    mostrarMensagem(error.message || 'Erro ao cadastrar produto', "erro");
-    console.error('Erro ao cadastrar produto:', error);
-  }
-};
-
-return (
+    return (
         <div className="card border-0 shadow-sm p-4 mb-4">
             <h2 className="h4 fw-bold text-dark border-bottom pb-3 mb-4">
                 <i className="bi bi-pencil-square me-2 text-primary"></i> 
-                Cadastrar Novo Produto na Vitrine
+                Cadastrar Novo Produto
             </h2>
 
             <form className="row g-3">
@@ -60,6 +69,7 @@ return (
                         onChange={(e) => setPreco(e.target.value)}
                     />
                 </div>
+
                 <div className="col-12 mt-3">
                     <label className="form-label fw-bold">Descrição e Detalhes</label>
                     <textarea 
@@ -73,12 +83,17 @@ return (
 
                 <div className="col-md-6 mt-3">
                     <label className="form-label fw-bold">Categoria</label>
-                    <input 
-                        className="form-control"
-                        placeholder="Categoria"
-                        value={categoria}
-                        onChange={(e) => setCategoria(e.target.value)}
-                    />
+                    <select
+                        className="form-select"
+                        value={categoriaId ?? ""}
+                        onChange={(e) => setCategoriaId(Number(e.target.value))}
+                        required
+                    >
+                        <option value="">Selecione uma categoria...</option>
+                        {categorias.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="col-md-6 mt-3">

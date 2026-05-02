@@ -31,6 +31,15 @@ export default function Admin() {
     }
   };
 
+  // Função auxiliar para evitar repetição de lógica de estilo
+ const getEstiloAba = (idAba) => {
+  const base = "nav-link w-100 text-start border-0 d-flex align-items-center py-3 px-4 transition-all ";
+  
+  return abaAtiva === idAba 
+    ? `${base} text-info fw-bold bg-secondary bg-opacity-10 border-start border-info border-4` 
+    : `${base} text-white opacity-50 bg-transparent`;
+};
+
   return (
     <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
       
@@ -47,44 +56,58 @@ export default function Admin() {
           <hr className="bg-secondary" />
         </div>
         
-        <ul className="nav flex-column gap-3">
+        <ul className="nav flex-column gap-2"> {/* Reduzi o gap para as abas ficarem mais próximas */}
           
           <li className="nav-item">
-            <button onClick={() => setAbaAtiva("estoque")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "estoque" ? "text-info fw-bold" : "text-white"}`}>
+            <button 
+              onClick={() => setAbaAtiva("estoque")}
+              className={getEstiloAba("estoque")}
+              style={{ borderRadius: '8px', padding: '10px 15px' }}>
               <i className="bi bi-box-seam me-3"></i> Estoque
             </button>
           </li>
+
           <li className="nav-item">
-            <button onClick={() => setAbaAtiva("clientes")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "clientes" ? "text-info fw-bold" : "text-white"}`}>
+            <button 
+              onClick={() => setAbaAtiva("clientes")}
+              className={getEstiloAba("clientes")}
+              style={{ borderRadius: '8px', padding: '10px 15px' }}>
               <i className="bi bi-people me-3"></i> Clientes
             </button>
           </li>
+
           <li className="nav-item">
-            <button onClick={() => setAbaAtiva("pedidos")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "pedidos" ? "text-info fw-bold" : "text-white"}`}>
+            <button 
+              onClick={() => setAbaAtiva("pedidos")}
+              className={getEstiloAba("pedidos")}
+              style={{ borderRadius: '8px', padding: '10px 15px' }}>
               <i className="bi bi-cart-check me-3"></i> Pedidos
             </button>
           </li>
           
           <li className="nav-item">
-            <button onClick={() => setAbaAtiva("novo-produto")}
-              className={`nav-link w-100 text-start border-0 bg-transparent d-flex align-items-center ${abaAtiva === "novo-produto" ? "text-info fw-bold" : "text-white"}`}>
+            <button 
+              onClick={() => setAbaAtiva("novo-produto")}
+              className={getEstiloAba("novo-produto")}
+              style={{ borderRadius: '8px', padding: '10px 15px' }}>
               <i className="bi bi-plus-circle-fill me-3"></i> Novo Produto
             </button>
           </li>
         </ul>
 
-        <div className="mt-5 pt-5">
+        <div className="mt-auto pt-5"> {/* 'mt-auto' ajuda a empurrar o botão para o rodapé se o container for flex */}
           <button className="btn btn-outline-danger w-100" onClick={handleLogout}>
             <i className="bi bi-box-arrow-right me-2"></i> Sair do Sistema
           </button>
         </div>
       </div>
 
-      <div className="flex-grow-1 p-5">
+      <div className="flex-grow-1 p-5" style={{ overflowY: 'auto', maxHeight: '100vh' }}>
         <div className="container-fluid">
+          {/* Header indicando a aba atual (Opcional para clareza) */}
+          <h2 className="mb-4 text-capitalize text-dark border-bottom pb-2">
+            {abaAtiva.replace('-', ' ')}
+          </h2>
           {renderConteudo()}
         </div>
       </div>

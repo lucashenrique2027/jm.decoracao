@@ -1,5 +1,5 @@
 import { db } from '../models/db.js';
-import { admin,produtos,clientes } from '../models/schema.js';
+import { admin,produtos,clientes,categorias } from '../models/schema.js';
 import { uploadImageToMinio } from '../src/services/uploadService.js';
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import s3Client from '../src/config/s3.js';
@@ -94,30 +94,28 @@ export const dadosAdmin = async (req,res) => {
 
 };
 
-export const listarProdutosAdmin = async(req,res) => {
+export const listarProdutos = async (req, res) => {
 
-  try{
-    const data = await db.select({
-      id: produtos.id,
-      nome: produtos.nome,
-      descricao: produtos.descricao,
-      categoria: produtos.categoria,
-      preco: produtos.preco,
-      imagemUpload: produtos.imagemUpload,
-      disponivel: produtos.disponivel,
-      estoque: produtos.estoque
-    }).from(produtos);
+    try{
+        const data = await db.select({
+            id: produtos.id,
+            nome: produtos.nome,
+            descricao: produtos.descricao,
+            categoriaId: produtos.categoriaId,
+            preco: produtos.preco,
+            imagemUpload: produtos.imagemUpload, 
+            disponivel: produtos.disponivel,
+            estoque: produtos.estoque
+        }).from(produtos)
+        .leftJoin(categorias, eq(produtos.categoriaId, categorias.id));
 
-    if(data.length === 0) {
-      return res.status(404).json({ message: 'Admin não encontrado' });
-    }
+        res.json(data);
 
-    return res.status(200).json(data);
-
-  }catch(error){
-    console.error(error.message);
-    return res.status(500).json({ message: 'Erro interno ao buscar produtos para o admin' })
-  }
+    }catch(error){
+        console.error(error);
+        res.status(500).json({ erro: 'Erro ao listar produtos' });
+        return;    
+    }    
 }
 
 export const buscarProduto = async(req,res) => {

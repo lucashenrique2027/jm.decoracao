@@ -7,12 +7,6 @@ export const statusPedidoEnum = jm.enum('status_pedido', ['pendente', 'confirmad
 export const userRoleEnum = jm.enum('user_role', ['admin', 'colaborador', 'cliente']);
 
 
-// TESTE
-export const teste = jm.table("teste", {
-  id: serial("id").primaryKey(),
-  nome: text("nome").notNull(),
-});
-
 export const admin = jm.table('admin', {
   id: serial('id').primaryKey(),
   nome: text('nome').notNull(),
@@ -34,9 +28,9 @@ export const clientes = jm.table('clientes', {
   telefone: text('telefone').notNull(),
   cep: text('cep').notNull(),
   endereco: text('endereco').notNull(),
-  bairro: text('bairro').notNull(),
-  cidade: text('cidade').notNull(),
-  estado: text('estado').notNull().default('SP'),
+  bairro: text('bairro'),
+  cidade: text('cidade'),
+  estado: text('estado').default('SP'),
   criadoEm: timestamp('criado_em').defaultNow(),
 });
 

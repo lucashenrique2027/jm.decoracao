@@ -1,6 +1,6 @@
 import { db } from '../models/db.js';
 import { produtos, categorias } from '../models/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, ilike, and } from 'drizzle-orm';
 
 export const listarProdutos = async (req, res) => {
 
@@ -14,7 +14,8 @@ export const listarProdutos = async (req, res) => {
             imagemUpload: produtos.imagemUpload, 
             disponivel: produtos.disponivel,
             estoque: produtos.estoque
-        }).from(produtos);
+        }).from(produtos)
+        .leftJoin(categorias, eq(produtos.categoriaId, categorias.id));
 
         res.json(data);
 
@@ -99,6 +100,62 @@ export const atualizarProduto = async (req, res) => {
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao atualizar produto' });
+    }
+};
+export const atualizarImagemProduto = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!req.file) {
+            return res.status(400).json({ erro: 'Imagem é obrigatória' });
+        }
+
+        const data = await db.update(produtos)
+            .set({ imagemUpload: req.file.filename })
+            .where(eq(produtos.id, Number(id)))
+            .returning();
+
+        if (data.length === 0) {
+            return res.status(404).json({ erro: 'Produto não encontrado' });
+        }
+
+        res.json(data[0]);
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ erro: 'Erro ao atualizar imagem' });
+    }
+};
+
+export const buscarProduto = async (req, res) => {
+    try {
+        const { id, nome, categoriaId, preco, disponivel } = req.query;
+        
+        const conditions = [];
+        
+        if (id)          conditions.push(eq(produtos.id, Number(id)));
+        if (categoriaId) conditions.push(eq(produtos.categoriaId, Number(categoriaId)));
+        if (preco)       conditions.push(eq(produtos.preco, preco));
+        if (disponivel !== undefined) conditions.push(eq(produtos.disponivel, disponivel === 'true'));
+        if (nome)        conditions.push(ilike(produtos.nome, `%${nome}%`));
+
+        const data = await db.select({
+            id: produtos.id,
+            nome: produtos.nome,
+            descricao: produtos.descricao,
+            preco: produtos.preco,
+            imagemUpload: produtos.imagemUpload,
+            disponivel: produtos.disponivel,
+            estoque: produtos.estoque,
+            categoriaId: produtos.categoriaId,
+            categoriaNome: categorias.nome
+        }).from(produtos)
+          .leftJoin(categorias, eq(produtos.categoriaId, categorias.id))
+          .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ erro: 'Erro ao buscar produtos' });
     }
 };
 

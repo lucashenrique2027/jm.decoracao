@@ -35,7 +35,7 @@ router.post('/produtos', verificarToken, upload.single('imagem'), cadastrarProdu
 router.put('/produtos/:id', verificarToken,upload.single('imagem'), atualizarProduto);
 router.delete('/produtos/:id', verificarToken, deletarProduto);
 router.patch('/produtos/:id/imagem', verificarToken, upload.single('imagem'), atualizarImagemProduto);
-router.get('/categorias', verificarToken, listarCategorias);
+router.get('/categorias', listarCategorias);
 router.post('/categorias', verificarToken, criarCategoria);
 
 export default router;

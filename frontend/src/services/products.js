@@ -21,3 +21,9 @@ export const buscarProdutos = async () => {
     return [];
   }
 };
+
+export const listarCategorias = async () => {
+  const response = await fetch(`${API_URL}/categorias`);
+  if (!response.ok) throw new Error('Erro ao carregar categorias');
+  return response.json();
+};

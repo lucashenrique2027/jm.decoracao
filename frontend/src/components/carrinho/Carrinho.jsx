@@ -1,5 +1,5 @@
 import { useCarrinho } from "../../context/CarrinhoContext";
-import { efetuarPagamento } from '../../services/payment.js';
+import { efetuarPagamentoTeste } from '../../services/pagamentoTeste.js';
 import { useNavigate } from "react-router-dom";
 import "./style.css";
 
@@ -15,9 +15,12 @@ export default function Carrinho() {
 
   const finalizarPedido = async () => {
     try {
-      const data = await efetuarPagamento('comprador@teste.com', itens);
-      if (data.url) {
-        window.location.href = data.url;
+      const payload = {
+        itens: itens.map(i => ({ produtoId: i.id, quantidade: i.quantidade }))
+      };
+      const data = await efetuarPagamentoTeste(payload);
+      if (data.success) {
+        navigate(`/pagamento/${data.pedidoId}`, { state: { qrCode: data.qrCodeVisual, total: data.total } });
       }
     } catch (error) {
       alert(error.message || 'Erro ao conectar com o servidor!');
@@ -61,7 +64,7 @@ export default function Carrinho() {
                     </div>
                   </div>
 
-                  <button className="btn-remover" onClick={() => removerItem(item.nome)}>
+                  <button className="btn-remover" onClick={() => removerItem(item.id)}>
                     🗑️
                   </button>
                 </div>

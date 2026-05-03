@@ -14,10 +14,11 @@ export const listarProdutos = async (req, res) => {
             id: produtos.id,
             nome: produtos.nome,
             descricao: produtos.descricao,
-            precoVarejo: produtos.precoprecoVarejo,
+            precoVarejo: produtos.precoVarejo,
             precoAtacado: produtos.precoAtacado,
             quantidadeMinimaAtacado: produtos.quantidadeMinimaAtacado,
             categoriaId: produtos.categoriaId,
+            categoriaNome: categorias.nome,
             imagemUpload: produtos.imagemUpload, 
             disponivel: produtos.disponivel,
             estoque: produtos.estoque
@@ -35,6 +36,14 @@ export const listarProdutos = async (req, res) => {
 
 // Buscar um Produto específico
 export const buscarProdutoPorId = async (req, res) => {
+
+    const { id } = req.params;
+
+    if (isNaN(Number(id))) {
+    console.log(`[buscarProdutoPorId] ID inválido recebido: "${id}"`);
+    return res.status(400).json({ erro: `ID inválido recebido: ${id}` });
+}
+
     try {
         const { id } = req.params;
         const data = await db.select().from(produtos).where(eq(produtos.id, Number(id)));

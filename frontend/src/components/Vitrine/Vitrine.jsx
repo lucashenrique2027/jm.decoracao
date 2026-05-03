@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useCarrinho } from "../../context/CarrinhoContext";
 import "./style.css";
 import DetalhesProduto from "../ProdutoDetalhes/ProdutoDetalhes";
-import { buscarProdutos } from '../../services/products.js';
+import { buscarProdutos, listarCategorias } from '../../services/products.js';
 
 export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCategoriasCarregadas }) {
   const [todosProdutos, setTodosProdutos] = useState([]);
@@ -12,30 +12,31 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
   const { adicionarItem } = useCarrinho();
 
   useEffect(() => {
-    let isMounted = true;
+  let isMounted = true;
 
-    async function carregar() {
-      try {
-        const dados = await buscarProdutos();
-        if (isMounted) {
-          setTodosProdutos(dados);
-          
-          // Missão 1: Extrair categorias únicas e enviar para a Home/Header
-          if (onCategoriasCarregadas) {
-            const cats = [...new Set(dados.map(p => p.categoria).filter(Boolean))];
-            onCategoriasCarregadas(["Todos", ...cats.sort()]);
-          }
+  async function carregar() {
+    try {
+      const [dados, cats] = await Promise.all([
+        buscarProdutos(),
+        listarCategorias()
+      ]);
+
+      if (isMounted) {
+        setTodosProdutos(dados);
+        if (onCategoriasCarregadas) {
+          onCategoriasCarregadas(["Todos", ...cats.map(c => c.nome)]);
         }
-      } catch {
-        if (isMounted) setErro("Não foi possível carregar os produtos.");
-      } finally {
-        if (isMounted) setCarregando(false);
       }
+    } catch {
+      if (isMounted) setErro("Não foi possível carregar os produtos.");
+    } finally {
+      if (isMounted) setCarregando(false);
     }
+  }
 
-    carregar();
-    return () => { isMounted = false; };
-  }, [onCategoriasCarregadas]);
+  carregar();
+  return () => { isMounted = false; };
+}, [onCategoriasCarregadas]);
 
   // Missão 2: Lógica de Filtro (Cérebro da Vitrine)
   const produtosFiltrados = useMemo(() => {
@@ -43,7 +44,7 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
       const termo = busca.toLowerCase();
       const bateNome = p.nome?.toLowerCase().includes(termo);
       const bateDescricao = p.descricao?.toLowerCase().includes(termo);
-      const bateCategoria = categoriaAtiva === "Todos" || p.categoria === categoriaAtiva;
+      const bateCategoria = categoriaAtiva === "Todos" || p.categoriaNome === categoriaAtiva;
       
       return (bateNome || bateDescricao) && bateCategoria;
     });
@@ -82,11 +83,27 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
               </div>
 
               <div className="produto-info">
-                <p><b>{produto.nome}</b></p>
-                <p className="preco">
-                  R$ {Number(produto.preco || 0).toFixed(2).replace('.', ',')}
-                </p>
-              </div>
+  <p><b>{produto.nome}</b></p>
+  
+  {/* Preço de Varejo - Exibido apenas se houver valor */}
+  {produto.precoVarejo > 0 && (
+    <p className="preco-varejo" style={{ fontSize: '0.85rem', color: '#555', margin: 0 }}>
+      Varejo: R$ {Number(produto.precoVarejo).toFixed(2).replace('.', ',')}
+    </p>
+  )}
+
+  {/* Preço de Atacado e Quantidade Mínima - Exibidos apenas se existirem no objeto */}
+  {produto.precoAtacado > 0 && (
+    <div className="info-atacado" style={{ marginTop: '4px' }}>
+      <p className="preco-atacado" style={{ color: '#28a745', fontWeight: '700', margin: 0 }}>
+        Atacado: R$ {Number(produto.precoAtacado).toFixed(2).replace('.', ',')}
+      </p>
+      <p style={{ fontSize: '0.7rem', color: '#777', margin: 0 }}>
+        (Mínimo: {produto.quantidadeMinimaAtacado} un.)
+      </p>
+    </div>
+  )}
+</div>
 
               <div className="compra-acoes">
                 <button

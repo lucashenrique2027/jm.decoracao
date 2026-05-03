@@ -15,7 +15,7 @@ export default function PaginaPagamento() {
 
         {qrCode && (
           <img
-            src={`data:image/png;base64,${qrCode}`}
+            src={qrCode}
             alt="QR Code de pagamento"
             className="img-fluid mb-4 mx-auto d-block"
             style={{ width: 220 }}

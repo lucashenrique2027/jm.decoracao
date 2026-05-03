@@ -6,13 +6,15 @@ export default function AbaProdutos() {
 
     const { mostrarMensagem } = useMensagem();
 
-    const [nome, setNome]           = useState("");
-    const [preco, setPreco]         = useState("");
-    const [descricao, setDescricao] = useState("");
-    const [categoriaId, setCategoriaId] = useState(null);
-    const [estoque, setEstoque]     = useState(0);
-    const [imagem, setImagem]       = useState(null);
-    const [categorias, setCategorias] = useState([]);
+    const [nome, setNome]                                 = useState("");
+    const [precoVarejo, setPrecoVarejo]                   = useState("");
+    const [precoAtacado, setPrecoAtacado]                 = useState("");
+    const [quantidadeMinimaAtacado, setQuantidadeMinima]  = useState("");
+    const [descricao, setDescricao]                       = useState("");
+    const [categoriaId, setCategoriaId]                   = useState(null);
+    const [estoque, setEstoque]                           = useState(0);
+    const [imagem, setImagem]                             = useState(null);
+    const [categorias, setCategorias]                     = useState([]);
 
     useEffect(() => {
         listarCategorias()
@@ -27,12 +29,23 @@ export default function AbaProdutos() {
         }
         try {
             await cadastrarProdutoService(
-                { nome, descricao, preco, categoriaId, estoque, disponivel: true },
+                { 
+                    nome, 
+                    descricao, 
+                    precoVarejo, 
+                    precoAtacado: precoAtacado || null,
+                    quantidadeMinimaAtacado: quantidadeMinimaAtacado || null,
+                    categoriaId, 
+                    estoque, 
+                    disponivel: true 
+                },
                 imagem
             );
             mostrarMensagem("Produto cadastrado com sucesso!", "sucesso");
             setNome("");
-            setPreco("");
+            setPrecoVarejo("");
+            setPrecoAtacado("");
+            setQuantidadeMinima("");
             setDescricao("");
             setCategoriaId(null);
             setEstoque(0);
@@ -60,13 +73,35 @@ export default function AbaProdutos() {
                         onChange={(e) => setNome(e.target.value)}
                     />
                 </div>
+
                 <div className="col-md-4">
-                    <label className="form-label fw-bold">Preço (R$)</label>
+                    <label className="form-label fw-bold">Preço Varejo (R$)</label>
                     <input 
                         className="form-control form-control-lg"
                         placeholder="0,00"
-                        value={preco}
-                        onChange={(e) => setPreco(e.target.value)}
+                        value={precoVarejo}
+                        onChange={(e) => setPrecoVarejo(e.target.value)}
+                    />
+                </div>
+
+                <div className="col-md-6 mt-3">
+                    <label className="form-label fw-bold">Preço Atacado (R$) <span className="text-muted fw-normal small">— opcional</span></label>
+                    <input 
+                        className="form-control"
+                        placeholder="0,00"
+                        value={precoAtacado}
+                        onChange={(e) => setPrecoAtacado(e.target.value)}
+                    />
+                </div>
+
+                <div className="col-md-6 mt-3">
+                    <label className="form-label fw-bold">Qtd. Mínima Atacado <span className="text-muted fw-normal small">— opcional</span></label>
+                    <input 
+                        type="number"
+                        className="form-control"
+                        placeholder="Ex: 6"
+                        value={quantidadeMinimaAtacado}
+                        onChange={(e) => setQuantidadeMinima(e.target.value)}
                     />
                 </div>
 

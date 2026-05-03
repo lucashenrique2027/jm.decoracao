@@ -7,17 +7,18 @@ export const efetuarPagamentoTeste = async (itens)=>{
             method: 'POST',
             headers:{ 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({itens})
+            body: JSON.stringify(itens)
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.erro || 'Erro ao efetuar pagamento');
+            const errorText = await response.text();
+            throw new Error(errorText || 'Erro ao efetuar pagamento');
         };
 
         return response.json();
 
     }catch(error){
-        
+        console.error(error);
+        return { success: false, erro: error.message };
     }
 };

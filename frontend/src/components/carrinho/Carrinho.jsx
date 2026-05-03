@@ -3,6 +3,11 @@ import { efetuarPagamentoTeste } from '../../services/pagamentoTeste.js';
 import { useNavigate } from "react-router-dom";
 import "./style.css";
 
+const precoUnitario = (item) =>
+  item.precoAtacado && item.quantidadeMinimaAtacado && item.quantidade >= item.quantidadeMinimaAtacado
+    ? Number(item.precoAtacado)
+    : Number(item.precoVarejo);
+
 export default function Carrinho() {
   const navigate = useNavigate();
   const {
@@ -18,7 +23,9 @@ export default function Carrinho() {
       const payload = {
         itens: itens.map(i => ({ produtoId: i.id, quantidade: i.quantidade }))
       };
+      
       const data = await efetuarPagamentoTeste(payload);
+     
       if (data.success) {
         navigate(`/pagamento/${data.pedidoId}`, { state: { qrCode: data.qrCodeVisual, total: data.total } });
       }
@@ -54,8 +61,16 @@ export default function Carrinho() {
                   <div className="carrinho-item-info">
                     <p className="item-nome">{item.nome}</p>
                     <p className="item-preco">
-                      R$ {(item.preco * item.quantidade).toFixed(2).replace(".", ",")}
+                      R$ {(precoUnitario(item) * item.quantidade).toFixed(2).replace(".", ",")}
                     </p>
+
+                    {item.precoAtacado && item.quantidadeMinimaAtacado && (
+                      <p style={{ fontSize: '0.75rem', color: '#28a745', margin: 0 }}>
+                        {item.quantidade >= item.quantidadeMinimaAtacado
+                          ? '✓ Preço atacado aplicado'
+                          : `Compre mais ${item.quantidadeMinimaAtacado - item.quantidade} un. para atacado`}
+                      </p>
+                    )}
 
                     <div className="carrinho-controles">
                       <button onClick={() => alterarQuantidade(item.id, -1)}>-</button>

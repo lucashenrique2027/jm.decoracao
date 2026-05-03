@@ -40,8 +40,13 @@ const alterarQuantidade = (id, delta) => {
 
   const limparCarrinho = () => setItens([]);
 
-  const total = itens.reduce((acc, i) => acc + i.preco * i.quantidade, 0);
-  const totalItens = itens.reduce((acc, i) => acc + i.quantidade, 0);
+  const total = itens.reduce((acc, i) => {
+  const preco = i.precoAtacado && i.quantidadeMinimaAtacado && i.quantidade >= i.quantidadeMinimaAtacado
+    ? Number(i.precoAtacado)
+    : Number(i.precoVarejo);
+  return acc + preco * i.quantidade;
+}, 0);
+const totalItens = itens.reduce((acc, i) => acc + i.quantidade, 0);
 
   return (
     <CarrinhoContext.Provider value={{

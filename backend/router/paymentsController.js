@@ -2,16 +2,10 @@ import Router from 'router';
 import { mercadoPago, pagamentoSimulado } from '../routes/pagamento.js';
 import { verificarToken } from '../middlewares/validarTokenClient.js';
 
-const pagamentoRouter = () => {
+const router = Router();
 
-    const router = Router();
+// router.get('/api/pagamento/mercadopago', mercadoPago);
 
-    // router.get('/api/pagamento/mercadopago', mercadoPago);
+router.post('/comprar',verificarToken,pagamentoSimulado);
 
-    router.post('/comprar',verificarToken,pagamentoSimulado);
-
-    return router;
-
-};
-
-export default pagamentoRouter;
+export default router;

@@ -1,0 +1,109 @@
+.perfil-app {
+  background: #f4f6f9;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.avatar-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.quick-access {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.nav-card {
+  background: #fff;
+  padding: 15px 5px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.icon-box {
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.purple { background: #f3e8ff; color: #7c3aed; }
+.red { background: #fee2e2; color: #ef4444; }
+.blue { background: #e0f2fe; color: #0ea5e9; }
+.gold { background: #fef3c7; color: #d97706; }
+
+.card-status {
+  background: #fff;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.status-body {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.product-thumb {
+  width: 50px;
+  height: 50px;
+  background: #eee;
+  border-radius: 8px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: #22c55e;
+}
+
+.settings-list {
+  margin-top: 30px;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.menu-item {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.logout { color: #ef4444; }

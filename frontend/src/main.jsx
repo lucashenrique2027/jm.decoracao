@@ -11,6 +11,7 @@ import Carrinho from "./components/carrinho/Carrinho.jsx";
 import Home from "./pages/Home/Home.jsx";
 import Sobre from "./pages/Sobre/Sobre.jsx";
 import Login from "./pages/Login/Login.jsx";
+import Perfil from "./pages/Perfil/perfil.jsx";
 import Pagamento from "./pages/Pagamento/pagamento.jsx";
 import Admin from "./admin/dashboard/Admin.jsx";
 import LoginAdmin from './admin/login/LoginAdmin.jsx';
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/sobre" element={<Sobre />} />{/*http://localhost:8080/sobre*/}
             <Route path="/login" element={<Login />} />{/*http://localhost:8080/Login*/}
             <Route path="/authAdmin" element={<LoginAdmin />} />{/*http://localhost:8080/authAdmin*/}
+            <Route path="/produto/:id" element={<ProdutoDetalhes />} />
             <Route path="/privacidade" element={<Privacidade />} />
             <Route path="/termos" element={<Termos />} />
             <Route path="/recuperar-senha" element={<RecuperarSenha />} />
@@ -39,8 +41,8 @@ createRoot(document.getElementById("root")).render(
               <Route path="/admin" element={<Admin />} />{/*http://localhost:8080/admin*/}
             </Route>
             <Route element={<RotaProtegida />}>
+              <Route path='/perfil' element={<Perfil/>}/>
               <Route path="/carrinho" element={<Carrinho />} />
-              <Route path="/produto/:id" element={<ProdutoDetalhes />} />
               <Route path="/pagamento/:pedidoId" element={<Pagamento/>}/>
             </Route>
           </Routes>

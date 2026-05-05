@@ -86,12 +86,10 @@ CREATE TABLE IF NOT EXISTS jm.pedido_itens (
   preco_unitario NUMERIC(10,2) NOT NULL
 );
 
--- ─── ZONAS INICIAIS (Atibaia) ───────────────────────────
--- Lista exata será confirmada com o cliente
-INSERT INTO jm.zonas_entrega (cidade, cep_prefixo, ativo) VALUES
-  ('Atibaia', '12940', true),
-  ('Atibaia', '12941', true),
-  ('Atibaia', '12942', true),
-  ('Atibaia', '12943', true),
-  ('Atibaia', '12944', true),
-  ('Atibaia', '12945', true);
+CREATE UNIQUE INDEX IF NOT EXISTS unico_carrinho_por_cliente
+ON jm.pedidos (cliente_id)
+WHERE status = 'pendente';
+
+ALTER TABLE jm.produtos 
+ADD CONSTRAINT estoque_positivo CHECK (estoque >= 0);
+

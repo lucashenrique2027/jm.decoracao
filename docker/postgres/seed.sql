@@ -56,3 +56,22 @@ VALUES
 ('Bruno Carvalho Nunes', 'bruno.nunes@gmail.com', '$2b$10$QcFeBpYLcU3xAOdP53jQ3OmhSAmFIWZspAbvXDg5cC1YuCknQ7mqq', '(61) 99333-4455', '70040-010', 'Esplanada dos Ministérios, Bloco A', 'Zona Cívico-Administrativa', 'Brasília', 'DF'),
 ('Camila Barbosa Freitas', 'camila.freitas@gmail.com', '$2b$10$DvWXyHtZlB4.V3iUXKdla.rcpw/CyA8bNsC14wv5SxrKSBT3wd0Ty', '(85) 99444-5566', '60060-000', 'Av. Beira Mar, 150', 'Meireles', 'Fortaleza', 'CE')
 ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO jm.pedidos (id, cliente_id, status, total, observacao_entrega)
+VALUES
+  (1, 1, 'entregue', 179.80, 'Entregue no prazo.'),
+  (2, 2, 'pendente', 200.00, 'Aguardando cliente finalizar.'),
+  (3, 3, 'confirmado', 415.00, 'Pagamento aprovado, separar estoque.'),
+  (4, 4, 'confirmado', 135.00, 'Tocar interfone 45.'),
+  (5, 5, 'pendente', 65.00, NULL)
+ON CONFLICT (id) DO NOTHING;
+
+-- ─── ZONAS INICIAIS (Atibaia) ───────────────────────────
+-- Lista exata será confirmada com o cliente
+INSERT INTO jm.zonas_entrega (cidade, cep_prefixo, ativo) VALUES
+  ('Atibaia', '12940', true),
+  ('Atibaia', '12941', true),
+  ('Atibaia', '12942', true),
+  ('Atibaia', '12943', true),
+  ('Atibaia', '12944', true),
+  ('Atibaia', '12945', true);

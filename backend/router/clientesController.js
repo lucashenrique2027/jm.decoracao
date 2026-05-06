@@ -9,6 +9,11 @@ import {
   atualizarCliente,
   deletarCliente
 } from '../routes/clientes.js';
+import {
+  obterCarrinhoAtivo,
+  adicionarProdutosAoCarrinho,
+  confirmarPagamentoCarrinho
+} from '../routes/carrinho.js';
 import { verificarToken } from '../middlewares/validarTokenClient.js';
 
 const router = express.Router();
@@ -20,6 +25,12 @@ router.post('/logout', logoutCliente);
 router.get('/data', verificarToken, dadosCliente);
 
 router.post('/', cadastrarCliente);
+
+router.post('/adicionar', verificarToken, adicionarProdutosAoCarrinho);
+
+router.get('/meu-carrinho', verificarToken, obterCarrinhoAtivo);
+
+router.post('/confirmar-pagamento', confirmarPagamentoCarrinho);
 
 router.get('/', listarClientes);
 

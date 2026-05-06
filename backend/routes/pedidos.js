@@ -92,39 +92,38 @@ export const atualizarStatusPedido = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const statusValidos = ['pendente', 'confirmado', 'rejeitado', 'entregue'];
-    if (!statusValidos.includes(status)) {
-      return res.status(400).json({ erro: `Status inválido. Use: ${statusValidos.join(', ')}` });
+    // 1. Busca o pedido para saber o status ATUAL (antes de mudar)
+    const [pedidoAtual] = await db.select().from(pedidos).where(eq(pedidos.id, parseInt(id)));
+    if (!pedidoAtual) return res.status(404).json({ erro: 'Pedido não encontrado' });
+
+    // 2. Só faz a mudança se o status for realmente diferente
+    if (pedidoAtual.status === status) {
+      return res.json({ mensagem: 'O pedido já está com este status' });
     }
 
+    // 3. Atualiza o status no banco
     const [pedidoAtualizado] = await db.update(pedidos)
       .set({ status })
       .where(eq(pedidos.id, parseInt(id)))
       .returning();
 
-    if (!pedidoAtualizado) {
-      return res.status(404).json({ erro: 'Pedido não encontrado' });
-    }
+    // 4. LÓGICA DE ESTOQUE: Só devolve se estiver REJEITANDO algo que estava PENDENTE ou CONFIRMADO
+    const deveDevolverEstoque = status === 'rejeitado' && pedidoAtual.status !== 'rejeitado';
 
-    if (status === 'rejeitado') {
-      const itens = await db.select().from(pedidoItens).where(eq(pedidoItens.pedidoId, parseInt(id)));
-
-      const produtosIds = itens.map(i => i.produtoId);
-      const produtosEncontrados = await db.select().from(produtos).where(inArray(produtos.id, produtosIds));
-      const produtosMap = new Map(produtosEncontrados.map(p => [p.id, p]));
+    if (deveDevolverEstoque) {
+      const itens = await db.select().from(pedidoItens).where(eq(pedidoItens.pedidoId, pedidoAtual.id));
 
       for (const item of itens) {
-        const produto = produtosMap.get(item.produtoId);
-        const novoEstoque = produto.estoque + item.quantidade;
+        const [produto] = await db.select().from(produtos).where(eq(produtos.id, item.produtoId));
+        
         await db.update(produtos)
-          .set({ estoque: novoEstoque, disponivel: true })
+          .set({ estoque: produto.estoque + item.quantidade })
           .where(eq(produtos.id, item.produtoId));
       }
     }
 
     res.json({ mensagem: 'Status atualizado com sucesso', pedido: pedidoAtualizado });
   } catch (erro) {
-    console.error('Erro ao atualizar status:', erro);
-    res.status(500).json({ erro: 'Erro ao atualizar status do pedido' });
+    res.status(500).json({ erro: 'Erro ao atualizar status' });
   }
 };

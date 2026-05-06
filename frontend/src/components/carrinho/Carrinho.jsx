@@ -1,6 +1,7 @@
 import { useCarrinho } from "../../context/CarrinhoContext";
 import { efetuarPagamentoTeste } from '../../services/pagamentoTeste.js';
 import { useNavigate } from "react-router-dom";
+import { Trash } from "lucide-react";
 import "./style.css";
 
 const precoUnitario = (item) =>
@@ -80,7 +81,7 @@ export default function Carrinho() {
                   </div>
 
                   <button className="btn-remover" onClick={() => removerItem(item.id)}>
-                    🗑️
+                    <Trash />
                   </button>
                 </div>
               ))

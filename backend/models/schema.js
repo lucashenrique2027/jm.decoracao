@@ -57,16 +57,6 @@ export const produtos = jm.table('produtos', {
 });
 
 
-export const produto_variacoes = jm.table('produto_variacoes',{
-  id: serial('id').primaryKey(),
-  produtoId: integer('produto_id').references(() => produtos.id, { onDelete: 'cascade' }),
-  descricao: text('descricao').notNull(),
-  precoVarejo: numeric('preco_varejo', { precision: 10, scale: 2 }).notNull().default('0'),
-  precoAtacado: numeric('preco_atacado',{precision:10,scale:2}),
-  estoque: integer('estoque').default(0),
-  criadoEm: timestamp('criado_em', { withTimezone: true }).defaultNow()
-});
-
 // ENTREGA
 export const zonasEntrega = jm.table('zonas_entrega', {
   id: serial('id').primaryKey(),

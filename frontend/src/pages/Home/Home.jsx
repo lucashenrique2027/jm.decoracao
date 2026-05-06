@@ -5,8 +5,7 @@ import Footer from "../../components/Footer/Footer";
 import Vitrine from "../../components/Vitrine/Vitrine";
 
 export default function Home() {
-  const [menuAberto, setMenuAberto] = useState(false);
-
+ 
   const [busca, setBusca] = useState(""); 
   const [categoriaAtiva, setCategoriaAtiva] = useState("Todos");
   const [categorias, setCategorias] = useState([]);
@@ -14,8 +13,6 @@ export default function Home() {
   return (
     <>
       <Header 
-        menuAberto={menuAberto} 
-        setMenuAberto={setMenuAberto}
         busca={busca}
         setBusca={setBusca}
         categorias={categorias}

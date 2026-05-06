@@ -3,15 +3,16 @@ import { useCarrinho } from '../../context/CarrinhoContext';
 import { logoutCliente } from '../../services/cliente.js'
 import { ShoppingCart, User, LogOut, Search, Menu } from 'lucide-react';
 import "./style.css";
+import { useState } from 'react';
 
 export default function Header({ 
   busca, setBusca, 
   categorias, categoriaAtiva, setCategoriaAtiva,
-  menuAberto, setMenuAberto 
 }) {
   const { totalItens } = useCarrinho();
   const navigate = useNavigate();
   const location = useLocation();
+  const [menuAberto, setMenuAberto] = useState(false);
 
   const cliente = JSON.parse(localStorage.getItem('clienteJM') || 'null');
   const isHome = location.pathname === '/';

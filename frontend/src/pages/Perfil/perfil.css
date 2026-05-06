@@ -1,109 +1,198 @@
 .perfil-app {
   background: #f4f6f9;
   min-height: 100vh;
-  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 16px;
   font-family: 'Inter', sans-serif;
 }
 
-.user-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+.perfil-loading {
+  text-align: center;
+  margin-top: 60px;
+  color: #888;
 }
 
-.avatar-container {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+/* HEADER */
+.perfil-header {
+  margin-bottom: 24px;
 }
 
-.user-avatar {
-  width: 60px;
-  height: 60px;
-  background: #fff;
+.perfil-avatar-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.perfil-avatar {
+  width: 64px;
+  height: 64px;
+  background: #077dac;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  color: #fff;
+  flex-shrink: 0;
 }
 
-.quick-access {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 25px;
+.perfil-nome {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1f2a33;
+  margin: 0;
 }
 
-.nav-card {
+.perfil-email {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* CARDS */
+.perfil-card {
   background: #fff;
-  padding: 15px 5px;
   border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 20px;
+  margin-bottom: 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.icon-box {
-  padding: 10px;
-  border-radius: 12px;
-}
-
-.purple { background: #f3e8ff; color: #7c3aed; }
-.red { background: #fee2e2; color: #ef4444; }
-.blue { background: #e0f2fe; color: #0ea5e9; }
-.gold { background: #fef3c7; color: #d97706; }
-
-.card-status {
-  background: #fff;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.status-body {
+.perfil-section-header {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin: 15px 0;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
-.product-thumb {
-  width: 50px;
-  height: 50px;
-  background: #eee;
-  border-radius: 8px;
+.perfil-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2a33;
+  margin: 0 0 16px;
 }
 
-.progress-bar {
-  height: 6px;
-  background: #eee;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.fill {
-  height: 100%;
-  background: #22c55e;
-}
-
-.settings-list {
-  margin-top: 30px;
-  background: #fff;
+.perfil-badge {
+  background: #077dac;
+  color: #fff;
   border-radius: 20px;
-  overflow: hidden;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
-.menu-item {
-  padding: 20px;
+/* DADOS */
+.perfil-dado {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.perfil-dado:last-child {
+  border-bottom: none;
+}
+
+/* PEDIDOS */
+.perfil-vazio {
+  color: #888;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.perfil-pedidos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.perfil-pedido-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.perfil-pedido-item:hover {
+  background: #f0f4f8;
+}
+
+.perfil-pedido-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #077dac;
+}
+
+.perfil-pedido-id {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1f2a33;
+  margin: 0;
+}
+
+.perfil-pedido-data {
+  font-size: 0.78rem;
+  color: #888;
+  margin: 0;
+}
+
+.perfil-pedido-direita {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.perfil-status {
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.perfil-pedido-total {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1f2a33;
+  white-space: nowrap;
+}
+
+/* MENU RODAPÉ */
+.perfil-menu {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.perfil-menu-item {
+  padding: 18px 20px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1f2a33;
+  transition: background 0.2s;
 }
 
-.logout { color: #ef4444; }
+.perfil-menu-item:hover {
+  background: #f9fafb;
+}
+
+.perfil-menu-item:last-child {
+  border-bottom: none;
+}
+
+.perfil-logout {
+  color: #ef4444;
+}

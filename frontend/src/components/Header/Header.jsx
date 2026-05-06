@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCarrinho } from '../../context/CarrinhoContext';
-import { logoutCliente } from '../../services/authCliente.js'
+import { logoutCliente } from '../../services/cliente.js'
 import { ShoppingCart, User, LogOut, Search, Menu } from 'lucide-react';
 import "./style.css";
 

@@ -1,5 +1,5 @@
 import { useEffect,useState } from "react";
-import { validarSessao } from "../../services/authCliente.js";
+import { validarSessao } from "../../services/cliente.js";
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function RotaProtegida(){

@@ -4,7 +4,7 @@ import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import logoJm from "../../../public/logo.jpeg";
 
-import { loginCliente } from '../../services/authCliente.js';
+import { loginCliente } from '../../services/cliente.js';
 import { cadastrarCliente } from '../../services/cadastraCliente.js';
 
 export default function Login() {

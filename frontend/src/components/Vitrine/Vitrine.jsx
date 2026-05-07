@@ -55,9 +55,6 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
               // AÇÃO: Navega para a URL própria do produto
               onClick={() => navigate(`/produto/${produto.id}`)}
             >
-              <div className="selo-status" style={{ background: disponivel ? "#25D366" : "#999" }}>
-                {disponivel ? "DISPONÍVEL" : "ESGOTADO"}
-              </div>
 
               <div className="img-container">
                 <img src={produto.img} alt={produto.nome} />
@@ -65,11 +62,18 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
 
               <div className="produto-info">
                 <p><b>{produto.nome}</b></p>
+
+                 <div className="selo-status" style={{ background: disponivel ? "#25D366" : "#999" }}>
+                {disponivel ? "DISPONÍVEL" : "ESGOTADO"}
+              </div>
                 {produto.precoVarejo > 0 && (
                   <p className="preco-varejo">
                     Varejo: R$ {Number(produto.precoVarejo).toFixed(2).replace('.', ',')}
                   </p>
                 )}
+
+                             
+
                 {produto.precoAtacado > 0 && (
                   <div className="info-atacado">
                     <p className="preco-atacado">

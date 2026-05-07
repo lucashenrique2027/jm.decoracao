@@ -5,10 +5,11 @@ import FormularioCadastro from '../modules/abaProdutos';
 import ListaEstoque from '../modules/abaEstoque';
 import PainelPedidos from '../modules/abaPedidos';
 import AbaClientes from '../modules/abaClientes';
+import Dashboard from '../modules/abaDashboard.jsx';
 
 export default function Admin() {
   const admin = JSON.parse(localStorage.getItem('adminJM') || 'null');
-  const [abaAtiva, setAbaAtiva] = useState("estoque");
+  const [abaAtiva, setAbaAtiva] = useState("dashboard");
 
   const renderConteudo = () => {
     switch (abaAtiva) {
@@ -16,7 +17,8 @@ export default function Admin() {
       case "estoque":      return <ListaEstoque />;
       case "pedidos":      return <PainelPedidos />;
       case "clientes":     return <AbaClientes />;
-      default:             return <ListaEstoque />;
+      case "dashboard":    return <Dashboard/>;
+      default:             return <Dashboard/>;
     }
   };
 
@@ -56,8 +58,17 @@ export default function Admin() {
           <hr className="bg-secondary" />
         </div>
         
-        <ul className="nav flex-column gap-2"> {/* Reduzi o gap para as abas ficarem mais próximas */}
+        <ul className="nav flex-column gap-2"> 
           
+          <li className="nav-item">
+            <button 
+              onClick={() => setAbaAtiva("dashboard")}
+              className={getEstiloAba("dashboard")}
+              style={{ borderRadius: '8px', padding: '10px 15px' }}>
+              <i className="bi bi-bar-chart-line me-3"></i> Dashboard
+            </button>
+          </li>
+
           <li className="nav-item">
             <button 
               onClick={() => setAbaAtiva("estoque")}

@@ -80,6 +80,129 @@ VALUES
   (5, 5, 'pendente', 65.00, NULL)
 ON CONFLICT (id) DO NOTHING;
 
+/* =========================================================
+   PEDIDOS ADICIONAIS
+========================================================= */
+
+INSERT INTO jm.pedidos (id, cliente_id, status, total, observacao_entrega)
+VALUES
+
+(6, 1, 'entregue',   225.00, 'Cliente elogiou os copos personalizados.'),
+(7, 2, 'confirmado', 150.00, 'Entrega agendada para sexta-feira.'),
+(8, 3, 'entregue',   390.00, 'Pedido corporativo.'),
+(9, 1, 'confirmado', 130.00, NULL),
+(10, 4, 'entregue',  520.00, 'Cliente pediu embalagem especial.'),
+(11, 5, 'confirmado', 95.00, NULL),
+(12, 6, 'entregue',  180.00, NULL),
+(13, 7, 'confirmado', 310.00, 'Cliente recorrente.'),
+(14, 8, 'entregue',  450.00, NULL),
+(15, 9, 'confirmado', 160.00, NULL),
+(16, 10, 'entregue', 270.00, 'Entregar após 18h.'),
+(17, 3, 'entregue',  600.00, 'Pedido grande para evento.'),
+(18, 2, 'confirmado', 145.00, NULL),
+(19, 4, 'entregue',  210.00, NULL),
+(20, 5, 'confirmado', 120.00, NULL),
+(21, 6, 'entregue',  340.00, 'Cliente gostou da linha premium.'),
+(22, 7, 'confirmado', 190.00, NULL),
+(23, 8, 'entregue',  410.00, NULL),
+(24, 9, 'confirmado', 155.00, NULL),
+(25, 10, 'entregue', 720.00, 'Maior compra do mês.')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO jm.pedido_itens
+(pedido_id, produto_id, quantidade, preco_unitario)
+VALUES
+
+/* PEDIDO 1 */
+(1, 11, 2, 75.00),
+(1, 9,  1, 45.00),
+
+/* PEDIDO 3 */
+(3, 14, 1, 350.00),
+(3, 12, 1, 65.00),
+
+/* PEDIDO 4 */
+(4, 13, 1, 135.00),
+
+/* PEDIDO 5 */
+(5, 12, 1, 65.00),
+
+/* PEDIDO 6 */
+(6, 11, 3, 75.00),
+
+/* PEDIDO 7 */
+(7, 8, 1, 150.00),
+
+/* PEDIDO 8 */
+(8, 11, 4, 75.00),
+(8, 12, 1, 65.00),
+(8, 9,  1, 45.00),
+
+/* PEDIDO 9 */
+(9, 5, 1, 130.00),
+
+/* PEDIDO 10 */
+(10, 14, 1, 350.00),
+(10, 1,  1, 89.90),
+
+/* PEDIDO 11 */
+(11, 12, 1, 65.00),
+(11, 9,  1, 45.00),
+
+/* PEDIDO 12 */
+(12, 11, 2, 75.00),
+
+/* PEDIDO 13 */
+(13, 3, 2, 95.00),
+(13, 11, 1, 75.00),
+
+/* PEDIDO 14 */
+(14, 15, 1, 280.00),
+(14, 5,  1, 130.00),
+
+/* PEDIDO 15 */
+(15, 1, 1, 89.90),
+(15, 9, 1, 45.00),
+
+/* PEDIDO 16 */
+(16, 13, 2, 135.00),
+
+/* PEDIDO 17 */
+(17, 14, 1, 350.00),
+(17, 15, 1, 280.00),
+
+/* PEDIDO 18 */
+(18, 11, 1, 75.00),
+(18, 12, 1, 65.00),
+
+/* PEDIDO 19 */
+(19, 2, 1, 120.00),
+(19, 9, 2, 45.00),
+
+/* PEDIDO 20 */
+(20, 12, 1, 65.00),
+(20, 9,  1, 45.00),
+
+/* PEDIDO 21 */
+(21, 14, 1, 350.00),
+
+/* PEDIDO 22 */
+(22, 11, 2, 75.00),
+
+/* PEDIDO 23 */
+(23, 3, 2, 95.00),
+(23, 11, 2, 75.00),
+
+/* PEDIDO 24 */
+(24, 5, 1, 130.00),
+
+/* PEDIDO 25 */
+(25, 14, 1, 350.00),
+(25, 15, 1, 280.00),
+(25, 11, 1, 75.00)
+
+ON CONFLICT DO NOTHING;
+
 -- ─── ZONAS INICIAIS (Atibaia) ───────────────────────────
 -- Lista exata será confirmada com o cliente
 INSERT INTO jm.zonas_entrega (cidade, cep_prefixo, ativo) VALUES

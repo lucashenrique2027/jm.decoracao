@@ -48,3 +48,6 @@ docker compose -f docker-compose.upload.yml run --rm storage-migrator
 - Minio imagens produtos    http://localhost:9001      
 
 docker exec -it loja-jm-decoracao-postgres-1 psql -U jm -d jm_decoracao
+
+
+carlos.silva@gmail.com - senha123

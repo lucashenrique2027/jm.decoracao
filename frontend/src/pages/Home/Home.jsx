@@ -1,19 +1,30 @@
+import { useState } from 'react';
 import Header from "../../components/Header/Header";
+import SubHeader from "../../components/subHeader/subHeader";
 import Footer from "../../components/Footer/Footer";
 import Vitrine from "../../components/Vitrine/Vitrine";
-import Carrinho from "../../components/carrinho/Carrinho";
 
 export default function Home() {
+ 
+  const [busca, setBusca] = useState(""); 
+  const [categoriaAtiva, setCategoriaAtiva] = useState("Todos");
+  const [categorias, setCategorias] = useState([]);
+
   return (
     <>
-      <Header />
-      {/* Sidebar do carrinho — fica disponível em toda a página */}
-      <Carrinho />
-      <main className="container my-5">
-        <div className="text-center mb-5">
-        </div>
-        <Vitrine />
-      </main>
+      <Header 
+        busca={busca}
+        setBusca={setBusca}
+        categorias={categorias}
+        categoriaAtiva={categoriaAtiva}
+        setCategoriaAtiva={setCategoriaAtiva}
+      />      
+      <SubHeader />
+      <Vitrine 
+        busca={busca}
+        categoriaAtiva={categoriaAtiva}
+        onCategoriasCarregadas={setCategorias} 
+      />
       <Footer />
     </>
   );

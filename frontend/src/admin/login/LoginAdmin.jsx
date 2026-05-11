@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
+import Header from "../../components/Header/Header.jsx";
+import Footer from "../../components/Footer/Footer.jsx";
 import logoJm from "../../../public/logo.jpeg";
+
+import { loginAdmin } from "../../services/authAdmin.js";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [verSenha, setVerSenha] = useState(false);
   const [errosLogin, setErrosLogin] = useState({});
-
+  
   const navigate = useNavigate();
 
   const validarLogin = () => {
@@ -20,7 +22,7 @@ export default function AdminLogin() {
     return erros;
   };
 
-  const handleEntrarAdmin = (e) => {
+  const handleEntrarAdmin = async (e) => {
     e.preventDefault();
     const erros = validarLogin();
     
@@ -31,11 +33,10 @@ export default function AdminLogin() {
 
     setErrosLogin({});
 
-    // Lógica de autenticação centralizada
-    if (email === "admin@jm" && senha === "123") {
-      alert("Acesso Administrativo Autorizado!");
-      navigate("/admin-dashboard");
-    } else {
+    try{
+      const dados = await loginAdmin( email, senha );
+      navigate("/admin");
+    } catch (error) {
       setErrosLogin({ auth: "Credenciais administrativas inválidas." });
     }
   };
@@ -48,12 +49,7 @@ export default function AdminLogin() {
       <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
         <div className="w-100 px-3" style={{ maxWidth: 460 }}>
           
-          {/* Badge de Alerta mantido para sinalizar o cargo alto/restrito */}
-          <div className="text-center mb-3">
-             <span className="badge rounded-pill bg-danger px-3 py-2 text-uppercase shadow-sm" style={{fontSize: '0.7rem'}}>
-                <i className="bi bi-shield-lock-fill me-2"></i>Acesso Restrito: Administrador
-             </span>
-          </div>
+          
 
           <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
             <div className="card-body p-4 p-md-5 text-center">
@@ -82,7 +78,7 @@ export default function AdminLogin() {
                     <input
                       type="email"
                       className={`form-control ${errosLogin.email ? "is-invalid" : ""}`}
-                      placeholder="admin@jm"
+                      placeholder="admin@gmail.com"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                     />
@@ -92,26 +88,34 @@ export default function AdminLogin() {
                   </div>
                 </div>
 
-                <div className="mb-4 text-start">
-                  <label className="form-label small fw-semibold">Senha de Acesso</label>
-                  <div className="input-group">
-                    {/* Alterado para o verde do tema btn-success */}
-                    <span className="input-group-text bg-success text-white"><i className="bi bi-key"></i></span>
-                    <input
-                      type={verSenha ? "text" : "password"}
-                      className={`form-control ${errosLogin.senha ? "is-invalid" : ""}`}
-                      placeholder="••••••"
-                      value={senha}
-                      onChange={e => setSenha(e.target.value)}
-                    />
-                    <button type="button" className="btn btn-outline-secondary" onClick={() => setVerSenha(p => !p)}>
-                      <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"}`}></i>
-                    </button>
-                    {errosLogin.senha && (
-                      <div className="invalid-feedback">{errosLogin.senha}</div>
-                    )}
-                  </div>
-                </div>
+                <div className="input-group">
+  <span className="input-group-text bg-success text-white">
+    <i className="bi bi-key"></i>
+  </span>
+  
+  <div className="position-relative flex-grow-1">
+    <input
+      type={verSenha ? "text" : "password"}
+      className={`form-control ${errosLogin.senha ? "is-invalid" : ""}`}
+      placeholder="senha123"
+      value={senha}
+      onChange={e => setSenha(e.target.value)}
+      style={{ paddingRight: '40px' }} // Abre espaço para o ícone não sobrepor o texto
+    />
+    
+    <span 
+      className="position-absolute top-50 end-0 translate-middle-y me-3" 
+      style={{ cursor: 'pointer', zIndex: 10 }}
+      onClick={() => setVerSenha(p => !p)}
+    >
+      <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"} text-secondary`}></i>
+    </span>
+  </div>
+
+  {errosLogin.senha && (
+    <div className="invalid-feedback d-block">{errosLogin.senha}</div>
+  )}
+</div>
 
                 {/* Botão agora segue o padrão btn-success do sistema */}
                 <button type="submit" className="btn btn-success w-100 fw-bold py-2 mb-3 shadow-sm">
@@ -124,6 +128,11 @@ export default function AdminLogin() {
                   <i className="bi bi-house-door me-1"></i>Voltar para o Início
                 </Link>
               </div>
+              <div className="mt-4">
+                    <Link to="/login" className="text-primary fw-semibold text-decoration-none">
+                      Login do Cliente
+                    </Link>
+                </div>
             </div>
           </div>
           

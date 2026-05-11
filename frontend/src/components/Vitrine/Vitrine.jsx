@@ -1,87 +1,105 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCarrinho } from "../../context/CarrinhoContext";
+import { useNavigate } from "react-router-dom";
 import "./style.css";
-import DetalhesProduto from "../ProdutoDetalhes/ProdutoDetalhes";
-import { buscarProdutos } from '../../services/products.js';
+import { buscarProdutos, listarCategorias } from '../../services/products.js';
 
-export default function Vitrine() {
+export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCategoriasCarregadas }) {
   const [todosProdutos, setTodosProdutos] = useState([]);
-  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
   const { adicionarItem } = useCarrinho();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
-
-    async function carregarProdutos() {
+    async function carregar() {
       try {
-        const dados = await buscarProdutos();
-        if (isMounted) setTodosProdutos(dados);
+        const [dados, cats] = await Promise.all([buscarProdutos(), listarCategorias()]);
+        if (isMounted) {
+          setTodosProdutos(dados);
+          if (onCategoriasCarregadas) onCategoriasCarregadas(["Todos", ...cats.map(c => c.nome)]);
+        }
       } catch {
-        if (isMounted) setErro("Não foi possível carregar os produtos.");
+        if (isMounted) setErro("Erro ao carregar produtos.");
       } finally {
         if (isMounted) setCarregando(false);
       }
     }
-
-    carregarProdutos();
+    carregar();
     return () => { isMounted = false; };
-  }, []);
+  }, [onCategoriasCarregadas]);
 
-  if (carregando) return <p>Carregando produtos...</p>;
-  if (erro) return <p>{erro}</p>;
+  const produtosFiltrados = useMemo(() => {
+    return todosProdutos.filter(p => {
+      const termo = busca.toLowerCase();
+      const bateTexto = p.nome?.toLowerCase().includes(termo) || p.descricao?.toLowerCase().includes(termo);
+      const bateCategoria = categoriaAtiva === "Todos" || p.categoriaNome === categoriaAtiva;
+      return bateTexto && bateCategoria;
+    });
+  }, [todosProdutos, busca, categoriaAtiva]);
+
+  if (carregando) return <p className="container my-5 text-center">Carregando produtos...</p>;
+  if (erro) return <p className="container my-5 text-center text-danger">{erro}</p>;
 
   return (
-    <div id="vitrine" className="galeria-profissional">
-      {todosProdutos.map((produtos, index) => (
-        <div className="card-item" key={produtos.id ?? index} onClick={() => setProdutoSelecionado(produtos)}>
-          <div className="selo-status" style={{ background: "#25D366" }}>
-            DISPONÍVEL
-          </div>
+    <main className="container my-5">
+      <div id="vitrine" className="galeria-professional">
+        {produtosFiltrados.map((produto) => {
+          const disponivel = produto.disponivel !== false && (produto.estoque > 0 || produto.estoque === undefined);
 
-          <div className="img-container">
-            <img src={produtos.img} alt={produtos.nome} />
-          </div>
-
-          <div className="produto-info">
-            <p className="mb-1"><b>{produtos.nome}</b></p>
-            <p className="text-success fw-bold mb-2">
-              R$ {Number(produtos.preco || 0).toFixed(2).replace('.', ',')}
-            </p>
-          </div>
-
-          <div className="compra-acoes">
-            <button
-              className="btn-add"
-              onClick={(e) => {
-                e.stopPropagation();
-                adicionarItem(produtos, 1);
-              }}
+          return (
+            <div 
+              className={`card-item ${!disponivel ? "card-esgotado" : ""}`} 
+              key={produto.id} 
+              // AÇÃO: Navega para a URL própria do produto
+              onClick={() => navigate(`/produto/${produto.id}`)}
             >
-              Adicionar ao Carrinho
-            </button>
 
-            <button
-              className="btn-info"
-              onClick={(e) => {
-                e.stopPropagation();
-                const msg = encodeURIComponent(`Olá, quero detalhes sobre: ${produtos.nome}`);
-                window.open(`https://wa.me/5511972011983?text=${msg}`);
-              }}
-            >
-              Pedir pelo WhatsApp
-            </button>
-          </div>
-        </div>
-      ))}
+              <div className="img-container">
+                <img src={produto.img} alt={produto.nome} />
+              </div>
 
-      {produtoSelecionado && (
-        <DetalhesProduto
-          produto={produtoSelecionado}
-          fechar={() => setProdutoSelecionado(null)}
-        />
-      )}
-    </div>
+              <div className="produto-info">
+                <p><b>{produto.nome}</b></p>
+
+                 <div className="selo-status" style={{ background: disponivel ? "#25D366" : "#999" }}>
+                {disponivel ? "DISPONÍVEL" : "ESGOTADO"}
+              </div>
+                {produto.precoVarejo > 0 && (
+                  <p className="preco-varejo">
+                    Varejo: R$ {Number(produto.precoVarejo).toFixed(2).replace('.', ',')}
+                  </p>
+                )}
+
+                             
+
+                {produto.precoAtacado > 0 && (
+                  <div className="info-atacado">
+                    <p className="preco-atacado">
+                      Atacado: R$ {Number(produto.precoAtacado).toFixed(2).replace('.', ',')}
+                    </p>
+                    <p className="minimo-atacado">(Mínimo: {produto.quantidadeMinimaAtacado} un.)</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="compra-acoes">
+                <button
+                  className="btn-add"
+                  disabled={!disponivel}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Evita navegar para a página de detalhes
+                    if (disponivel) adicionarItem(produto, 1);
+                  }}
+                >
+                  {disponivel ? "Adicionar ao Carrinho" : "Sem estoque"}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </main>
   );
 }

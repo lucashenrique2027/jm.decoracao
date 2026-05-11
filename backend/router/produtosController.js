@@ -1,26 +1,17 @@
 import { Router } from 'express';
-import { listarProdutos, buscarProdutoPorId, buscarProdutoPorCategoria, criarProduto, atualizarProduto, deletarProduto } from '../routes/produtos.js';
+import {
+  listarProdutos,
+  buscarProdutoPorId,
+  buscarProdutoPorCategoria,
+  listarCategorias
+} from '../routes/produtos.js';
 
-export default (function(){
-    const router = Router();
+const router = Router();
 
-    //  Listar Produtos
-    router.get('/listar',listarProdutos);
 
-    // buscar produto por id
-    router.get('/listar/:id',buscarProdutoPorId);
+router.get('/listar', listarProdutos);
+router.get('/listar/categorias', listarCategorias);
+router.get('/listar/categoria/:categoria', buscarProdutoPorCategoria);
+router.get('/listar/:id', buscarProdutoPorId);
 
-    // buscar produto por categoria
-    router.get('/listar/categoria/:categoria',buscarProdutoPorCategoria);
-
-    // criar produto
-    router.post('/criar', criarProduto);
-
-    // atualizar produto
-    router.put('/atualizar/:id', atualizarProduto);
-
-    // deletar produto
-    router.delete('/deletar/:id', deletarProduto);
-
-    return router;
-})()
+export default router;

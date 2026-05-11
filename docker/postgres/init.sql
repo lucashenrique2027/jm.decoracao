@@ -8,14 +8,9 @@ CREATE TYPE jm.user_role AS ENUM ('admin', 'colaborador', 'cliente');
 -- ─── STATUS DO PEDIDO ───────────────────────────────────
 CREATE TYPE jm.status_pedido AS ENUM ('pendente', 'confirmado', 'rejeitado', 'entregue');
 
--- ─── TESTES ───────────────────────────────────
-CREATE TABLE IF NOT EXISTS jm.teste(
-  id SERIAL PRIMARY KEY,
-  nome TEXT NOT NULL
-);
 
 -- ─── USUÁRIOS (admin e colaboradores) ───────────────────
-CREATE TABLE IF NOT EXISTS jm.usuarios (
+CREATE TABLE IF NOT EXISTS jm.admin (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
@@ -34,11 +29,17 @@ CREATE TABLE IF NOT EXISTS jm.clientes (
   senha_hash TEXT NOT NULL,
   telefone TEXT NOT NULL,
   cep TEXT NOT NULL,
-  endereco TEXT NOT NULL,
-  bairro TEXT NOT NULL,
-  cidade TEXT NOT NULL,
-  estado TEXT NOT NULL DEFAULT 'SP',
+  endereco TEXT ,
+  bairro TEXT ,
+  cidade TEXT ,
+  estado TEXT  DEFAULT 'SP',
   criado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS jm.categorias (
+    id SERIAL PRIMARY KEY,
+    nome TEXT NOT NULL UNIQUE,
+    criado_em TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ─── PRODUTOS ───────────────────────────────────────────
@@ -46,9 +47,11 @@ CREATE TABLE IF NOT EXISTS jm.produtos (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   descricao TEXT,
-  preco NUMERIC(10,2) NOT NULL DEFAULT 0,
+  preco_varejo NUMERIC(10,2) NOT NULL DEFAULT 0,
+  preco_atacado NUMERIC(10,2),
+  quantidade_minima_atacado INTEGER,
   imagem_upload TEXT,
-  categoria TEXT NOT NULL,
+  categoria_id INTEGER REFERENCES jm.categorias(id) ON DELETE RESTRICT,
   disponivel BOOLEAN DEFAULT true,
   estoque INTEGER DEFAULT 0,
   criado_em TIMESTAMPTZ DEFAULT NOW()
@@ -83,12 +86,10 @@ CREATE TABLE IF NOT EXISTS jm.pedido_itens (
   preco_unitario NUMERIC(10,2) NOT NULL
 );
 
--- ─── ZONAS INICIAIS (Atibaia) ───────────────────────────
--- Lista exata será confirmada com o cliente
-INSERT INTO jm.zonas_entrega (cidade, cep_prefixo, ativo) VALUES
-  ('Atibaia', '12940', true),
-  ('Atibaia', '12941', true),
-  ('Atibaia', '12942', true),
-  ('Atibaia', '12943', true),
-  ('Atibaia', '12944', true),
-  ('Atibaia', '12945', true);
+CREATE UNIQUE INDEX IF NOT EXISTS unico_carrinho_por_cliente
+ON jm.pedidos (cliente_id)
+WHERE status = 'pendente';
+
+ALTER TABLE jm.produtos 
+ADD CONSTRAINT estoque_positivo CHECK (estoque >= 0);
+

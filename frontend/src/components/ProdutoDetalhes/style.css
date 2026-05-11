@@ -1,93 +1,272 @@
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.modal-content {
-  width: 90%;
-  max-width: 1100px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  position: relative;
-  animation: fadeIn 0.3s ease;
-}
-
-.grid-detalhes {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr;
-  gap: 20px;
-}
-
-/* ESQUERDA */
-.col-img img {
-  width: 100%;
-  border-radius: 10px;
-}
-
-/* CENTRO */
-.col-info {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.top-info {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.categoria {
-  font-size: 12px;
-  color: #777;
-}
-
-.vendidos {
-  font-size: 12px;
-  color: #25D366;
-}
-
-.descricao {
-  margin-top: 10px;
-  height: 200px;
-  resize: none;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 10px;
-}
-
-/* DIREITA */
-.col-compra {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.preco {
-  font-size: 22px;
-  font-weight: bold;
-  color: #25D366;
-}
-
-.estoque {
-  font-size: 13px;
-}
-
-.btn-fechar {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+.pd-voltar-btn {
   border: none;
-  background: none;
-  font-size: 20px;
-  cursor: pointer;
+  background: transparent;
+  color: #3483fa;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.pd-voltar-btn:hover {
+  opacity: 0.7;
+}
+
+/* IMAGEM */
+
+.pd-img-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+}
+
+.pd-img-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.pd-img-wrapper img {
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.pd-img-wrapper:hover img {
+  transform: scale(1.03);
+}
+
+.pd-img-badge {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(37,211,102,0.25);
+  color: #16a34a;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+
+/* TAGS */
+
+.pd-tags {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.pd-tag-categoria {
+  background: #eef9f3;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.pd-tag-vendidos {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+/* TITULO */
+
+.pd-titulo {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  margin-bottom: 28px;
+}
+
+/* PREÇOS */
+
+.pd-preco-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.pd-preco-label {
+  display: block;
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.pd-preco-varejo {
+  margin: 0;
+  font-size: 2rem;
+  color: #111827;
+  font-weight: 800;
+}
+
+.pd-atacado-box {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pd-preco-atacado {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #16a34a;
+  font-weight: 800;
+}
+
+/* ESTOQUE */
+
+.pd-estoque-badge {
+  background: #dcfce7;
+  color: #166534;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.pd-estoque-badge.esgotado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* DESCRIÇÃO */
+
+.pd-descricao-box {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.pd-descricao-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #9ca3af;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.pd-descricao-texto {
+  color: #4b5563;
+  line-height: 1.8;
+  font-size: 15px;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* DESTAQUES */
+
+.pd-destaques {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pd-destaque-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.pd-destaque-icone {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* BOTÕES */
+
+.pd-btn-comprar {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  background: #3483fa;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.pd-btn-comprar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #2563eb;
+}
+
+.pd-btn-comprar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pd-btn-whatsapp {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  background: #25D366;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.pd-btn-whatsapp:hover {
+  transform: translateY(-1px);
+  background: #1db954;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 768px) {
+
+  .pd-titulo {
+    font-size: 1.6rem;
+  }
+
+  .pd-preco-varejo {
+    font-size: 1.7rem;
+  }
+
+  .pd-preco-atacado {
+    font-size: 1.4rem;
+  }
+
+  .pd-img-card {
+    padding: 16px;
+  }
 }

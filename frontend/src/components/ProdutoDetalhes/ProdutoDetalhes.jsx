@@ -1,137 +1,236 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useCarrinho } from "../../context/CarrinhoContext";
+import { buscarProdutos } from "../../services/products.js";
 import "./style.css";
 
-export default function ProdutoDetalhes({ produto, fechar }) {
+export default function ProdutoDetalhes() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { adicionarItem } = useCarrinho();
-  const [qtd, setQtd] = useState(1);
-  const [cep, setCep] = useState("");
-  const [frete, setFrete] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [qntVendido, setQtdVendido] = useState(0);
-  const [estoque, setEstoque] = useState(0);
-  const [estaLogado, setEstaLogado] = useState(false);
 
-  
-  // garante que qtd nunca passe do estoque
+  const [produto, setProduto] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+
   useEffect(() => {
-    if (produto) {
-      const estoque = produto.estoque || 0;
-      setEstoque(estoque);
+    let isMounted = true;
 
-      setQtd(prev => Math.min(prev, estoque || 1));
+    async function carregarDados() {
+      try {
+        const dados = await buscarProdutos();
+        const encontrado = dados.find(
+          (p) => String(p.id) === String(id)
+        );
 
-      //reseta valores ao fechar e abrir um produto
-      setQtd(1);
-      setCep("");
-      setFrete("");
-    } else {
-      setQtd(1);
-      setCep("");
-      setFrete("");
+        if (isMounted) {
+          setProduto(encontrado);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar produto:", err);
+      } finally {
+        if (isMounted) {
+          setCarregando(false);
+        }
+      }
     }
-  }, [produto]);
 
+    carregarDados();
 
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
-  if (!produto) return null;
+  if (carregando) {
+    return (
+      <div className="container my-5 py-5 text-center text-muted fs-5">
+        Carregando dados do produto...
+      </div>
+    );
+  }
+
+  if (!produto) {
+    return (
+      <div className="container my-5 py-5 text-center text-danger fs-5">
+        Produto não localizado.
+      </div>
+    );
+  }
+
+  const disponivel =
+    produto.disponivel !== false &&
+    (produto.estoque > 0 || produto.estoque === undefined);
 
   return (
-    
-    <div className="modal-overlay" onClick={fechar}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="container py-5">
 
-        <button className="btn-fechar" onClick={fechar}>✕</button>
+      {/* VOLTAR */}
+      <div className="mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="pd-voltar-btn"
+        >
+          ← Voltar para Vitrine
+        </button>
+      </div>
 
-        <div className="grid-detalhes">
-        
-          {/* ÁREA DA IMAGEM */}
-          <div className="col-img">
-            <img  src={produto.img} alt={produto.nome} />
-          </div>
+      <div className="row g-5 align-items-start">
 
-          {/* ÁREA DE INFORMAÇÕES */}
-          <div className="col-info">
-            <div className="top-info">
-              <span className="categoria">
-                <b>Categoria:</b> {categoria || "Decoração"}
-              </span>
-              <span className="vendidos">
-                +{qntVendido || 120} vendidos
-              </span>
-              <h2>{produto.nome}</h2>
-            </div>
+        {/* IMAGEM */}
+        <section className="col-12 col-lg-7">
+          <div className="pd-img-card">
+            <div className="pd-img-wrapper">
+              <img
+                src={produto.img}
+                alt={produto.nome}
+                className="img-fluid"
+              />
 
-            <textarea
-              className="descricao"
-              readOnly
-              value={produto.descricao || "Descrição detalhada do produto..."}
-            />
-          </div>
-
-          {/* ÁREA DE COMPRA */}
-          <div className="col-compra">
-
-            <p className="preco">
-              R$ {Number(produto.preco).toFixed(2).replace(".", ",")}
-            </p>
-
-            <p className="estoque">{estoque} unidades disponíveis</p>
-
-            {/* QUANTIDADE */}
-            <div className="qtd-area">
-              <p>Quantidade:</p>
-              <div className="controle-qtd">
-                <button onClick={() => setQtd(Math.max(1, qtd - 1))}>-</button>
-
-                <input type="number" value={qtd} readOnly />
-
-                <button onClick={() => setQtd(Math.min(estoque, qtd + 1))}>
-                  +
-                </button>
+              <div className="pd-img-badge">
+                Artesanal
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* BOTÕES */}
+        {/* INFO */}
+        <section className="col-12 col-lg-5">
+
+          <div className="pd-tags">
+            <span className="pd-tag-categoria">
+              {produto.categoriaNome}
+            </span>
+
+            <span className="pd-tag-vendidos">
+              ✓ Produto exclusivo
+            </span>
+          </div>
+
+          <h1 className="pd-titulo">
+            {produto.nome}
+          </h1>
+
+          {/* PREÇOS */}
+          <div className="pd-preco-card">
+
+            <div>
+              <span className="pd-preco-label">
+                Varejo
+              </span>
+
+              <h2 className="pd-preco-varejo">
+                R${" "}
+                {Number(produto.precoVarejo)
+                  .toFixed(2)
+                  .replace(".", ",")}
+              </h2>
+            </div>
+
+            {produto.precoAtacado > 0 && (
+              <div className="pd-atacado-box">
+                <span className="pd-preco-label">
+                  Atacado (mín.{" "}
+                  {produto.quantidadeMinimaAtacado} un.)
+                </span>
+
+                <h3 className="pd-preco-atacado">
+                  R${" "}
+                  {Number(produto.precoAtacado)
+                    .toFixed(2)
+                    .replace(".", ",")}
+                </h3>
+              </div>
+            )}
+          </div>
+
+          {/* ESTOQUE */}
+          <div className="mb-4">
+            {produto.estoque > 0 ? (
+              <span className="pd-estoque-badge">
+                Estoque disponível:
+                <strong> {produto.estoque}</strong> unidades
+              </span>
+            ) : (
+              <span className="pd-estoque-badge esgotado">
+                Sem estoque no momento
+              </span>
+            )}
+          </div>
+
+          {/* DESCRIÇÃO */}
+          <div className="pd-descricao-box">
+            <p className="pd-descricao-label">
+              Sobre o produto
+            </p>
+
+            <p className="pd-descricao-texto">
+              {produto.descricao}
+            </p>
+          </div>
+
+          {/* DESTAQUES */}
+          <div className="pd-destaques">
+
+            <div className="pd-destaque-item">
+              <span className="pd-destaque-icone">
+                🎨
+              </span>
+
+              <span>
+                Feito à mão
+              </span>
+            </div>
+
+            <div className="pd-destaque-item">
+              <span className="pd-destaque-icone">
+                📦
+              </span>
+
+              <span>
+                Entrega rápida
+              </span>
+            </div>
+
+            <div className="pd-destaque-item">
+              <span className="pd-destaque-icone">
+                ✨
+              </span>
+
+              <span>
+                Peça única
+              </span>
+            </div>
+
+          </div>
+
+          {/* BOTÕES */}
+          <div className="d-grid gap-3 mt-4">
+
             <button
-              className="btn-add"
+              className="pd-btn-comprar"
+              disabled={!disponivel}
               onClick={() => {
-                adicionarItem(produto, qtd); 
-                fechar();
+                adicionarItem(produto, 1);
+                navigate("/carrinho");
               }}
-              disabled={estoque === 0 || qtd > estoque}
             >
-              Adicionar ao Carrinho
-            </button>
-
-            <button className="btn-comprar" onClick={estaLogado === true ? () => alert("se estiver logado direciona para tela de compra!") : () => (window.location.href = "/login")}>
               Comprar Agora
             </button>
 
-            {/* FRETE */}
-            <div className="frete-area">
-              <p><b>Calcular Frete</b></p>
-
-              <input
-                type="text"
-                placeholder="Digite seu CEP"
-                value={cep}
-                onChange={(e) => setCep(e.target.value)}
-              />
-
-              <button
-                onClick={() => setFrete("R$ 25,00 - Sedex (simulação)")}
-              >
-                Calcular
-              </button>
-
-              {frete && (
-                <p className="frete-resultado">{frete}</p>
-              )}
-            </div>
+            <button
+              className="pd-btn-whatsapp"
+              onClick={() =>
+                window.open(
+                  `https://wa.me/5511972011983?text=Interesse:${produto.nome}`
+                )
+              }
+            >
+              Dúvidas via WhatsApp
+            </button>
 
           </div>
-        </div>
+
+        </section>
       </div>
     </div>
   );

@@ -32,8 +32,22 @@ Docker Compose moderno:
 ```sh
 docker compose up --build
 ```
+
+## Enviar imagens para a aplicação:
+### Se for a primeira vez iniciando o projeto rode isto para popular o estoque de imagens do projeto:
+
+```sh
+docker compose -f docker-compose.upload.yml run --rm storage-migrator
+```
+
 ## Acessar aplicação
 - frontend express          http://localhost:8080
+- Swagger Docs              http://localhost:8080/api/info
 - backend nginx direto      http://localhost:3000/api (usar para testes)
 - backend nginx via proxy   http://localhost:8080/api (usar para chamada de api real)
 - Minio imagens produtos    http://localhost:9001      
+
+docker exec -it loja-jm-decoracao-postgres-1 psql -U jm -d jm_decoracao
+
+
+carlos.silva@gmail.com - senha123

@@ -12,7 +12,8 @@ import {
 import {
   obterCarrinhoAtivo,
   adicionarProdutosAoCarrinho,
-  confirmarPagamentoCarrinho
+  confirmarPagamentoCarrinho,
+  sincronizarCarrinho
 } from '../routes/carrinho.js';
 import { verificarToken } from '../middlewares/validarTokenClient.js';
 
@@ -30,7 +31,9 @@ router.post('/adicionar', verificarToken, adicionarProdutosAoCarrinho);
 
 router.get('/meu-carrinho', verificarToken, obterCarrinhoAtivo);
 
-router.post('/confirmar-pagamento', confirmarPagamentoCarrinho);
+router.post('/confirmar-pagamento',verificarToken,confirmarPagamentoCarrinho);
+
+router.put('/sincronizar-carrinho',verificarToken,sincronizarCarrinho);
 
 router.get('/', listarClientes);
 

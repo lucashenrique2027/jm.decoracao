@@ -86,9 +86,35 @@ CREATE TABLE IF NOT EXISTS jm.pedido_itens (
   preco_unitario NUMERIC(10,2) NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS unico_carrinho_por_cliente
-ON jm.pedidos (cliente_id)
-WHERE status = 'pendente';
+-- ─── CARRINHOS ──────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS jm.carrinhos (
+  id SERIAL PRIMARY KEY,
+
+  cliente_id INTEGER NOT NULL UNIQUE
+    REFERENCES jm.clientes(id)
+    ON DELETE CASCADE,
+
+  criado_em TIMESTAMPTZ DEFAULT NOW(),
+
+  atualizado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS jm.carrinho_itens (
+  id SERIAL PRIMARY KEY,
+
+  carrinho_id INTEGER NOT NULL
+    REFERENCES jm.carrinhos(id)
+    ON DELETE CASCADE,
+
+  produto_id INTEGER NOT NULL
+    REFERENCES jm.produtos(id),
+
+  quantidade INTEGER NOT NULL DEFAULT 1,
+
+  preco_unitario NUMERIC(10,2) NOT NULL,
+
+  criado_em TIMESTAMPTZ DEFAULT NOW()
+);
 
 ALTER TABLE jm.produtos 
 ADD CONSTRAINT estoque_positivo CHECK (estoque >= 0);

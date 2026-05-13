@@ -9,6 +9,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 import pagamentoRouter from  './router/paymentsController.js';
 import routesBusiness from './router/businessController.js';
+import RelatoriosRouter from './router/relatoriosController.js';
 
 import cookieParser from 'cookie-parser';
 
@@ -42,6 +43,8 @@ app.use('/api/clientes', routesClientes);
 app.use('/api/pedidos', routesPedidos);
 
 app.use('/api/pagamento',pagamentoRouter);
+
+app.use('/api/relatorios',RelatoriosRouter);
 
 app.use('/api/metrics/business',routesBusiness);
 

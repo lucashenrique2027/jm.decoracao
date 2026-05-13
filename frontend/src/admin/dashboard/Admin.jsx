@@ -6,6 +6,7 @@ import ListaEstoque from '../modules/abaEstoque';
 import PainelPedidos from '../modules/abaPedidos';
 import AbaClientes from '../modules/abaClientes';
 import Dashboard from '../modules/abaDashboard.jsx';
+import AbaRelatorio from '../modules/abaRelatorio.jsx';
 
 export default function Admin() {
   const admin = JSON.parse(localStorage.getItem('adminJM') || 'null');
@@ -17,6 +18,7 @@ export default function Admin() {
       case "estoque":      return <ListaEstoque />;
       case "pedidos":      return <PainelPedidos />;
       case "clientes":     return <AbaClientes />;
+      case "relatorios":   return <AbaRelatorio/>;
       case "dashboard":    return <Dashboard/>;
       default:             return <Dashboard/>;
     }
@@ -104,6 +106,16 @@ export default function Admin() {
               <i className="bi bi-plus-circle-fill me-3"></i> Novo Produto
             </button>
           </li>
+
+          <li className="nav-item">
+            <button 
+              onClick={() => setAbaAtiva("relatorios")}
+              className={getEstiloAba("relatorios")}
+              style={{ borderRadius: '8px', padding: '10px 15px' }}>
+              <i className="bi bi-plus-circle-fill me-3"></i> Relatórios
+            </button>
+          </li>
+
         </ul>
 
         <div className="mt-auto pt-5"> {/* 'mt-auto' ajuda a empurrar o botão para o rodapé se o container for flex */}

@@ -48,12 +48,6 @@ export const adicionarProdutosAoCarrinho = async (req, res) => {
       });
     }
 
-    if (produto.estoque < qtdSolicitada) {
-      return res.status(400).json({
-        erro: 'Estoque insuficiente',
-      });
-    }
-
     /* =====================================================
        LOCALIZAR OU CRIAR CARRINHO
     ===================================================== */

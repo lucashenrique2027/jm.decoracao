@@ -10,6 +10,7 @@ const precoUnitario = (item) =>
     : Number(item.precoVarejo);
 
 export default function Carrinho() {
+  
   const navigate = useNavigate();
   const {
     itens,

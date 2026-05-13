@@ -4,7 +4,7 @@ import {
   buscarPedidoPorId,
   listarPedidosPorCliente,
   atualizarStatusPedido
-} from '../routes/pedidos.js';
+} from '../controller/pedidosController.js';
 import { verificarToken as verificarTokenAdmin } from '../middlewares/validarTokenAdmin.js';
 import { verificarToken as verificarTokenCliente } from '../middlewares/validarTokenClient.js';
 

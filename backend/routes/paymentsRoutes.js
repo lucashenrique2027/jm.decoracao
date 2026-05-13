@@ -1,5 +1,5 @@
 import Router from 'router';
-import { mercadoPago, pagamentoSimulado } from '../routes/pagamento.js';
+import { mercadoPago, pagamentoSimulado } from '../controller/pagamentoController.js';
 import { verificarToken } from '../middlewares/validarTokenClient.js';
 
 const router = Router();

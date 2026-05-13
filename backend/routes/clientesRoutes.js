@@ -8,13 +8,13 @@ import {
   buscarClientePorId,
   atualizarCliente,
   deletarCliente
-} from '../routes/clientes.js';
+} from '../controller/clientesController.js';
 import {
   obterCarrinhoAtivo,
   adicionarProdutosAoCarrinho,
   confirmarPagamentoCarrinho,
   sincronizarCarrinho
-} from '../routes/carrinho.js';
+} from '../controller/carrinhoController.js';
 import { verificarToken } from '../middlewares/validarTokenClient.js';
 
 const router = express.Router();

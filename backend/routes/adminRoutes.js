@@ -4,7 +4,7 @@ import {
   dadosAdmin,
   logOutAdmin,
   listarClientes,
-} from '../routes/admin.js';
+} from '../controller/adminController.js';
 import {
   criarCategoria,
   listarCategorias, 
@@ -16,7 +16,7 @@ import {
   atualizarProduto,
   deletarProduto,
   cadastrarProduto,
-} from '../routes/produtos.js';
+} from '../controller/produtosController.js';
 import { upload  }  from  '../middlewares/multer.js'
 import { verificarToken } from '../middlewares/validarTokenAdmin.js';
 

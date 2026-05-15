@@ -1,3 +1,4 @@
+name: loja-jm-decoracao-prod
 services:
   app:
     build:
@@ -25,9 +26,8 @@ services:
     build:
       context: .
       dockerfile: docker/vite/Dockerfile
-    volumes:
-      - /app/node_modules
-      - ./frontend:/app/frontend
+    expose:
+      - "80"
     networks:
       - app
     restart: unless-stopped

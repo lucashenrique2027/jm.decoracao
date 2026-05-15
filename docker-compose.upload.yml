@@ -1,4 +1,7 @@
+
+name: loja-jm-decoracao-prod
 services:
+
   storage-migrator:
     build:
       context: .
@@ -16,4 +19,4 @@ services:
 networks:
   storage:
     external: true  
-    name: loja-jm-decoracao_storage
+    name: loja-jm-decoracao-prod_storage

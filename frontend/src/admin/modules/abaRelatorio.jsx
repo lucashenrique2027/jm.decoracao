@@ -20,9 +20,8 @@ export default function AbaRelatorios() {
   /* =========================================================
      BUSCAR
   ========================================================= */
-
   const handleBuscar = async () => {
-    if (!inicio || !fim) return alert('Selecione o período completo.');
+    if (!inicio || !fim) return alert('Por favor, selecione a data de início e a data de fim do período.');
     setCarregando(true);
     try {
       const [fat, prod, cat] = await Promise.all([
@@ -34,7 +33,7 @@ export default function AbaRelatorios() {
       setProdutos(prod);
       setCategorias(cat);
     } catch (error) {
-      alert('Erro ao buscar relatórios. Tente novamente.');
+      alert('Erro ao buscar relatórios. Por favor, tente novamente.');
       console.error(error);
     } finally {
       setCarregando(false);
@@ -44,9 +43,8 @@ export default function AbaRelatorios() {
   /* =========================================================
      BAIXAR PDF
   ========================================================= */
-
   const handlePdf = async (tipo) => {
-    if (!inicio || !fim) return alert('Selecione o período antes de exportar.');
+    if (!inicio || !fim) return alert('Selecione o período antes de exportar o arquivo.');
     try {
       const fns = {
         faturamento: baixarPdfFaturamento,
@@ -57,119 +55,161 @@ export default function AbaRelatorios() {
       const url  = URL.createObjectURL(blob);
       window.open(url);
     } catch (error) {
-      alert('Erro ao gerar PDF.');
+      alert('Erro ao gerar o documento PDF.');
       console.error(error);
     }
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
-
   return (
-    <div className="card border-0 shadow-sm p-4">
-
-      {/* CABEÇALHO */}
-      <div className="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
-        <h2 className="h4 fw-bold mb-0">
-          <i className="bi bi-file-earmark-text me-2 text-primary"></i>
-          Relatórios
+    <div className="container-fluid px-0">
+      
+      {/* CABEÇALHO DO MÓDULO */}
+      <div className="mb-4 bg-white p-4 rounded-3 shadow-sm border-0">
+        <h2 className="fw-bold text-dark mb-2 fs-3">
+          <i className="bi bi-file-earmark-bar-graph-fill text-primary me-2"></i>
+          Painel de Relatórios e Exportação
         </h2>
+        <p className="text-secondary mb-0 fs-5">
+          Escolha o período desejado abaixo para consultar os dados de vendas e gerar arquivos para impressão.
+        </p>
+      </div>
 
-        {/* FILTRO DE PERÍODO */}
-        <div className="d-flex gap-2 align-items-center">
-          <input
-            type="date"
-            className="form-control form-control-sm"
-            value={inicio}
-            onChange={e => setInicio(e.target.value)}
-          />
-          <span className="text-muted small">até</span>
-          <input
-            type="date"
-            className="form-control form-control-sm"
-            value={fim}
-            onChange={e => setFim(e.target.value)}
-          />
-          <button
-            className="btn btn-sm btn-jm-primary"
-            onClick={handleBuscar}
-            disabled={carregando}
-          >
-            {carregando
-              ? <span className="spinner-border spinner-border-sm" />
-              : <><i className="bi bi-search me-1"></i>Buscar</>
-            }
-          </button>
+      {/* SEÇÃO DE FILTRO - AMPLIADA PARA FÁCIL LEITURA */}
+      <div className="card border-0 shadow-sm mb-4" style={{ borderRadius: '16px' }}>
+        <div className="card-body p-4 bg-light rounded-3">
+          <span className="text-dark fw-bold fs-5 d-block mb-3">
+            <i className="bi bi-calendar3 text-primary me-2"></i> Selecione o Período das Vendas
+          </span>
+          
+          <div className="row g-3 align-items-end">
+            <div className="col-md-4">
+              <label className="form-label fw-bold text-dark fs-5">Data Inicial</label>
+              <input
+                type="date"
+                className="form-control form-control-lg fs-5 text-dark"
+                style={{ border: '2px solid #cbd5e1', borderRadius: '10px', padding: '0.75rem' }}
+                value={inicio}
+                onChange={e => setInicio(e.target.value)}
+              />
+            </div>
+            
+            <div className="col-md-4">
+              <label className="form-label fw-bold text-dark fs-5">Data Final</label>
+              <input
+                type="date"
+                className="form-control form-control-lg fs-5 text-dark"
+                style={{ border: '2px solid #cbd5e1', borderRadius: '10px', padding: '0.75rem' }}
+                value={fim}
+                onChange={e => setFim(e.target.value)}
+              />
+            </div>
+            
+            <div className="col-md-4">
+              <button
+                className="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm"
+                style={{ borderRadius: '10px', fontSize: '1.2rem' }}
+                onClick={handleBuscar}
+                disabled={carregando}
+              >
+                {carregando ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Consultando...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-search me-2 fs-5"></i>Buscar Dados
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ESTADO INICIAL */}
+      {/* ESTADO INICIAL SEM DADOS */}
       {!faturamento && !carregando && (
-        <p className="text-center text-muted my-5">
-          Selecione um período e clique em Buscar para gerar os relatórios.
-        </p>
+        <div className="card border-0 shadow-sm p-5 text-center" style={{ borderRadius: '16px' }}>
+          <div className="py-4">
+            <i className="bi bi-arrow-up-circle text-muted mb-3" style={{ fontSize: '3.5rem' }}></i>
+            <p className="text-secondary fw-bold fs-4 mb-0">
+              Nenhum período selecionado.
+            </p>
+            <p className="text-muted fs-5 mt-1">
+              Escolha as datas acima e clique no botão azul <strong>"Buscar Dados"</strong> para exibir os resultados.
+            </p>
+          </div>
+        </div>
       )}
 
-      {/* RESULTADOS */}
+      {/* PAINEL DE RESULTADOS CARREGADOS */}
       {faturamento && (
-        <>
+        <div className="d-flex flex-column gap-5">
 
-          {/* ── FATURAMENTO ── */}
-          <div className="mb-5">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="fw-bold mb-0">
+          {/* ── SEÇÃO: FATURAMENTO ── */}
+          <div className="card border-0 shadow-sm p-4 p-md-5" style={{ borderRadius: '16px' }}>
+            
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom pb-3 mb-4 gap-3">
+              <h3 className="fw-bold text-dark mb-0 fs-3">
                 <i className="bi bi-cash-stack me-2 text-success"></i>
-                Faturamento
-              </h5>
+                1. Relatório de Faturamento Geral
+              </h3>
               <button
-                className="btn btn-sm btn-outline-dark"
+                className="btn btn-lg btn-outline-danger fw-bold px-4 d-inline-flex align-items-center"
+                style={{ border強化: '2px', borderRadius: '10px', fontSize: '1.1rem' }}
                 onClick={() => handlePdf('faturamento')}
               >
-                <i className="bi bi-file-earmark-pdf me-1"></i>
-                Exportar PDF
+                <i className="bi bi-file-earmark-pdf-fill me-2 fs-5"></i>
+                Imprimir PDF de Faturamento
               </button>
             </div>
 
-            {/* Resumo */}
-            <div className="d-flex gap-3 mb-3">
-              <div className="card border-0 bg-light px-4 py-3 text-center">
-                <small className="text-muted">Total do período</small>
-                <strong className="text-success fs-5">
-                  R$ {Number(faturamento.totalPeriodo).toFixed(2).replace('.', ',')}
-                </strong>
+            {/* CARDS DE RESUMO EM TAMANHO GIGANTE */}
+            <div className="row g-4 mb-4">
+              <div className="col-md-6">
+                <div className="card border-0 bg-success bg-opacity-10 p-4 rounded-3 border-start border-success" style={{ borderWidth: '5px !important' }}>
+                  <span className="text-secondary fw-bold fs-5 d-block text-uppercase mb-1">Valor Total Faturado</span>
+                  <strong className="text-success fs-1 d-block">
+                    R$ {Number(faturamento.totalPeriodo).toFixed(2).replace('.', ',')}
+                  </strong>
+                </div>
               </div>
-              <div className="card border-0 bg-light px-4 py-3 text-center">
-                <small className="text-muted">Pedidos</small>
-                <strong className="fs-5">{faturamento.quantidadePedidos}</strong>
+              <div className="col-md-6">
+                <div className="card border-0 bg-dark bg-opacity-10 p-4 rounded-3 border-start border-dark" style={{ borderWidth: '5px !important' }}>
+                  <span className="text-secondary fw-bold fs-5 d-block text-uppercase mb-1">Quantidade de Pedidos</span>
+                  <strong className="text-dark fs-1 d-block">
+                    {faturamento.quantidadePedidos} fechados
+                  </strong>
+                </div>
               </div>
             </div>
 
+            {/* TABELA DE PEDIDOS */}
             <div className="table-responsive">
-              <table className="table table-hover align-middle">
-                <thead className="table-dark">
+              <table className="table table-striped table-hover align-middle mb-0">
+                <thead className="table-dark fs-5">
                   <tr>
-                    <th># ID</th>
-                    <th>Cliente</th>
-                    <th>Status</th>
-                    <th>Total</th>
-                    <th>Data</th>
+                    <th className="py-3 px-3">Código</th>
+                    <th className="py-3">Nome do Cliente</th>
+                    <th className="py-3 text-center">Situação</th>
+                    <th className="py-3 text-end">Valor do Pedido</th>
+                    <th className="py-3 text-center">Data da Venda</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="fs-5 text-dark">
                   {faturamento.pedidos.map(p => (
                     <tr key={p.pedidoId}>
-                      <td className="text-muted small">#{p.pedidoId}</td>
-                      <td>{p.cliente}</td>
-                      <td>
-                        <span className="badge bg-success">
+                      <td className="py-3 px-3 fw-bold text-secondary">#{p.pedidoId}</td>
+                      <td className="py-3 fw-bold">{p.cliente}</td>
+                      <td className="py-3 text-center">
+                        <span className="badge bg-success px-3 py-2 fs-6 fw-bold">
                           {p.status.toUpperCase()}
                         </span>
                       </td>
-                      <td className="fw-bold text-success">
+                      <td className="py-3 text-end fw-bold text-success fs-5">
                         R$ {Number(p.total).toFixed(2).replace('.', ',')}
                       </td>
-                      <td className="text-muted small">
+                      <td className="py-3 text-center text-secondary fw-medium">
                         {new Date(p.criadoEm).toLocaleDateString('pt-BR')}
                       </td>
                     </tr>
@@ -179,37 +219,39 @@ export default function AbaRelatorios() {
             </div>
           </div>
 
-          {/* ── PRODUTOS ── */}
-          <div className="mb-5">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="fw-bold mb-0">
-                <i className="bi bi-box-seam me-2 text-warning"></i>
-                Produtos Vendidos
-              </h5>
+          {/* ── SEÇÃO: PRODUTOS VENDIDOS ── */}
+          <div className="card border-0 shadow-sm p-4 p-md-5" style={{ borderRadius: '16px' }}>
+            
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom pb-3 mb-4 gap-3">
+              <h3 className="fw-bold text-dark mb-0 fs-3">
+                <i className="bi bi-box-seam-fill me-2 text-warning"></i>
+                2. Ranking de Produtos Mais Vendidos
+              </h3>
               <button
-                className="btn btn-sm btn-outline-dark"
+                className="btn btn-lg btn-outline-danger fw-bold px-4 d-inline-flex align-items-center"
+                style={{ border強化: '2px', borderRadius: '10px', fontSize: '1.1rem' }}
                 onClick={() => handlePdf('produtos')}
               >
-                <i className="bi bi-file-earmark-pdf me-1"></i>
-                Exportar PDF
+                <i className="bi bi-file-earmark-pdf-fill me-2 fs-5"></i>
+                Imprimir PDF de Produtos
               </button>
             </div>
 
             <div className="table-responsive">
-              <table className="table table-hover align-middle">
-                <thead className="table-dark">
+              <table className="table table-striped table-hover align-middle mb-0">
+                <thead className="table-dark fs-5">
                   <tr>
-                    <th>Produto</th>
-                    <th>Qtd Vendida</th>
-                    <th>Faturamento</th>
+                    <th className="py-3 px-3">Nome da Peça / Vaso</th>
+                    <th className="py-3 text-center">Quantidade Total Vendida</th>
+                    <th className="py-3 text-end">Total Arrecadado</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="fs-5 text-dark">
                   {produtos.produtos.map(p => (
                     <tr key={p.produtoId}>
-                      <td>{p.nome}</td>
-                      <td>{p.quantidadeVendida}</td>
-                      <td className="fw-bold text-success">
+                      <td className="py-3 px-3 fw-bold">{p.nome}</td>
+                      <td className="py-3 text-center fw-bold text-secondary fs-4">{p.quantidadeVendida}</td>
+                      <td className="py-3 text-end fw-bold text-success">
                         R$ {Number(p.faturamento).toFixed(2).replace('.', ',')}
                       </td>
                     </tr>
@@ -219,37 +261,39 @@ export default function AbaRelatorios() {
             </div>
           </div>
 
-          {/* ── CATEGORIAS ── */}
-          <div className="mb-2">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="fw-bold mb-0">
-                <i className="bi bi-tag me-2 text-info"></i>
-                Categorias
-              </h5>
+          {/* ── SEÇÃO: CATEGORIAS ── */}
+          <div className="card border-0 shadow-sm p-4 p-md-5 mb-3" style={{ borderRadius: '16px' }}>
+            
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom pb-3 mb-4 gap-3">
+              <h3 className="fw-bold text-dark mb-0 fs-3">
+                <i className="bi bi-tags-fill me-2 text-info"></i>
+                3. Desempenho por Categorias
+              </h3>
               <button
-                className="btn btn-sm btn-outline-dark"
+                className="btn btn-lg btn-outline-danger fw-bold px-4 d-inline-flex align-items-center"
+                style={{ border強化: '2px', borderRadius: '10px', fontSize: '1.1rem' }}
                 onClick={() => handlePdf('categorias')}
               >
-                <i className="bi bi-file-earmark-pdf me-1"></i>
-                Exportar PDF
+                <i className="bi bi-file-earmark-pdf-fill me-2 fs-5"></i>
+                Imprimir PDF de Categorias
               </button>
             </div>
 
             <div className="table-responsive">
-              <table className="table table-hover align-middle">
-                <thead className="table-dark">
+              <table className="table table-striped table-hover align-middle mb-0">
+                <thead className="table-dark fs-5">
                   <tr>
-                    <th>Categoria</th>
-                    <th>Qtd Vendida</th>
-                    <th>Faturamento</th>
+                    <th className="py-3 px-3">Nome da Categoria</th>
+                    <th className="py-3 text-center">Quantidade de Itens Vendidos</th>
+                    <th className="py-3 text-end">Faturamento Comercial</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="fs-5 text-dark">
                   {categorias.categorias.map(c => (
                     <tr key={c.categoriaId}>
-                      <td>{c.categoria}</td>
-                      <td>{c.quantidadeVendida}</td>
-                      <td className="fw-bold text-success">
+                      <td className="py-3 px-3 fw-bold">{c.categoria}</td>
+                      <td className="py-3 text-center fw-bold text-secondary fs-4">{c.quantidadeVendida}</td>
+                      <td className="py-3 text-end fw-bold text-success">
                         R$ {Number(c.faturamento).toFixed(2).replace('.', ',')}
                       </td>
                     </tr>
@@ -259,7 +303,7 @@ export default function AbaRelatorios() {
             </div>
           </div>
 
-        </>
+        </div>
       )}
     </div>
   );

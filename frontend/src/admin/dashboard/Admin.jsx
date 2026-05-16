@@ -35,105 +35,93 @@ export default function Admin() {
     }
   };
 
-  // Função auxiliar para evitar repetição de lógica de estilo
- const getEstiloAba = (idAba) => {
-  const base = "nav-link w-100 text-start border-0 d-flex align-items-center py-3 px-4 transition-all ";
-  
-  return abaAtiva === idAba 
-    ? `${base} text-info fw-bold bg-secondary bg-opacity-10 border-start border-info border-4` 
-    : `${base} text-white opacity-50 bg-transparent`;
-};
+  // Nova assinatura de classes acompanhando o design system do login_card
+  const getEstiloAba = (idAba) => {
+    const base = "admin-nav-item";
+    return abaAtiva === idAba ? `${base} active` : base;
+  };
 
   return (
-    <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
+    <div className="admin-layout">
       
-      <div className="bg-dark text-white p-4 shadow" style={{ width: "260px" }}>
-        <div className="text-center mb-4">
-          <h4 className="fw-bold text-info">JM ADMIN</h4>
-          {admin && (
-            <div className="mt-2">
-              <i className="bi bi-person-circle text-info" style={{ fontSize: '2rem' }}></i>
-              <p className="mb-0 fw-semibold text-white mt-1">{admin.nome}</p>
-              <p className="text-secondary small mb-0">{admin.email}</p>
-            </div>
-          )}
-          <hr className="bg-secondary" />
+      {/* Sidebar Lateral Moderna */}
+      <aside className="admin-sidebar">
+        <div className="admin-brand-area">
+          <h4 className="admin-brand-title">JM ADMIN</h4>
+          <span className="admin-brand-badge">Painel Interno</span>
         </div>
+
+        {admin && (
+          <div className="admin-user-profile">
+            <div className="admin-avatar-wrapper">
+              <i className="bi bi-person-badge"></i>
+            </div>
+            <div className="admin-user-info">
+              <p className="admin-user-name">{admin.nome}</p>
+              <p className="admin-user-role">{admin.email}</p>
+            </div>
+          </div>
+        )}
+
+        <hr className="admin-divider" />
         
-        <ul className="nav flex-column gap-2"> 
+        {/* Menu de Navegação */}
+        <nav className="admin-menu"> 
+          <button onClick={() => setAbaAtiva("dashboard")} className={getEstiloAba("dashboard")}>
+            <i className="bi bi-grid-1x2-fill"></i>
+            <span>Dashboard</span>
+          </button>
+
+          <button onClick={() => setAbaAtiva("estoque")} className={getEstiloAba("estoque")}>
+            <i className="bi bi-box-seam-fill"></i>
+            <span>Estoque</span>
+          </button>
+
+          <button onClick={() => setAbaAtiva("clientes")} className={getEstiloAba("clientes")}>
+            <i className="bi bi-people-fill"></i>
+            <span>Clientes</span>
+          </button>
+
+          <button onClick={() => setAbaAtiva("pedidos")} className={getEstiloAba("pedidos")}>
+            <i className="bi bi-receipt-cutoff"></i>
+            <span>Pedidos</span>
+          </button>
           
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("dashboard")}
-              className={getEstiloAba("dashboard")}
-              style={{ borderRadius: '8px', padding: '10px 15px' }}>
-              <i className="bi bi-bar-chart-line me-3"></i> Dashboard
-            </button>
-          </li>
+          <button onClick={() => setAbaAtiva("novo-produto")} className={getEstiloAba("novo-produto")}>
+            <i className="bi bi-plus-circle-fill"></i>
+            <span>Novo Produto</span>
+          </button>
 
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("estoque")}
-              className={getEstiloAba("estoque")}
-              style={{ borderRadius: '8px', padding: '10px 15px' }}>
-              <i className="bi bi-box-seam me-3"></i> Estoque
-            </button>
-          </li>
+          <button onClick={() => setAbaAtiva("relatorios")} className={getEstiloAba("relatorios")}>
+            <i className="bi bi-bar-chart-steps"></i>
+            <span>Relatórios</span>
+          </button>
+        </nav>
 
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("clientes")}
-              className={getEstiloAba("clientes")}
-              style={{ borderRadius: '8px', padding: '10px 15px' }}>
-              <i className="bi bi-people me-3"></i> Clientes
-            </button>
-          </li>
-
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("pedidos")}
-              className={getEstiloAba("pedidos")}
-              style={{ borderRadius: '8px', padding: '10px 15px' }}>
-              <i className="bi bi-cart-check me-3"></i> Pedidos
-            </button>
-          </li>
-          
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("novo-produto")}
-              className={getEstiloAba("novo-produto")}
-              style={{ borderRadius: '8px', padding: '10px 15px' }}>
-              <i className="bi bi-plus-circle-fill me-3"></i> Novo Produto
-            </button>
-          </li>
-
-          <li className="nav-item">
-            <button 
-              onClick={() => setAbaAtiva("relatorios")}
-              className={getEstiloAba("relatorios")}
-              style={{ borderRadius: '8px', padding: '10px 15px' }}>
-              <i className="bi bi-plus-circle-fill me-3"></i> Relatórios
-            </button>
-          </li>
-
-        </ul>
-
-        <div className="mt-auto pt-5"> {/* 'mt-auto' ajuda a empurrar o botão para o rodapé se o container for flex */}
-          <button className="btn btn-outline-danger w-100" onClick={handleLogout}>
-            <i className="bi bi-box-arrow-right me-2"></i> Sair do Sistema
+        {/* Botão de Saída Customizado no Rodapé */}
+        <div className="admin-sidebar-footer">
+          <button className="admin-btn-logout" onClick={handleLogout}>
+            <i className="bi bi-box-arrow-left"></i>
+            <span>Sair do Sistema</span>
           </button>
         </div>
-      </div>
+      </aside>
 
-      <div className="flex-grow-1 p-5" style={{ overflowY: 'auto', maxHeight: '100vh' }}>
-        <div className="container-fluid">
-          {/* Header indicando a aba atual (Opcional para clareza) */}
-          <h2 className="mb-4 text-capitalize text-dark border-bottom pb-2">
-            {abaAtiva.replace('-', ' ')}
-          </h2>
+      {/* Área de Conteúdo Principal */}
+      <main className="admin-main-content">
+        <header className="admin-content-header">
+          <div className="admin-breadcrumb">
+            <span className="text-muted">Visão Geral</span>
+            <i className="bi bi-chevron-right text-muted mx-2" style={{ fontSize: '0.8rem' }}></i>
+            <span className="text-dark fw-semibold text-capitalize">{abaAtiva.replace('-', ' ')}</span>
+          </div>
+        </header>
+
+        <div className="admin-view-wrapper">
           {renderConteudo()}
         </div>
-      </div>
+      </main>
+
     </div>
   );
 }

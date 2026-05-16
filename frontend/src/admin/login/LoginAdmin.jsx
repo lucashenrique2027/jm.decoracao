@@ -33,8 +33,8 @@ export default function AdminLogin() {
 
     setErrosLogin({});
 
-    try{
-      const dados = await loginAdmin( email, senha );
+    try {
+      const dados = await loginAdmin(email, senha);
       navigate("/admin");
     } catch (error) {
       setErrosLogin({ auth: "Credenciais administrativas inválidas." });
@@ -45,97 +45,98 @@ export default function AdminLogin() {
     <>
       <Header />
 
-      {/* Mesma cor de fundo bg-light do usuário para consistência */}
-      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
-        <div className="w-100 px-3" style={{ maxWidth: 460 }}>
-          
-          
+      <div className="login-bg">
+        <div className="login-card-wrapper">
+          <div className="login-card">
+            
+            {/* Cabeçalho alinhado com o padrão estético novo */}
+            <div className="login-header">
+              <img src={logoJm} alt="Logo JM" className="login-logo" />
+              <h3 className="login-titulo">Painel JM</h3>
+              <p className="login-subtitulo">Gestão Interna da Unidade</p>
+            </div>
 
-          <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
-            <div className="card-body p-4 p-md-5 text-center">
+            {/* Renderização de erros globais de autenticação */}
+            {errosLogin.auth && (
+              <span className="login-error-msg mb-3" style={{ justifyContent: 'center' }}>
+                <i className="bi bi-exclamation-triangle-fill"></i> {errosLogin.auth}
+              </span>
+            )}
 
-              {/* Logo colorida original para manter a marca */}
-              <img
-                src={logoJm}
-                alt="Logo JM"
-                className="rounded-circle mx-auto mb-3"
-                style={{ width: 70, height: 70, objectFit: "cover" }}
-              />
-
-              <h3 className="fw-bold mb-1">Painel JM</h3>
-              <p className="text-muted small mb-4">Gestão Interna da Unidade</p>
-
-              {errosLogin.auth && (
-                <div className="alert alert-danger small py-2">{errosLogin.auth}</div>
-              )}
-
-              <form onSubmit={handleEntrarAdmin} noValidate>
-                <div className="mb-3 text-start">
-                  <label className="form-label small fw-semibold">E-mail Corporativo</label>
-                  <div className="input-group">
-                    {/* Alterado para o verde do tema btn-success */}
-                    <span className="input-group-text bg-success text-white"><i className="bi bi-person-badge"></i></span>
-                    <input
-                      type="email"
-                      className={`form-control ${errosLogin.email ? "is-invalid" : ""}`}
-                      placeholder="admin@gmail.com"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                    />
-                    {errosLogin.email && (
-                      <div className="invalid-feedback">{errosLogin.email}</div>
-                    )}
-                  </div>
+            <form onSubmit={handleEntrarAdmin} noValidate>
+              
+              {/* Campo de Email Corporativo */}
+              <div className="login-form-group">
+                <label className="login-label">E-mail Corporativo</label>
+                <div className={`login-input-wrapper ${errosLogin.email ? 'erro' : ''}`}>
+                  <span className="login-input-icon">
+                    <i className="bi bi-person-badge"></i>
+                  </span>
+                  <input
+                    type="email"
+                    className="login-input"
+                    placeholder="admin@gmail.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                  />
                 </div>
+                {errosLogin.email && (
+                  <span className="login-error-msg">
+                    <i className="bi bi-exclamation-circle"></i> {errosLogin.email}
+                  </span>
+                )}
+              </div>
 
-                <div className="input-group">
-  <span className="input-group-text bg-success text-white">
-    <i className="bi bi-key"></i>
-  </span>
-  
-  <div className="position-relative flex-grow-1">
-    <input
-      type={verSenha ? "text" : "password"}
-      className={`form-control ${errosLogin.senha ? "is-invalid" : ""}`}
-      placeholder="senha123"
-      value={senha}
-      onChange={e => setSenha(e.target.value)}
-      style={{ paddingRight: '40px' }} // Abre espaço para o ícone não sobrepor o texto
-    />
-    
-    <span 
-      className="position-absolute top-50 end-0 translate-middle-y me-3" 
-      style={{ cursor: 'pointer', zIndex: 10 }}
-      onClick={() => setVerSenha(p => !p)}
-    >
-      <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"} text-secondary`}></i>
-    </span>
-  </div>
+              {/* Campo de Senha com o botão dinâmico de olho integrado no wrapper */}
+              <div className="login-form-group">
+                <label className="login-label">Senha</label>
+                <div className={`login-input-wrapper ${errosLogin.senha ? 'erro' : ''}`}>
+                  <span className="login-input-icon">
+                    <i className="bi bi-key"></i>
+                  </span>
+                  <input
+                    type={verSenha ? "text" : "password"}
+                    className="login-input"
+                    placeholder="senha123"
+                    value={senha}
+                    onChange={e => setSenha(e.target.value)}
+                  />
+                  <button 
+                    type="button" 
+                    className="login-btn-eye" 
+                    onClick={() => setVerSenha(p => !p)}
+                  >
+                    <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"}`}></i>
+                  </button>
+                </div>
+                {errosLogin.senha && (
+                  <span className="login-error-msg">
+                    <i className="bi bi-exclamation-circle"></i> {errosLogin.senha}
+                  </span>
+                )}
+              </div>
 
-  {errosLogin.senha && (
-    <div className="invalid-feedback d-block">{errosLogin.senha}</div>
-  )}
-</div>
+              {/* Botão de envio usando as novas classes de design */}
+              <button type="submit" className="login-btn-primary mb-3">
+                <i className="bi bi-unlock-fill"></i> Entrar no Sistema
+              </button>
+            </form>
 
-                {/* Botão agora segue o padrão btn-success do sistema */}
-                <button type="submit" className="btn btn-success w-100 fw-bold py-2 mb-3 shadow-sm">
-                  <i className="bi bi-unlock-fill me-2"></i>Entrar no Sistema
-                </button>
-              </form>
-
-              <div className="mt-2">
-                <Link to="/" className="text-muted small text-decoration-none">
-                  <i className="bi bi-house-door me-1"></i>Voltar para o Início
+            {/* Links inferiores estilizados e limpos */}
+            <div className="login-footer-links">
+              <Link to="/" className="login-btn-link">
+                <i className="bi bi-house-door"></i> Voltar para o Início
+              </Link>
+              
+              <div className="login-admin-link text-center" style={{ borderTop: '1px solid #f3f4f6', width: '100%', marginTop: '16px', paddingTop: '16px' }}>
+                <Link to="/login" style={{ color: '#0284c7' }}>
+                  <i className="bi bi-person-workspace me-1"></i> Login do Cliente
                 </Link>
               </div>
-              <div className="mt-4">
-                    <Link to="/login" className="text-primary fw-semibold text-decoration-none">
-                      Login do Cliente
-                    </Link>
-                </div>
             </div>
+
           </div>
-          
+
           <p className="text-center text-muted mt-4 small">
             &copy; 2026 JM Arte em Vidro - Sistema de Gestão
           </p>

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { listarProdutosAdmin, atualizarProduto, deletarProduto, listarCategorias } from "../../services/adminProducts.js";
+import { 
+  listarProdutosAdmin, 
+  atualizarProduto, 
+  deletarProduto, 
+  listarCategorias 
+} from "../../services/adminProducts.js";
 
 export default function Estoque() {
   const [produtos, setProdutos] = useState([]);
@@ -8,6 +13,7 @@ export default function Estoque() {
   const [erro, setErro] = useState(null);
   const [produtoEmEdicao, setProdutoEmEdicao] = useState(null);
   const [produtoParaExcluir, setProdutoParaExcluir] = useState(null);
+  const [modalErro, setModalErro] = useState(null);
 
   useEffect(() => {
     carregar();
@@ -20,7 +26,7 @@ export default function Estoque() {
       setProdutos(data);
       setCategorias(cats);
     } catch (error) {
-      setErro("Não foi possível carregar os produtos.");
+      setErro("Não foi possível carregar os produtos do inventário.");
     } finally {
       setCarregando(false);
     }
@@ -32,7 +38,7 @@ export default function Estoque() {
       setProdutos(produtos.filter(p => p.id !== produtoParaExcluir.id));
       setProdutoParaExcluir(null);
     } catch (error) {
-      alert("Erro ao excluir: " + error.message);
+      setModalErro("Erro ao remover produto: " + error.message);
     }
   };
 
@@ -43,97 +49,214 @@ export default function Estoque() {
       await atualizarProduto(id, { nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel });
       await carregar();
       setProdutoEmEdicao(null);
+      setModalErro(null);
     } catch (error) {
-      alert("Erro ao atualizar: " + error.message);
+      setModalErro("Erro ao atualizar dados: " + error.message);
     }
   };
 
-  if (carregando) return <p className="text-center text-muted mt-4">Carregando produtos...</p>;
-  if (erro) return <p className="text-center text-danger mt-4">{erro}</p>;
+  if (carregando) {
+    return (
+      <div className="d-flex flex-column align-items-center justify-content-center py-5 mt-5">
+        <div className="spinner-border text-primary mb-3" role="status"></div>
+        <p className="text-muted fw-medium">Sincronizando banco de inventário...</p>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div className="alert alert-danger border-0 shadow-sm p-4 text-center mt-5" role="alert">
+        <i className="bi bi-exclamation-triangle-fill text-danger fs-3 mb-2 d-block"></i>
+        <span className="fw-semibold text-danger">{erro}</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="card border-0 shadow-sm p-4">
-      <h2 className="h4 fw-bold border-bottom pb-3 mb-4">
-        <i className="bi bi-box-seam me-2 text-primary"></i> Estoque & Vitrine
-      </h2>
-
-      <div className="table-responsive">
-        <table className="table table-hover align-middle">
-          <thead className="table-dark">
-            <tr>
-              <th>#</th>
-              <th>Imagem</th>
-              <th>Nome</th>
-              <th>Categoria</th>
-              <th>Varejo</th>
-              <th>Atacado</th>
-              <th>Estoque</th>
-              <th>Disponível</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {produtos.map(produto => (
-              <tr key={produto.id}>
-                <td className="text-muted small">{produto.id}</td>
-                <td>
-                  {produto.imagemUpload
-                    ? <img src={`http://localhost:9000/loja-jm/${produto.imagemUpload}`} alt={produto.nome} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 6 }} />
-                    : <span className="text-muted small">Sem foto</span>
-                  }
-                </td>
-                <td className="fw-semibold">{produto.nome}</td>
-                <td><span className="badge bg-secondary">{produto.categoriaNome}</span></td>
-                <td>R$ {Number(produto.precoVarejo).toFixed(2).replace('.', ',')}</td>
-                <td>{produto.precoAtacado ? `R$ ${Number(produto.precoAtacado).toFixed(2).replace('.', ',')}` : <span className="text-muted small">—</span>}</td>
-                <td>{produto.estoque}</td>
-                <td>
-                  <span className={`badge ${produto.disponivel ? 'bg-success' : 'bg-danger'}`}>
-                    {produto.disponivel ? 'Sim' : 'Não'}
-                  </span>
-                </td>
-                <td>
-                  <div className="d-flex gap-2">
-                    <button className="btn btn-sm btn-outline-primary" onClick={() => setProdutoEmEdicao(produto)}>
-                      <i className="bi bi-pencil"></i>
-                    </button>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => setProdutoParaExcluir(produto)}>
-                      <i className="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="container-fluid px-0">
+      
+      {/* HEADER INTERNO */}
+      <div className="mb-4">
+        <h3 className="fw-bold text-dark mb-1">Estoque & Vitrine</h3>
+        <p className="text-muted small">
+          Controle centralizado de mercadorias, precificação diferenciada e status de visibilidade na loja.
+        </p>
       </div>
 
+      {/* PAINEL DA TABELA */}
+      <div className="card border-0 shadow-sm mb-4" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+        <div className="card-body p-4">
+          
+          <div className="table-responsive">
+            <table className="table align-middle table-borderless m-0">
+              <thead>
+                <tr className="border-bottom" style={{ borderColor: '#f1f5f9' }}>
+                  <th className="text-muted fw-semibold py-3" style={{ fontSize: '0.85rem', width: '70px' }}>ID</th>
+                  <th className="text-muted fw-semibold py-3" style={{ fontSize: '0.85rem', width: '80px' }}>PRODUTO</th>
+                  <th className="text-muted fw-semibold py-3" style={{ fontSize: '0.85rem' }}>DETALHES</th>
+                  <th className="text-muted fw-semibold py-3" style={{ fontSize: '0.85rem' }}>CATEGORIA</th>
+                  <th className="text-muted fw-semibold py-3 text-end" style={{ fontSize: '0.85rem', width: '130px' }}>VAREJO</th>
+                  <th className="text-muted fw-semibold py-3 text-end" style={{ fontSize: '0.85rem', width: '130px' }}>ATACADO</th>
+                  <th className="text-muted fw-semibold py-3 text-center" style={{ fontSize: '0.85rem', width: '120px' }}>ESTOQUE</th>
+                  <th className="text-muted fw-semibold py-3 text-center" style={{ fontSize: '0.85rem', width: '130px' }}>VITRINE</th>
+                  <th className="text-muted fw-semibold py-3 text-end" style={{ fontSize: '0.85rem', width: '100px' }}>AÇÕES</th>
+                </tr>
+              </thead>
+              
+              <tbody>
+                {produtos.map(produto => {
+                  const estoqueBaixo = produto.estoque <= 3;
+                  return (
+                    <tr key={produto.id} className="border-bottom" style={{ borderColor: '#f8fafc' }}>
+                      
+                      {/* ID */}
+                      <td className="py-3 text-muted" style={{ fontSize: '0.85rem', fontFamily: 'monospace' }}>
+                        #{String(produto.id).padStart(4, '0')}
+                      </td>
+
+                      {/* IMAGEM */}
+                      <td className="py-3">
+                        {produto.imagemUpload ? (
+                          <img 
+                            src={`http://localhost:9000/loja-jm/${produto.imagemUpload}`} 
+                            alt={produto.nome} 
+                            className="shadow-sm"
+                            style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: '10px', border: '1px solid #f1f5f9' }} 
+                          />
+                        ) : (
+                          <div className="d-flex align-items-center justify-content-center text-muted bg-light" 
+                               style={{ width: 44, height: 44, borderRadius: '10px', fontSize: '0.7rem', fw: 'bold' }}>
+                            S/ FOTO
+                          </div>
+                        )}
+                      </td>
+
+                      {/* NOME */}
+                      <td className="py-3">
+                        <span className="fw-semibold text-dark" style={{ fontSize: '0.95rem' }}>{produto.nome}</span>
+                      </td>
+
+                      {/* CATEGORIA */}
+                      <td className="py-3">
+                        <span className="badge fw-medium px-2.5 py-1" style={{ backgroundColor: '#f1f5f9', color: '#475569', fontSize: '0.8rem' }}>
+                          {produto.categoriaNome}
+                        </span>
+                      </td>
+
+                      {/* PREÇO VAREJO */}
+                      <td className="py-3 text-end fw-semibold text-dark" style={{ fontSize: '0.9rem' }}>
+                        R$ {Number(produto.precoVarejo).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+
+                      {/* PREÇO ATACADO */}
+                      <td className="py-3 text-end text-secondary" style={{ fontSize: '0.9rem' }}>
+                        {produto.precoAtacado ? (
+                          <span className="fw-medium text-dark">
+                            R$ {Number(produto.precoAtacado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        ) : (
+                          <span className="text-muted small">—</span>
+                        )}
+                      </td>
+
+                      {/* QUANTIDADE ESTOQUE */}
+                      <td className="py-3 text-center">
+                        <span className={`fw-bold px-2.5 py-1 rounded-pill`} 
+                              style={{ 
+                                backgroundColor: estoqueBaixo ? '#fef2f2' : '#f0fdf4', 
+                                color: estoqueBaixo ? '#ef4444' : '#15803d',
+                                fontSize: '0.85rem' 
+                              }}>
+                          {produto.estoque} un
+                        </span>
+                      </td>
+
+                      {/* DISPONIBILIDADE (VITRINE) */}
+                      <td className="py-3 text-center">
+                        <span className={`badge fw-semibold px-2.5 py-1 rounded`}
+                              style={{
+                                backgroundColor: produto.disponivel ? '#e0f2fe' : '#fee2e2',
+                                color: produto.disponivel ? '#0369a1' : '#b91c1c',
+                                fontSize: '0.78rem'
+                              }}>
+                          {produto.disponivel ? 'Ativo' : 'Pausado'}
+                        </span>
+                      </td>
+
+                      {/* AÇÕES */}
+                      <td className="py-3 text-end">
+                        <div className="d-flex gap-1 justify-content-end">
+                          <button className="btn btn-sm btn-light border-0 text-primary p-2" 
+                                  style={{ borderRadius: '8px' }}
+                                  onClick={() => { setProdutoEmEdicao(produto); setModalErro(null); }}>
+                            <i className="bi bi-pencil-square fs-6"></i>
+                          </button>
+                          <button className="btn btn-sm btn-light border-0 text-danger p-2" 
+                                  style={{ borderRadius: '8px' }}
+                                  onClick={() => { setProdutoParaExcluir(produto); setModalErro(null); }}>
+                            <i className="bi bi-trash3 fs-6"></i>
+                          </button>
+                        </div>
+                      </td>
+
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ESTADO VAZIO */}
+          {produtos.length === 0 && (
+            <div className="text-center py-5">
+              <i className="bi bi-box-seam text-muted fs-1 mb-2 d-block"></i>
+              <p className="text-muted m-0 fw-medium">Nenhum item localizado no estoque.</p>
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      {/* =====================================================
+          MODAL: EDIÇÃO DE PRODUTO
+      ====================================================== */}
       {produtoEmEdicao && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content border-0 shadow">
-              <div className="modal-header">
-                <h5 className="modal-title fw-bold">Editar Detalhes do Produto</h5>
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px' }}>
+              
+              <div className="modal-header border-bottom px-4 py-3" style={{ borderColor: '#f1f5f9' }}>
+                <h5 className="modal-title fw-bold text-dark d-flex align-items-center">
+                  <i className="bi bi-sliders me-2 text-primary"></i> Configurações do Produto
+                </h5>
                 <button type="button" className="btn-close" onClick={() => setProdutoEmEdicao(null)}></button>
               </div>
+
               <form onSubmit={handleSalvarEdicao}>
-                <div className="modal-body">
-                  <div className="row">
-                    <div className="col-md-8 mb-3">
-                      <label className="form-label small fw-bold">Nome do Produto</label>
+                <div className="modal-body p-4">
+                  {modalErro && (
+                    <div className="alert alert-danger border-0 p-3 small fw-medium mb-3">{modalErro}</div>
+                  )}
+
+                  <div className="row g-3">
+                    <div className="col-md-8">
+                      <label className="form-label small fw-semibold text-secondary">Nome Comercial</label>
                       <input
                         type="text"
                         className="form-control"
+                        style={{ borderRadius: '8px', padding: '0.6rem 0.75rem' }}
                         value={produtoEmEdicao.nome}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, nome: e.target.value})}
                         required
                       />
                     </div>
 
-                    <div className="col-md-4 mb-3">
-                      <label className="form-label small fw-bold">Categoria</label>
+                    <div className="col-md-4">
+                      <label className="form-label small fw-semibold text-secondary">Categoria Vinculada</label>
                       <select
                         className="form-select"
+                        style={{ borderRadius: '8px', padding: '0.6rem 0.75rem' }}
                         value={produtoEmEdicao.categoriaId}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, categoriaId: Number(e.target.value)})}
                         required
@@ -144,109 +267,133 @@ export default function Estoque() {
                         ))}
                       </select>
                     </div>
-                  </div>
 
-                  <div className="mb-3">
-                    <label className="form-label small fw-bold">Descrição</label>
-                    <textarea
-                      className="form-control"
-                      rows="3"
-                      value={produtoEmEdicao.descricao || ''}
-                      onChange={e => setProdutoEmEdicao({...produtoEmEdicao, descricao: e.target.value})}
-                    ></textarea>
-                  </div>
+                    <div className="col-12">
+                      <label className="form-label small fw-semibold text-secondary">Descrição detalhada</label>
+                      <textarea
+                        className="form-control"
+                        style={{ borderRadius: '8px' }}
+                        rows="3"
+                        value={produtoEmEdicao.descricao || ''}
+                        onChange={e => setProdutoEmEdicao({...produtoEmEdicao, descricao: e.target.value})}
+                      ></textarea>
+                    </div>
 
-                  <div className="row">
-                    <div className="col-md-4 mb-3">
-                      <label className="form-label small fw-bold">Preço Varejo (R$)</label>
+                    <div className="col-md-4">
+                      <label className="form-label small fw-semibold text-secondary">Preço Varejo (R$)</label>
                       <input
                         type="number"
                         step="0.01"
                         className="form-control"
+                        style={{ borderRadius: '8px' }}
                         value={produtoEmEdicao.precoVarejo}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, precoVarejo: e.target.value})}
                         required
                       />
                     </div>
 
-                    <div className="col-md-4 mb-3">
-                      <label className="form-label small fw-bold">Preço Atacado (R$) <span className="text-muted fw-normal">— opcional</span></label>
+                    <div className="col-md-4">
+                      <label className="form-label small fw-semibold text-secondary">Preço Atacado (R$)</label>
                       <input
                         type="number"
                         step="0.01"
                         className="form-control"
+                        style={{ borderRadius: '8px' }}
                         value={produtoEmEdicao.precoAtacado || ''}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, precoAtacado: e.target.value})}
                       />
                     </div>
 
-                    <div className="col-md-4 mb-3">
-                      <label className="form-label small fw-bold">Qtd. Mínima Atacado <span className="text-muted fw-normal">— opcional</span></label>
+                    <div className="col-md-4">
+                      <label className="form-label small fw-semibold text-secondary">Qtd Mínima Atacado</label>
                       <input
                         type="number"
                         className="form-control"
+                        style={{ borderRadius: '8px' }}
                         value={produtoEmEdicao.quantidadeMinimaAtacado || ''}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, quantidadeMinimaAtacado: e.target.value})}
                       />
                     </div>
-                  </div>
 
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label small fw-bold">Qtd. Estoque</label>
+                    <div className="col-md-6">
+                      <label className="form-label small fw-semibold text-secondary">Quantidade em Estoque</label>
                       <input
                         type="number"
                         className="form-control"
+                        style={{ borderRadius: '8px' }}
                         value={produtoEmEdicao.estoque}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, estoque: e.target.value})}
                         required
                       />
                     </div>
 
-                    <div className="col-md-6 mb-3 d-flex flex-column justify-content-end">
-                      <div className="form-check form-switch mb-2">
+                    <div className="col-md-6 d-flex align-items-center pt-4 ps-4">
+                      <div className="form-check form-switch">
                         <input
                           className="form-check-input"
                           type="checkbox"
-                          id="flexSwitchCheckDefault"
+                          id="switchDisponivel"
+                          style={{ cursor: 'pointer', scale: '1.1' }}
                           checked={produtoEmEdicao.disponivel}
                           onChange={e => setProdutoEmEdicao({...produtoEmEdicao, disponivel: e.target.checked})}
                         />
-                        <label className="form-check-label small fw-bold" htmlFor="flexSwitchCheckDefault">
-                          Disponível na Loja
+                        <label className="form-check-label small fw-semibold text-dark ms-2" htmlFor="switchDisponivel" style={{ cursor: 'pointer' }}>
+                          Disponibilizar para venda na vitrine
                         </label>
                       </div>
                     </div>
                   </div>
+
                 </div>
 
-                <div className="modal-footer bg-light">
-                  <button type="button" className="btn btn-secondary" onClick={() => setProdutoEmEdicao(null)}>Cancelar</button>
-                  <button type="submit" className="btn btn-primary px-4">Salvar Alterações</button>
+                <div className="modal-footer border-0 bg-light px-4 py-3">
+                  <button type="button" className="btn btn-link text-secondary text-decoration-none fw-medium" onClick={() => setProdutoEmEdicao(null)}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary px-4 fw-medium" style={{ borderRadius: '8px' }}>Salvar Alterações</button>
                 </div>
               </form>
+
             </div>
           </div>
         </div>
       )}
 
+      {/* =====================================================
+          MODAL: DELETAR PRODUTO (CONFIRMAÇÃO)
+      ====================================================== */}
       {produtoParaExcluir && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
           <div className="modal-dialog modal-sm modal-dialog-centered">
-            <div className="modal-content border-0 shadow">
-              <div className="modal-body text-center py-4">
-                <i className="bi bi-exclamation-triangle text-danger display-4 mb-3"></i>
-                <h5 className="fw-bold">Apagar Produto?</h5>
-                <p className="text-muted small">Deseja realmente remover <strong>{produtoParaExcluir.nome}</strong>? Esta ação é irreversível.</p>
-                <div className="d-flex gap-2 justify-content-center mt-4">
-                  <button className="btn btn-light" onClick={() => setProdutoParaExcluir(null)}>Cancelar</button>
-                  <button className="btn btn-danger" onClick={handleConfirmarExclusao}>Remover</button>
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '14px' }}>
+              <div className="modal-body text-center p-4">
+                
+                <div className="d-inline-flex p-3 bg-danger-subtle rounded-circle text-danger mb-3">
+                  <i className="bi bi-trash3-fill fs-3"></i>
                 </div>
+                
+                <h5 className="fw-bold text-dark">Excluir Produto?</h5>
+                <p className="text-muted small px-2">
+                  Tem certeza que deseja remover <strong>{produtoParaExcluir.nome}</strong>? Essa operação apagará o item permanentemente.
+                </p>
+
+                {modalErro && (
+                  <div className="alert alert-danger border-0 p-2 small fw-medium mb-3">{modalErro}</div>
+                )}
+
+                <div className="d-grid gap-2 d-flex justify-content-center mt-4">
+                  <button className="btn btn-light px-3" style={{ borderRadius: '8px' }} onClick={() => setProdutoParaExcluir(null)}>
+                    Cancelar
+                  </button>
+                  <button className="btn btn-danger px-4" style={{ borderRadius: '8px' }} onClick={handleConfirmarExclusao}>
+                    Remover
+                  </button>
+                </div>
+
               </div>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }

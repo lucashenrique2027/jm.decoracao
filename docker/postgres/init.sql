@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS jm.produtos (
   categoria_id INTEGER REFERENCES jm.categorias(id) ON DELETE RESTRICT,
   disponivel BOOLEAN DEFAULT true,
   estoque INTEGER DEFAULT 0,
-  criado_em TIMESTAMPTZ DEFAULT NOW()
+  criado_em TIMESTAMPTZ DEFAULT NOW(),
+  desativado_em TIMESTAMPTZ DEFAULT NULL
 );
 
 -- ─── ZONAS DE ENTREGA ───────────────────────────────────
@@ -119,3 +120,6 @@ CREATE TABLE IF NOT EXISTS jm.carrinho_itens (
 ALTER TABLE jm.produtos 
 ADD CONSTRAINT estoque_positivo CHECK (estoque >= 0);
 
+-- Índices para suportar a paginação e abas da UI do Admin no futuro
+CREATE INDEX IF NOT EXISTS idx_produtos_ativos ON jm.produtos (id) WHERE disponivel = true;
+CREATE INDEX IF NOT EXISTS idx_produtos_inativos_cronologico ON jm.produtos (desativado_em DESC) WHERE disponivel = false;

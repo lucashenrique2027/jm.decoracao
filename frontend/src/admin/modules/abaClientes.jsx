@@ -27,7 +27,6 @@ export default function Clientes() {
           };
         });
 
-        // Ordena por faturamento decrescente para dar sentido à "Inteligência"
         clientesComMetricas.sort((a, b) => b.faturamento - a.faturamento);
         setClientes(clientesComMetricas);
       } catch (error) {
@@ -58,7 +57,6 @@ export default function Clientes() {
     );
   }
 
-  // Função interna auxiliar para gerar um avatar minimalista baseado nas iniciais do cliente
   const obterIniciais = (nome) => {
     if (!nome) return "JM";
     const partes = nome.trim().split(" ");
@@ -79,11 +77,12 @@ export default function Clientes() {
         </p>
       </div>
 
-      {/* CONTAINER DO RELATÓRIO / TABELA */}
+      {/* CONTAINER DO RELATÓRIO / VISUALIZAÇÃO ADAPTÁVEL */}
       <div className="card border-0 shadow-sm" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-        <div className="card-body p-4">
+        <div className="card-body p-3 p-md-4">
           
-          <div className="table-responsive">
+          {/* 1. VISÃO EM TABELA: Exibida em telas Médias (Tablets) e Grandes (Desktops) */}
+          <div className="table-responsive d-none d-md-block">
             <table className="table align-middle table-borderless m-0">
               <thead>
                 <tr className="border-bottom" style={{ borderColor: '#f1f5f9' }}>
@@ -100,12 +99,10 @@ export default function Clientes() {
                 {clientes.map((cliente) => (
                   <tr key={cliente.id} className="border-bottom" style={{ borderColor: '#f8fafc' }}>
                     
-                    {/* ID */}
                     <td className="py-3 text-muted" style={{ fontSize: '0.85rem', fontFamily: 'monospace' }}>
                       #{String(cliente.id).padStart(4, '0')}
                     </td>
 
-                    {/* DADOS DO CLIENTE COM AVATAR */}
                     <td className="py-3">
                       <div className="d-flex align-items-center">
                         <div className="d-flex align-items-center justify-content-center fw-bold me-3"
@@ -127,13 +124,11 @@ export default function Clientes() {
                       </div>
                     </td>
 
-                    {/* LOCALIZAÇÃO */}
                     <td className="py-3 text-secondary" style={{ fontSize: '0.9rem' }}>
                       <i className="bi bi-geo-alt-fill text-muted me-1" style={{ fontSize: '0.85rem' }}></i>
                       {cliente.cidade ? `${cliente.cidade} - ${cliente.estado}` : 'Não informado'}
                     </td>
 
-                    {/* RECORRÊNCIA / TOTAL PEDIDOS */}
                     <td className="py-3 text-center">
                       <span className="badge fw-semibold px-3 py-1.5 rounded-pill" 
                             style={{ 
@@ -145,12 +140,10 @@ export default function Clientes() {
                       </span>
                     </td>
 
-                    {/* FATURAMENTO ACUMULADO */}
                     <td className="py-3 text-end fw-bold" style={{ color: '#0f172a', fontSize: '0.95rem' }}>
                       R$ {Number(cliente.faturamento).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
 
-                    {/* DATA DE CADASTRO */}
                     <td className="py-3 text-end text-muted small" style={{ fontSize: '0.85rem' }}>
                       {cliente.criadoEm ? new Date(cliente.criadoEm).toLocaleDateString('pt-BR') : '--/--/----'}
                     </td>
@@ -159,6 +152,65 @@ export default function Clientes() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* 2. VISÃO EM CARDS: Exibida estritamente em Mobile (telas menores que 768px) */}
+          <div className="d-block d-md-none">
+            {clientes.map((cliente) => (
+              <div key={cliente.id} className="p-3 mb-3 rounded-4 border" style={{ borderColor: '#f1f5f9', backgroundColor: '#ffffff' }}>
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <span className="text-muted small" style={{ fontFamily: 'monospace' }}>
+                    #{String(cliente.id).padStart(4, '0')}
+                  </span>
+                  <span className="text-muted xs" style={{ fontSize: '0.78rem' }}>
+                    Cadastrado: {cliente.criadoEm ? new Date(cliente.criadoEm).toLocaleDateString('pt-BR') : '--/--/----'}
+                  </span>
+                </div>
+
+                <div className="d-flex align-items-center mb-3">
+                  <div className="d-flex align-items-center justify-content-center fw-bold me-3 flex-shrink-0"
+                       style={{ 
+                         width: '42px', 
+                         height: '42px', 
+                         backgroundColor: '#f1f5f9', 
+                         color: '#475569', 
+                         borderRadius: '12px',
+                         fontSize: '0.85rem'
+                       }}>
+                    {obterIniciais(cliente.nome)}
+                  </div>
+                  <div className="overflow-hidden">
+                    <div className="fw-semibold text-dark text-truncate" style={{ fontSize: '1rem' }}>{cliente.nome}</div>
+                    <div className="text-muted text-truncate" style={{ fontSize: '0.8rem' }}>{cliente.email}</div>
+                  </div>
+                </div>
+
+                <div className="mb-3 text-secondary" style={{ fontSize: '0.85rem' }}>
+                  <i className="bi bi-geo-alt-fill text-muted me-1"></i>
+                  {cliente.cidade ? `${cliente.cidade} - ${cliente.estado}` : 'Localização não informada'}
+                </div>
+
+                <div className="d-flex align-items-center justify-content-between pt-2 border-top" style={{ borderColor: '#f8fafc' }}>
+                  <div>
+                    <div className="text-muted mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pedidos</div>
+                    <span className="badge fw-semibold px-2.5 py-1 rounded-pill" 
+                          style={{ 
+                            backgroundColor: cliente.totalPedidos > 3 ? '#ecfeff' : '#f8fafc', 
+                            color: cliente.totalPedidos > 3 ? '#0891b2' : '#64748b', 
+                            fontSize: '0.8rem' 
+                          }}>
+                      {cliente.totalPedidos} {cliente.totalPedidos === 1 ? 'unid' : 'unids'}
+                    </span>
+                  </div>
+                  <div className="text-end">
+                    <div className="text-muted mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Acumulado (LTV)</div>
+                    <span className="fw-bold" style={{ color: '#0f172a', fontSize: '1rem' }}>
+                      R$ {Number(cliente.faturamento).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* ESTADO VAZIO */}

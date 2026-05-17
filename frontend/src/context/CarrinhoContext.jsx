@@ -5,6 +5,8 @@ import {
   useEffect,
 } from "react";
 
+import { useMensagem } from '../context/MensagemContext';
+
 import {
   obterCarrinhoAtivo,
   adicionarProdutosAoCarrinho,
@@ -20,6 +22,8 @@ export function useCarrinho() {
 }
 
 export function CarrinhoProvider({ children }) {
+
+  const { mostrarMensagem } = useMensagem();
 
   /* ======================================================
      ESTADO PRINCIPAL DO CARRINHO
@@ -113,7 +117,7 @@ export function CarrinhoProvider({ children }) {
 
     try {
 
-      await adicionarProdutosAoCarrinho(
+      const maisProduto = await adicionarProdutosAoCarrinho(
         produto.id,
         quantidade
       );
@@ -149,7 +153,7 @@ export function CarrinhoProvider({ children }) {
 
     } catch (error) {
 
-      console.log(error.message);
+      mostrarMensagem(error.message, "erro")
 
       throw error;
     }

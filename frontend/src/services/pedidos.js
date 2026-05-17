@@ -85,12 +85,27 @@ export const adicionarProdutosAoCarrinho = async (
       }
     );
     if (!response.ok) {
-      const erro = await response.json();
-      throw new Error(
-        erro.erro || 'Erro ao adicionar produto'
-      );
+      // 1. COOKIE AUSENTE OU SESSÃO EXPIRADA (O backend barrou por falta de credenciais)
+      if (response.status === 401) {
+        throw new Error("Você precisa fazer login para adicionar produtos ao carrinho.");
+      }
+      
+      // 2. USUÁRIO LOGADO, MAS SEM PERMISSÃO (Ex: Uma conta de admin tentando comprar)
+      if (response.status === 403) {
+        throw new Error("Sua conta não tem permissão para realizar esta operação.");
+      }
+
+      // 3. PRODUTO ESGOTADO OU PARÂMETRO INCORRETO (Bad Request)
+      if (response.status === 400) {
+        throw new Error("Não foi possível adicionar o item. Verifique a quantidade ou se o produto ainda está disponível.");
+      }
+      
+      // 4. ERRO GENÉRICO DE SERVIDOR (Status 500, etc)
+      throw new Error("Ocorreu um erro no servidor. Por favor, tente novamente mais tarde.");
     }
-    return response.json();
+
+    return await response.json(); 
+
   } catch (error) {
     console.log(error.message);
     throw error;

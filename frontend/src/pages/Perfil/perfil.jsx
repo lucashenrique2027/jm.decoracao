@@ -408,25 +408,6 @@ export default function Perfil() {
 
               </div>
 
-              {/* BUSCA */}
-
-              <div className="perfil-busca-box">
-
-                <Search size={18} />
-
-                <input
-                  type="text"
-                  placeholder="Buscar pedido por ID ou status"
-                  value={buscaPedido}
-                  onChange={(e) =>
-                    setBuscaPedido(
-                      e.target.value
-                    )
-                  }
-                />
-
-              </div>
-
               {/* LISTA */}
 
               {pedidosFiltrados.length === 0 ? (

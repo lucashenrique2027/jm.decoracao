@@ -221,3 +221,70 @@ body {
 .card-estoque { border: 1px solid #ddd; padding: 15px; border-radius: 8px; position: relative; }
 .status-viva { background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
 .status-esgotado { background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+
+/* ── Hambúrguer (só mobile) ─────────────────────────── */
+.admin-hamburger {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #0f172a;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-right: 16px;
+  line-height: 1;
+}
+
+/* ── Overlay escuro por trás do drawer ──────────────── */
+.admin-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9;
+}
+
+/* ── Mobile: ≤ 768px ────────────────────────────────── */
+@media (max-width: 768px) {
+
+  .admin-hamburger {
+    display: block; /* aparece só no mobile */
+  }
+
+  .admin-overlay {
+    display: block; /* overlay ativo quando sidebar aberta */
+  }
+
+  /* Sidebar vira drawer fora da tela por padrão */
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 10;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 260px;
+  }
+
+  /* Drawer desliza para dentro quando .aberta */
+  .admin-sidebar.aberta {
+    transform: translateX(0);
+  }
+
+  /* Header ganha altura confortável para toque */
+  .admin-content-header {
+    padding: 0 16px;
+    height: 60px;
+  }
+
+  /* Conteúdo ocupa tela toda sem a sidebar */
+  .admin-main-content {
+    width: 100%;
+  }
+
+  /* Padding interno menor no mobile */
+  .admin-view-wrapper {
+    padding: 20px 16px;
+  }
+}

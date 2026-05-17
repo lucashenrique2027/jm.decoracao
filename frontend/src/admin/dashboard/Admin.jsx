@@ -11,6 +11,7 @@ import AbaRelatorio from '../modules/abaRelatorio.jsx';
 export default function Admin() {
   const admin = JSON.parse(localStorage.getItem('adminJM') || 'null');
   const [abaAtiva, setAbaAtiva] = useState("dashboard");
+  const [sidebarAberta, setSidebarAberta] = useState(false); // ← novo
 
   const renderConteudo = () => {
     switch (abaAtiva) {
@@ -18,9 +19,9 @@ export default function Admin() {
       case "estoque":      return <ListaEstoque />;
       case "pedidos":      return <PainelPedidos />;
       case "clientes":     return <AbaClientes />;
-      case "relatorios":   return <AbaRelatorio/>;
-      case "dashboard":    return <Dashboard/>;
-      default:             return <Dashboard/>;
+      case "relatorios":   return <AbaRelatorio />;
+      case "dashboard":    return <Dashboard />;
+      default:             return <Dashboard />;
     }
   };
 
@@ -35,17 +36,27 @@ export default function Admin() {
     }
   };
 
-  // Nova assinatura de classes acompanhando o design system do login_card
   const getEstiloAba = (idAba) => {
     const base = "admin-nav-item";
     return abaAtiva === idAba ? `${base} active` : base;
   };
 
+  // Navega e fecha o drawer no mobile
+  const navegarPara = (aba) => {
+    setAbaAtiva(aba);
+    setSidebarAberta(false);
+  };
+
   return (
     <div className="admin-layout">
-      
-      {/* Sidebar Lateral Moderna */}
-      <aside className="admin-sidebar">
+
+      {/* Overlay escuro no mobile quando sidebar aberta */}
+      {sidebarAberta && (
+        <div className="admin-overlay" onClick={() => setSidebarAberta(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${sidebarAberta ? 'aberta' : ''}`}>
         <div className="admin-brand-area">
           <h4 className="admin-brand-title">JM ADMIN</h4>
           <span className="admin-brand-badge">Painel Interno</span>
@@ -64,52 +75,48 @@ export default function Admin() {
         )}
 
         <hr className="admin-divider" />
-        
-        {/* Menu de Navegação */}
-        <nav className="admin-menu"> 
-          <button onClick={() => setAbaAtiva("dashboard")} className={getEstiloAba("dashboard")}>
-            <i className="bi bi-grid-1x2-fill"></i>
-            <span>Dashboard</span>
-          </button>
 
-          <button onClick={() => setAbaAtiva("estoque")} className={getEstiloAba("estoque")}>
-            <i className="bi bi-box-seam-fill"></i>
-            <span>Estoque</span>
+        <nav className="admin-menu">
+          <button onClick={() => navegarPara("dashboard")} className={getEstiloAba("dashboard")}>
+            <i className="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
           </button>
-
-          <button onClick={() => setAbaAtiva("clientes")} className={getEstiloAba("clientes")}>
-            <i className="bi bi-people-fill"></i>
-            <span>Clientes</span>
+          <button onClick={() => navegarPara("estoque")} className={getEstiloAba("estoque")}>
+            <i className="bi bi-box-seam-fill"></i><span>Estoque</span>
           </button>
-
-          <button onClick={() => setAbaAtiva("pedidos")} className={getEstiloAba("pedidos")}>
-            <i className="bi bi-receipt-cutoff"></i>
-            <span>Pedidos</span>
+          <button onClick={() => navegarPara("clientes")} className={getEstiloAba("clientes")}>
+            <i className="bi bi-people-fill"></i><span>Clientes</span>
           </button>
-          
-          <button onClick={() => setAbaAtiva("novo-produto")} className={getEstiloAba("novo-produto")}>
-            <i className="bi bi-plus-circle-fill"></i>
-            <span>Novo Produto</span>
+          <button onClick={() => navegarPara("pedidos")} className={getEstiloAba("pedidos")}>
+            <i className="bi bi-receipt-cutoff"></i><span>Pedidos</span>
           </button>
-
-          <button onClick={() => setAbaAtiva("relatorios")} className={getEstiloAba("relatorios")}>
-            <i className="bi bi-bar-chart-steps"></i>
-            <span>Relatórios</span>
+          <button onClick={() => navegarPara("novo-produto")} className={getEstiloAba("novo-produto")}>
+            <i className="bi bi-plus-circle-fill"></i><span>Novo Produto</span>
+          </button>
+          <button onClick={() => navegarPara("relatorios")} className={getEstiloAba("relatorios")}>
+            <i className="bi bi-bar-chart-steps"></i><span>Relatórios</span>
           </button>
         </nav>
 
-        {/* Botão de Saída Customizado no Rodapé */}
         <div className="admin-sidebar-footer">
           <button className="admin-btn-logout" onClick={handleLogout}>
-            <i className="bi bi-box-arrow-left"></i>
-            <span>Sair do Sistema</span>
+            <i className="bi bi-box-arrow-left"></i><span>Sair do Sistema</span>
           </button>
         </div>
       </aside>
 
-      {/* Área de Conteúdo Principal */}
+      {/* Conteúdo Principal */}
       <main className="admin-main-content">
         <header className="admin-content-header">
+
+          {/* Botão hambúrguer — só aparece no mobile */}
+          <button
+            className="admin-hamburger"
+            onClick={() => setSidebarAberta(!sidebarAberta)}
+            aria-label="Abrir menu"
+          >
+            <i className={`bi ${sidebarAberta ? 'bi-x-lg' : 'bi-list'}`}></i>
+          </button>
+
           <div className="admin-breadcrumb">
             <span className="text-muted">Visão Geral</span>
             <i className="bi bi-chevron-right text-muted mx-2" style={{ fontSize: '0.8rem' }}></i>

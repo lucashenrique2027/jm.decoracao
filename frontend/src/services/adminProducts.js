@@ -60,11 +60,21 @@ export const cadastrarProduto = async (dadosProduto, imagemFile) => {
   formData.append('nome', dadosProduto.nome);
   formData.append('descricao', dadosProduto.descricao || '');
   formData.append('categoriaId', Number(dadosProduto.categoriaId));
-  formData.append('preco', dadosProduto.preco);
-  formData.append('estoque', dadosProduto.estoque || 0);
-  formData.append('disponivel', dadosProduto.disponivel ?? true);
-  formData.append('imagem', imagemFile);
+  formData.append('precoVarejo', dadosProduto.precoVarejo);
 
+  if (dadosProduto.precoAtacado) {
+    formData.append('precoAtacado', dadosProduto.precoAtacado);
+    formData.append('quantidadeMinimaAtacado', Number(dadosProduto.quantidadeMinimaAtacado) || 0);
+  }
+
+  formData.append('estoque', Number(dadosProduto.estoque) || 0);
+  formData.append('disponivel', dadosProduto.disponivel ?? true);
+
+  if (imagemFile) {
+    formData.append('imagem', imagemFile);
+  }
+
+  // ✅ Sem try/catch aqui — deixa o erro subir para quem chamou
   const response = await fetch(`${API_URL}/produtos`, {
     method: 'POST',
     credentials: 'include',
@@ -75,6 +85,7 @@ export const cadastrarProduto = async (dadosProduto, imagemFile) => {
     const error = await response.json();
     throw new Error(error.erro || `Erro HTTP! status: ${response.status}`);
   }
+
   return response.json();
 };
 
@@ -82,21 +93,18 @@ export const atualizarProduto = async (id, campos, imagemFile = null) => {
   const formData = new FormData();
   
   Object.keys(campos).forEach(key => {
-    if (campos[key] !== undefined) formData.append(key, campos[key]);
+    if (campos[key] !== undefined) {
+      const valor = campos[key] === null ? "" : campos[key];
+      formData.append(key, valor);
+    }
   });
   if (imagemFile) formData.append('imagem', imagemFile);
-
   const response = await fetch(`${API_URL}/produtos/${id}`, {
     method: 'PUT',
     credentials: 'include',
     body: formData 
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.erro || `Erro HTTP! status: ${response.status}`);
-  }
-  return response.json();
+  return response.json(); 
 };
 
 

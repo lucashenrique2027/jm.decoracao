@@ -31,48 +31,45 @@ export default function AbaProdutos() {
     }
   };
 
-  const cadastrarProduto = async (e) => {
-    e.preventDefault();
+const cadastrarProduto = async (e) => {
+  e.preventDefault();
 
-    if (!categoriaId) {
-      mostrarMensagem("Por favor, selecione uma categoria vinculada.", "erro");
-      return;
-    }
+  // Validações no frontend antes de nem chamar a API
+  if (!categoriaId) {
+    mostrarMensagem("Por favor, selecione uma categoria vinculada.", "erro");
+    return;
+  }
+  if (!imagem) {
+    mostrarMensagem("Por favor, selecione uma imagem para o produto.", "erro");
+    return;
+  }
+  if (!nome || !precoVarejo || !estoque) {
+    mostrarMensagem("Preencha todos os campos obrigatórios.", "erro");
+    return;
+  }
 
-    try {
-      setEnviando(true);
-      await cadastrarProdutoService(
-        { 
-          nome, 
-          descricao, 
-          precoVarejo, 
-          precoAtacado: precoAtacado || null,
-          quantidadeMinimaAtacado: quantidadeMinimaAtacado || null,
-          categoriaId: Number(categoriaId), 
-          estoque: Number(estoque), 
-          disponivel: true 
-        },
-        imagem
-      );
-      
-      mostrarMensagem("Produto publicado com sucesso no catálogo!", "sucesso");
-      
-      setNome("");
-      setPrecoVarejo("");
-      setPrecoAtacado("");
-      setQuantidadeMinima("");
-      setDescricao("");
-      setCategoriaId("");
-      setEstoque(0);
-      setImagem(null);
-      setPreviewImagem(null);
-    } catch (error) {
-      mostrarMensagem(error.message || 'Erro ao realizar o cadastro da nova mercadoria.', "erro");
-      console.error('Erro ao cadastrar produto:', error);
-    } finally {
-      setEnviando(false);
-    }
-  };
+  try {
+    setEnviando(true);
+    await cadastrarProdutoService(
+      { nome, descricao, precoVarejo, precoAtacado: precoAtacado || null,
+        quantidadeMinimaAtacado: quantidadeMinimaAtacado || null,
+        categoriaId: Number(categoriaId), estoque: Number(estoque), disponivel: true },
+      imagem
+    );
+
+    // ✅ Só chega aqui se o service não lançou exceção
+    mostrarMensagem("Produto publicado com sucesso no catálogo!", "sucesso");
+    setNome(""); setPrecoVarejo(""); setPrecoAtacado("");
+    setQuantidadeMinima(""); setDescricao(""); setCategoriaId("");
+    setEstoque(0); setImagem(null); setPreviewImagem(null);
+
+  } catch (error) {
+    mostrarMensagem(error.message || "Erro ao realizar o cadastro.", "erro");
+    console.error("Erro ao cadastrar produto:", error);
+  } finally {
+    setEnviando(false);
+  }
+};
 
   return (
     <div className="container-fluid px-0">

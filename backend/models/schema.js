@@ -87,6 +87,7 @@ export const produtos = jm.table('produtos', {
   disponivel: boolean('disponivel').default(true),
   estoque: integer('estoque').default(0),
   criadoEm: timestamp('criado_em', { withTimezone: true }).defaultNow(),
+  desativadoEm: timestamp('desativado_em', { withTimezone: true, mode: 'date' }),
 });
 
 /* =========================================================

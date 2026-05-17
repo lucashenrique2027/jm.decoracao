@@ -14,6 +14,9 @@ export default function Estoque() {
   const [produtoEmEdicao, setProdutoEmEdicao] = useState(null);
   const [produtoParaExcluir, setProdutoParaExcluir] = useState(null);
   const [modalErro, setModalErro] = useState(null);
+  
+  // Controla o estado da aba selecionada na interface do administrador
+  const [abaAtiva, setAbaAtiva] = useState("ativos");
 
   useEffect(() => {
     carregar();
@@ -35,7 +38,8 @@ export default function Estoque() {
   const handleConfirmarExclusao = async () => {
     try {
       await deletarProduto(produtoParaExcluir.id);
-      setProdutos(produtos.filter(p => p.id !== produtoParaExcluir.id));
+      // Recarrega todo o inventário, pois o item pode ter sofrido Soft Delete e mudado de aba em vez de sumir
+      await carregar();
       setProdutoParaExcluir(null);
     } catch (error) {
       setModalErro("Erro ao remover produto: " + error.message);
@@ -45,8 +49,14 @@ export default function Estoque() {
   const handleSalvarEdicao = async (e) => {
     e.preventDefault();
     try {
-      const { id, nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel } = produtoEmEdicao;
-      await atualizarProduto(id, { nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel });
+      const { id, nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel, aba } = produtoEmEdicao;
+      
+      // Se o produto veio da aba de excluídos, montamos o payload estritamente com as travas aceitas pelo backend
+      const payload = aba === 'excluidos' 
+        ? { disponivel, estoque } 
+        : { nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel };
+
+      await atualizarProduto(id, payload);
       await carregar();
       setProdutoEmEdicao(null);
       setModalErro(null);
@@ -54,6 +64,9 @@ export default function Estoque() {
       setModalErro("Erro ao atualizar dados: " + error.message);
     }
   };
+
+  // Filtra dinamicamente os produtos de acordo com a aba selecionada
+  const produtosFiltrados = produtos.filter(p => p.aba === abaAtiva);
 
   if (carregando) {
     return (
@@ -80,8 +93,33 @@ export default function Estoque() {
       <div className="mb-4">
         <h3 className="fw-bold text-dark mb-1">Estoque & Vitrine</h3>
         <p className="text-muted small">
-          Controle centralizado de mercadorias, precificação diferenciada e status de visibilidade na loja.
+          Controle centralizado de mercadorias, status de visibilidade e gerenciamento de histórico de exclusões.
         </p>
+      </div>
+
+      {/* SELETOR DE ABAS DA UI */}
+      <div className="d-flex gap-2 mb-3 border-bottom pb-2">
+        <button 
+          className={`btn btn-sm fw-semibold px-4 py-2 border-0 ${abaAtiva === 'ativos' ? 'btn-primary' : 'btn-light text-secondary'}`}
+          style={{ borderRadius: '8px' }}
+          onClick={() => setAbaAtiva('ativos')}
+        >
+          Disponíveis ({produtos.filter(p => p.aba === 'ativos').length})
+        </button>
+        <button 
+          className={`btn btn-sm fw-semibold px-4 py-2 border-0 ${abaAtiva === 'indisponivel' ? 'btn-warning text-dark' : 'btn-light text-secondary'}`}
+          style={{ borderRadius: '8px' }}
+          onClick={() => setAbaAtiva('indisponivel')}
+        >
+          Indisponíveis ({produtos.filter(p => p.aba === 'indisponivel').length})
+        </button>
+        <button 
+          className={`btn btn-sm fw-semibold px-4 py-2 border-0 ${abaAtiva === 'excluidos' ? 'btn-danger' : 'btn-light text-secondary'}`}
+          style={{ borderRadius: '8px' }}
+          onClick={() => setAbaAtiva('excluidos')}
+        >
+          Retirados / Antigos ({produtos.filter(p => p.aba === 'excluidos').length})
+        </button>
       </div>
 
       {/* PAINEL DA TABELA */}
@@ -105,7 +143,7 @@ export default function Estoque() {
               </thead>
               
               <tbody>
-                {produtos.map(produto => {
+                {produtosFiltrados.map(produto => {
                   const estoqueBaixo = produto.estoque <= 3;
                   return (
                     <tr key={produto.id} className="border-bottom" style={{ borderColor: '#f8fafc' }}>
@@ -126,7 +164,7 @@ export default function Estoque() {
                           />
                         ) : (
                           <div className="d-flex align-items-center justify-content-center text-muted bg-light" 
-                               style={{ width: 44, height: 44, borderRadius: '10px', fontSize: '0.7rem', fw: 'bold' }}>
+                               style={{ width: 44, height: 44, borderRadius: '10px', fontSize: '0.7rem', fontWeight: 'bold' }}>
                             S/ FOTO
                           </div>
                         )}
@@ -180,7 +218,7 @@ export default function Estoque() {
                                 color: produto.disponivel ? '#0369a1' : '#b91c1c',
                                 fontSize: '0.78rem'
                               }}>
-                          {produto.disponivel ? 'Ativo' : 'Pausado'}
+                          {produto.aba === 'excluidos' ? 'Excluido' : produto.disponivel ? 'Disponível' : 'Indisponível'}
                         </span>
                       </td>
 
@@ -192,11 +230,15 @@ export default function Estoque() {
                                   onClick={() => { setProdutoEmEdicao(produto); setModalErro(null); }}>
                             <i className="bi bi-pencil-square fs-6"></i>
                           </button>
-                          <button className="btn btn-sm btn-light border-0 text-danger p-2" 
-                                  style={{ borderRadius: '8px' }}
-                                  onClick={() => { setProdutoParaExcluir(produto); setModalErro(null); }}>
-                            <i className="bi bi-trash3 fs-6"></i>
-                          </button>
+                          
+                          {/* O botão de excluir é ocultado se o produto já estiver na aba de excluídos */}
+                          {produto.aba !== 'excluidos' && (
+                            <button className="btn btn-sm btn-light border-0 text-danger p-2" 
+                                    style={{ borderRadius: '8px' }}
+                                    onClick={() => { setProdutoParaExcluir(produto); setModalErro(null); }}>
+                              <i className="bi bi-trash3 fs-6"></i>
+                            </button>
+                          )}
                         </div>
                       </td>
 
@@ -208,19 +250,17 @@ export default function Estoque() {
           </div>
 
           {/* ESTADO VAZIO */}
-          {produtos.length === 0 && (
+          {produtosFiltrados.length === 0 && (
             <div className="text-center py-5">
               <i className="bi bi-box-seam text-muted fs-1 mb-2 d-block"></i>
-              <p className="text-muted m-0 fw-medium">Nenhum item localizado no estoque.</p>
+              <p className="text-muted m-0 fw-medium">Nenhum item nesta categoria de listagem.</p>
             </div>
           )}
 
         </div>
       </div>
 
-      {/* =====================================================
-          MODAL: EDIÇÃO DE PRODUTO
-      ====================================================== */}
+      {/* MODAL: EDIÇÃO DE PRODUTO */}
       {produtoEmEdicao && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -228,7 +268,8 @@ export default function Estoque() {
               
               <div className="modal-header border-bottom px-4 py-3" style={{ borderColor: '#f1f5f9' }}>
                 <h5 className="modal-title fw-bold text-dark d-flex align-items-center">
-                  <i className="bi bi-sliders me-2 text-primary"></i> Configurações do Produto
+                  <i className="bi bi-sliders me-2 text-primary"></i> 
+                  {produtoEmEdicao.aba === 'excluidos' ? 'Reativação de Produto Histórico' : 'Configurações do Produto'}
                 </h5>
                 <button type="button" className="btn-close" onClick={() => setProdutoEmEdicao(null)}></button>
               </div>
@@ -237,6 +278,13 @@ export default function Estoque() {
                 <div className="modal-body p-4">
                   {modalErro && (
                     <div className="alert alert-danger border-0 p-3 small fw-medium mb-3">{modalErro}</div>
+                  )}
+
+                  {produtoEmEdicao.aba === 'excluidos' && (
+                    <div className="alert alert-warning border-0 p-3 small fw-medium mb-3">
+                      <i className="bi bi-exclamation-diamond-fill me-2"></i>
+                      Este produto foi excluido. Para reintroduzi-lo no catálogo operacional, modifique o switch abaixo para ativo e defina um estoque válido. Os dados cadastrais permanecem imutáveis.
+                    </div>
                   )}
 
                   <div className="row g-3">
@@ -249,6 +297,7 @@ export default function Estoque() {
                         value={produtoEmEdicao.nome}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, nome: e.target.value})}
                         required
+                        disabled={produtoEmEdicao.aba === 'excluidos'}
                       />
                     </div>
 
@@ -257,9 +306,10 @@ export default function Estoque() {
                       <select
                         className="form-select"
                         style={{ borderRadius: '8px', padding: '0.6rem 0.75rem' }}
-                        value={produtoEmEdicao.categoriaId}
+                        value={produtoEmEdicao.categoriaId || ''}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, categoriaId: Number(e.target.value)})}
                         required
+                        disabled={produtoEmEdicao.aba === 'excluidos'}
                       >
                         <option value="">Selecione...</option>
                         {categorias.map(cat => (
@@ -276,6 +326,7 @@ export default function Estoque() {
                         rows="3"
                         value={produtoEmEdicao.descricao || ''}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, descricao: e.target.value})}
+                        disabled={produtoEmEdicao.aba === 'excluidos'}
                       ></textarea>
                     </div>
 
@@ -289,6 +340,7 @@ export default function Estoque() {
                         value={produtoEmEdicao.precoVarejo}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, precoVarejo: e.target.value})}
                         required
+                        disabled={produtoEmEdicao.aba === 'excluidos'}
                       />
                     </div>
 
@@ -301,6 +353,7 @@ export default function Estoque() {
                         style={{ borderRadius: '8px' }}
                         value={produtoEmEdicao.precoAtacado || ''}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, precoAtacado: e.target.value})}
+                        disabled={produtoEmEdicao.aba === 'excluidos'}
                       />
                     </div>
 
@@ -312,6 +365,7 @@ export default function Estoque() {
                         style={{ borderRadius: '8px' }}
                         value={produtoEmEdicao.quantidadeMinimaAtacado || ''}
                         onChange={e => setProdutoEmEdicao({...produtoEmEdicao, quantidadeMinimaAtacado: e.target.value})}
+                        disabled={produtoEmEdicao.aba === 'excluidos'}
                       />
                     </div>
 
@@ -348,7 +402,9 @@ export default function Estoque() {
 
                 <div className="modal-footer border-0 bg-light px-4 py-3">
                   <button type="button" className="btn btn-link text-secondary text-decoration-none fw-medium" onClick={() => setProdutoEmEdicao(null)}>Cancelar</button>
-                  <button type="submit" className="btn btn-primary px-4 fw-medium" style={{ borderRadius: '8px' }}>Salvar Alterações</button>
+                  <button type="submit" className="btn btn-primary px-4 fw-medium" style={{ borderRadius: '8px' }}>
+                    {produtoEmEdicao.aba === 'excluidos' ? 'Reviver Produto' : 'Salvar Alterações'}
+                  </button>
                 </div>
               </form>
 
@@ -357,9 +413,7 @@ export default function Estoque() {
         </div>
       )}
 
-      {/* =====================================================
-          MODAL: DELETAR PRODUTO (CONFIRMAÇÃO)
-      ====================================================== */}
+      {/* MODAL: DELETAR PRODUTO (CONFIRMAÇÃO) */}
       {produtoParaExcluir && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
           <div className="modal-dialog modal-sm modal-dialog-centered">
@@ -372,7 +426,7 @@ export default function Estoque() {
                 
                 <h5 className="fw-bold text-dark">Excluir Produto?</h5>
                 <p className="text-muted small px-2">
-                  Tem certeza que deseja remover <strong>{produtoParaExcluir.nome}</strong>? Essa operação apagará o item permanentemente.
+                  Tem certeza que deseja remover <strong>{produtoParaExcluir.nome}</strong>? O sistema decidirá se aplicará arquivamento lógico ou remoção completa baseado nas vendas.
                 </p>
 
                 {modalErro && (

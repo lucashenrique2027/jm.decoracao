@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS jm.produtos (
   categoria_id INTEGER REFERENCES jm.categorias(id) ON DELETE RESTRICT,
   disponivel BOOLEAN DEFAULT true,
   estoque INTEGER DEFAULT 0,
-  criado_em TIMESTAMPTZ DEFAULT NOW()
+  criado_em TIMESTAMPTZ DEFAULT NOW(),
+  desativado_em TIMESTAMPTZ DEFAULT NULL
 );
 
 -- ─── ZONAS DE ENTREGA ───────────────────────────────────
@@ -86,10 +87,39 @@ CREATE TABLE IF NOT EXISTS jm.pedido_itens (
   preco_unitario NUMERIC(10,2) NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS unico_carrinho_por_cliente
-ON jm.pedidos (cliente_id)
-WHERE status = 'pendente';
+-- ─── CARRINHOS ──────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS jm.carrinhos (
+  id SERIAL PRIMARY KEY,
+
+  cliente_id INTEGER NOT NULL UNIQUE
+    REFERENCES jm.clientes(id)
+    ON DELETE CASCADE,
+
+  criado_em TIMESTAMPTZ DEFAULT NOW(),
+
+  atualizado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS jm.carrinho_itens (
+  id SERIAL PRIMARY KEY,
+
+  carrinho_id INTEGER NOT NULL
+    REFERENCES jm.carrinhos(id)
+    ON DELETE CASCADE,
+
+  produto_id INTEGER NOT NULL
+    REFERENCES jm.produtos(id),
+
+  quantidade INTEGER NOT NULL DEFAULT 1,
+
+  preco_unitario NUMERIC(10,2) NOT NULL,
+
+  criado_em TIMESTAMPTZ DEFAULT NOW()
+);
 
 ALTER TABLE jm.produtos 
 ADD CONSTRAINT estoque_positivo CHECK (estoque >= 0);
 
+-- Índices para suportar a paginação e abas da UI do Admin no futuro
+CREATE INDEX IF NOT EXISTS idx_produtos_ativos ON jm.produtos (id) WHERE disponivel = true;
+CREATE INDEX IF NOT EXISTS idx_produtos_inativos_cronologico ON jm.produtos (desativado_em DESC) WHERE disponivel = false;

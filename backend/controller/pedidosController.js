@@ -31,40 +31,95 @@ export const listarPedidos = async (req, res) => {
 };
 
 // Admin e Cliente: buscar pedido por ID com itens e dados do cliente
-export const buscarPedidoPorId = async (req, res) => {
+export const buscarPedidoPorId = async (
+  req,
+  res
+) => {
+
   try {
+
     const { id } = req.params;
 
-    const [pedido] = await db.select().from(pedidos).where(eq(pedidos.id, parseInt(id)));
+    const clienteId = req.clienteId;
+
+    /* =====================================================
+       BUSCAR PEDIDO
+    ===================================================== */
+
+    const conditions = [
+      eq(pedidos.id, parseInt(id))
+    ];
+
+    /* =====================================================
+       VALIDAR PROPRIETÁRIO
+    ===================================================== */
+
+    if (clienteId) {
+      conditions.push(
+        eq(
+          pedidos.clienteId,
+          clienteId
+        )
+      );
+    }
+    
+    const [pedido] = await db
+      .select()
+      .from(pedidos)
+      .where(and(...conditions));
 
     if (!pedido) {
-      return res.status(404).json({ erro: 'Pedido não encontrado' });
+
+      return res.status(404).json({
+        erro: 'Pedido não encontrado'
+      });
     }
 
-    const [cliente] = await db.select({
-      nome: clientes.nome,
-      email: clientes.email,
-      telefone: clientes.telefone
-    }).from(clientes).where(eq(clientes.id, pedido.clienteId));
+    /* =====================================================
+       BUSCAR CLIENTE
+    ===================================================== */
 
-    const itens = await db.select({
-      id: pedidoItens.id,
-      produtoId: pedidoItens.produtoId,
-      quantidade: pedidoItens.quantidade,
-      precoUnitario: pedidoItens.precoUnitario,
-      nomeProduto: produtos.nome,
-      imagemUpload: produtos.imagemUpload
-    }).from(pedidoItens)
-      .leftJoin(produtos, eq(pedidoItens.produtoId, produtos.id))
-      .where(eq(pedidoItens.pedidoId, parseInt(id)));
+    const [cliente] = await db
+      .select({
+        nome: clientes.nome,
+        email: clientes.email,
+        telefone: clientes.telefone
+      })
+      .from(clientes)
+      .where(eq(clientes.id,pedido.clienteId)
+      );
 
-    res.json({ ...pedido, cliente, itens });
+    /* =====================================================
+       BUSCAR ITENS
+    ===================================================== */
+
+    const itens = await db
+      .select({
+        id: pedidoItens.id,
+        produtoId: pedidoItens.produtoId,
+        quantidade: pedidoItens.quantidade,
+        precoUnitario: pedidoItens.precoUnitario,
+        nomeProduto: produtos.nome,
+        imagemUpload: produtos.imagemUpload
+      })
+      .from(pedidoItens)
+      .leftJoin(produtos,eq(pedidoItens.produtoId,produtos.id))
+      .where(
+        eq(pedidoItens.pedidoId,parseInt(id))
+      );
+
+    return res.json({...pedido,cliente,itens});
+
   } catch (erro) {
-    console.error('Erro ao buscar pedido:', erro);
-    res.status(500).json({ erro: 'Erro ao buscar pedido' });
+    console.error(
+      'Erro ao buscar pedido:',
+      erro
+    );
+    return res.status(500).json({
+      erro: 'Erro ao buscar pedido'
+    });
   }
 };
-
 // Cliente: listar apenas os pedidos do cliente autenticado
 export const listarPedidosPorCliente = async (req, res) => {
   try {

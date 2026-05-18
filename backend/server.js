@@ -1,14 +1,14 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import routesProdutos from './router/produtosController.js';
-import routesAdmin from './router/adminController.js';
-import routesClientes from './router/clientesController.js';
-import routesPedidos from './router/pedidosController.js';
-import swaggerUi from 'swagger-ui-express';
-import swaggerSpec from './swagger.js';
-import pagamentoRouter from  './router/paymentsController.js';
-import routesBusiness from './router/businessController.js';
+import routesProdutos from './routes/produtosRoutes.js';
+import routesAdmin from './routes/adminRoutes.js';
+import routesClientes from './routes/clientesRoutes.js';
+import routesPedidos from './routes/pedidosRoutes.js';
+
+import pagamentoRouter from  './routes/paymentsRoutes.js';
+import routesBusiness from './routes/businessRoutes.js';
+import RelatoriosRouter from './routes/relatoriosRoutes.js';
 
 import cookieParser from 'cookie-parser';
 
@@ -29,8 +29,6 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', uptime: process.uptime() });
 });
 
-app.use('/api/info', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 app.use('/uploads', express.static('uploads')); 
 
 app.use('/api', routesProdutos);
@@ -42,6 +40,8 @@ app.use('/api/clientes', routesClientes);
 app.use('/api/pedidos', routesPedidos);
 
 app.use('/api/pagamento',pagamentoRouter);
+
+app.use('/api/relatorios',RelatoriosRouter);
 
 app.use('/api/metrics/business',routesBusiness);
 

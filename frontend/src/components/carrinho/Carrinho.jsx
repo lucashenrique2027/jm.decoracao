@@ -1,7 +1,7 @@
 import { useCarrinho } from "../../context/CarrinhoContext";
 import { efetuarPagamentoTeste } from '../../services/pagamentoTeste.js';
 import { useNavigate } from "react-router-dom";
-import { Trash } from "lucide-react";
+import { Trash, ShoppingCart, Minus, Plus } from "lucide-react";
 import "./style.css";
 
 const precoUnitario = (item) =>
@@ -10,6 +10,7 @@ const precoUnitario = (item) =>
     : Number(item.precoVarejo);
 
 export default function Carrinho() {
+  
   const navigate = useNavigate();
   const {
     itens,
@@ -38,7 +39,7 @@ export default function Carrinho() {
   return (
     <div className="container py-5">
       <div className="carrinho-header mb-4">
-        <h2 className="fw-bold">🛒 Meu Carrinho</h2>
+        <h2 className="fw-bold"><ShoppingCart size={24} color="#414141" /> Minhas compras</h2>
         <button className="btn-voltar" onClick={() => navigate("/")}>
           Continuar Comprando
         </button>
@@ -74,9 +75,9 @@ export default function Carrinho() {
                     )}
 
                     <div className="carrinho-controles">
-                      <button onClick={() => alterarQuantidade(item.id, -1)}>-</button>
+                      <button onClick={() => alterarQuantidade(item.id, -1)}><Minus size={16} /></button>
                       <span>{item.quantidade}</span>
-                      <button onClick={() => alterarQuantidade(item.id, 1)}>+</button>
+                      <button onClick={() => alterarQuantidade(item.id, 1)}><Plus size={16} /></button>
                     </div>
                   </div>
 

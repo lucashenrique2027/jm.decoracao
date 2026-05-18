@@ -15,6 +15,7 @@ import Perfil from "./pages/Perfil/perfil.jsx";
 import Pagamento from "./pages/Pagamento/pagamento.jsx";
 import Admin from "./admin/dashboard/Admin.jsx";
 import LoginAdmin from './admin/login/LoginAdmin.jsx';
+import PedidoSelecionado from './components/PedidoSelected/pagePedido.jsx';
 
 import "../styles/global.css";
 
@@ -41,9 +42,10 @@ createRoot(document.getElementById("root")).render(
               <Route path="/admin" element={<Admin />} />{/*http://localhost:8080/admin*/}
             </Route>
             <Route element={<RotaProtegida />}>
-              <Route path='/perfil' element={<Perfil/>}/>
               <Route path="/carrinho" element={<Carrinho />} />
               <Route path="/pagamento/:pedidoId" element={<Pagamento/>}/>
+              <Route path='/pedido/:id'element={<PedidoSelecionado/>}/>
+              <Route path='/perfil' element={<Perfil/>}/>
             </Route>
           </Routes>
         </CarrinhoProvider>

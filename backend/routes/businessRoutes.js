@@ -4,7 +4,7 @@ import {
   faturamentoPorCliente,
   produtosMaisVendidos,
   categoriasMaisVendidas,
-} from '../routes/business.js';
+} from '../controller/businessController.js';
 
 import { verificarToken } from '../middlewares/validarTokenAdmin.js';
 

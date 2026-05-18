@@ -8,12 +8,13 @@ import {
   buscarClientePorId,
   atualizarCliente,
   deletarCliente
-} from '../routes/clientes.js';
+} from '../controller/clientesController.js';
 import {
   obterCarrinhoAtivo,
   adicionarProdutosAoCarrinho,
-  confirmarPagamentoCarrinho
-} from '../routes/carrinho.js';
+  confirmarPagamentoCarrinho,
+  sincronizarCarrinho
+} from '../controller/carrinhoController.js';
 import { verificarToken } from '../middlewares/validarTokenClient.js';
 
 const router = express.Router();
@@ -30,7 +31,9 @@ router.post('/adicionar', verificarToken, adicionarProdutosAoCarrinho);
 
 router.get('/meu-carrinho', verificarToken, obterCarrinhoAtivo);
 
-router.post('/confirmar-pagamento', confirmarPagamentoCarrinho);
+router.post('/confirmar-pagamento',verificarToken,confirmarPagamentoCarrinho);
+
+router.put('/sincronizar-carrinho',verificarToken,sincronizarCarrinho);
 
 router.get('/', listarClientes);
 

@@ -62,7 +62,7 @@ export default function Login() {
     setErrosLogin({});
     try {
       await loginCliente(email, senha);
-      navigate('/perfil');
+      navigate('/');
     } catch {
       setErrosLogin({ geral: 'Email ou senha inválidos' });
     }

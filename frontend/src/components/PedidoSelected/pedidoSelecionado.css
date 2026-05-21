@@ -265,3 +265,27 @@
     height: 220px;
   }
 }
+.pedido-selected-pagamento {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.pedido-selected-btn-pagar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pedido-selected-btn-pagar:hover {
+  background: #16a34a;
+}

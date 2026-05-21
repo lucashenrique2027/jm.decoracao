@@ -49,6 +49,7 @@ export const meusPedidos = async () => {
     try {
         const response = await fetch(`${API_URL_PEDIDO}/meus`, { credentials: 'include' });
         if (!response.ok) throw new Error("Erro ao listar pedidos");
+        console.log(response)
         return response.json();
     } catch (error) {
         console.log(error.message);

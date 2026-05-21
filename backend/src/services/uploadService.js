@@ -6,7 +6,7 @@ import crypto from "crypto";
 export const imageExistsInMinio = async (fileName) => {
   try {
     await s3Client.send(new HeadObjectCommand({
-      Bucket: "loja-jm",
+      Bucket: process.env.MINIO_BUCKET,
       Key: fileName
     }));
     return true;
@@ -28,7 +28,7 @@ export const uploadImageToMinio = async (file, forceName = null) => {
   }
 
   const params = {
-    Bucket: "loja-jm",
+    Bucket: process.env.MINIO_BUCKET,
     Key: fileName,
     Body: file.buffer,
     ContentType: file.mimetype,

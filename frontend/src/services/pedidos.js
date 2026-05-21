@@ -49,7 +49,6 @@ export const meusPedidos = async () => {
     try {
         const response = await fetch(`${API_URL_PEDIDO}/meus`, { credentials: 'include' });
         if (!response.ok) throw new Error("Erro ao listar pedidos");
-        console.log(response)
         return response.json();
     } catch (error) {
         console.log(error.message);
@@ -233,6 +232,23 @@ export const criarPedidoPendente = async ({
 
     console.error(error);
 
+    throw error;
+  }
+};
+
+export const deletarPedido = async (id) => {
+  try {
+    const response = await fetch(`${API_URL_PEDIDO}`+"/delete"+`/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const erro = await response.json();
+      throw new Error(erro.erro || 'Erro ao deletar pedido');
+    }
+    return response.json();
+  } catch (error) {
+    console.log(error.message);
     throw error;
   }
 };

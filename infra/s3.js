@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 const s3Client = new S3Client({
-  region: "us-east-1", 
+  region: process.env.MINIO_REGION,
   endpoint: "http://minio:9000", 
   forcePathStyle: true, 
   credentials: {
@@ -12,7 +12,7 @@ const s3Client = new S3Client({
   },
 });
 
-const BUCKET_NAME = "loja-jm";
+const BUCKET_NAME = process.env.MINIO_BUCKET || "loja-jm";
 const UPLOADS_PATH = path.resolve("uploads");
 
 const mimeTypes = {

@@ -132,6 +132,8 @@ export default function PedidoSelecionado() {
               {statusInfo.label}
             </span>
 
+              {pedido.status === 'pendente' && ( <div className="pedido-selected-pagamento"> <button className="pedido-selected-btn-pagar" onClick={() => navigate(`/pagamento/${pedido.id}`)} > <CreditCard size={18} /> Ir para pagamento </button> </div> )}
+
           </div>
         </div>
 

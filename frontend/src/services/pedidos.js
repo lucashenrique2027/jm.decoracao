@@ -157,3 +157,81 @@ export const sincronizarCarrinho = async (
     throw error;
   }
 };
+
+export const criarPedidoPendente = async ({
+  usarEnderecoPerfil = true,
+  novoEndereco = null,
+  observacaoEntrega = "",
+}) => {
+
+  try {
+
+    const response = await fetch(
+
+      `${API_URL_CARRINHO}/criar-pedido`,
+
+      {
+        method: 'POST',
+
+        credentials: 'include',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+
+          usarEnderecoPerfil,
+
+          novoEndereco,
+
+          observacaoEntrega,
+        }),
+      }
+    );
+
+    /* =============================================
+       TRATAR ERROS
+    ============================================= */
+
+    if (!response.ok) {
+
+      const erro = await response.json();
+
+      if (response.status === 401) {
+
+        throw new Error(
+          'Você precisa estar logado'
+        );
+      }
+
+      if (
+        response.status === 400 ||
+        response.status === 404
+      ) {
+
+        throw new Error(
+          erro.erro ||
+          'Erro ao criar pedido'
+        );
+      }
+
+      throw new Error(
+        erro.erro ||
+        'Erro interno'
+      );
+    }
+
+    /* =============================================
+       SUCESSO
+    ============================================= */
+
+    return await response.json();
+
+  } catch (error) {
+
+    console.error(error);
+
+    throw error;
+  }
+};

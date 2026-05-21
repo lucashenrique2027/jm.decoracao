@@ -5,7 +5,7 @@ minio_pid=$!
 echo "Aguardando o MinIO iniciar..."
 sleep 5;
 
-mc alias set local http://localhost:9000 "${MINIO_ROOT_USER}" "${}";
+mc alias set local http://localhost:9000 "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}";
 
 BUCKET_NAME="loja-jm"
 

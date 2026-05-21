@@ -9,8 +9,6 @@ services:
     depends_on:
       postgres: 
         condition: service_healthy
-    ports:
-      - "3001:3000"
     networks:
       - app
       - services
@@ -53,7 +51,7 @@ services:
       - .env
     environment:
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}  
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -78,7 +76,7 @@ services:
       - .env
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      : ${}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     healthcheck:
         test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
         interval: 10s

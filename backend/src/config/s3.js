@@ -6,7 +6,7 @@ const s3Client = new S3Client({
   forcePathStyle: true, 
   credentials: {
     accessKeyId: process.env.MINIO_ROOT_USER,
-    secretAccessKey: process.env.,
+    secretAccessKey: process.env.MINIO_ROOT_PASSWORD,
   },
 });
 

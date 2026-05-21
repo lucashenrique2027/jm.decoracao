@@ -4,7 +4,7 @@ import {
   buscarProdutoPorId,
   buscarProdutoPorCategoria,
   listarCategorias
-} from '../controller/produtosController.js';
+} from '../controllers/produtosController.js';
 
 const router = Router();
 

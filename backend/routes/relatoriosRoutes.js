@@ -4,7 +4,7 @@ import {
   relatorioFaturamento,    relatorioFaturamentoPdf,
   relatorioProdutos,       relatorioProdutosPdf,
   relatorioCategorias,     relatorioCategotiasPdf,
-} from '../controller/relatoriosController.js';
+} from '../controllers/relatoriosController.js';
 
 const router = express.Router();
 

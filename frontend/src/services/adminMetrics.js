@@ -1,0 +1,63 @@
+const API = 'http://localhost:8080/api/metrics/business';
+
+/* =========================================================
+   FATURAMENTO POR CLIENTE
+========================================================= */
+
+export const buscarFaturamentoClientes = async () => {
+
+  const response = await fetch(
+    `${API}/faturamento-clientes`,
+    {
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Erro ao buscar faturamento por cliente');
+  }
+
+  return response.json();
+};
+
+
+/* =========================================================
+   PRODUTOS MAIS VENDIDOS
+========================================================= */
+
+export const buscarProdutosMaisVendidos = async () => {
+
+  const response = await fetch(
+    `${API}/produtos-mais-vendidos`,
+    {
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Erro ao buscar produtos mais vendidos');
+  }
+
+  return response.json();
+};
+
+
+/* =========================================================
+   CATEGORIAS MAIS VENDIDAS
+========================================================= */
+
+export const buscarCategoriasMaisVendidas = async () => {
+
+  const response = await fetch(
+    `${API}/categorias-mais-vendidas`,
+    {
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Erro ao buscar categorias mais vendidas');
+  }
+
+  return response.json();
+};

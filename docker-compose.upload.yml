@@ -1,0 +1,21 @@
+name: loja-jm-decoracao-prod
+
+services:
+  storage-migrator:
+    build:
+      context: .
+      dockerfile: docker/migrator-images/Dockerfile
+    container_name: jm_migrator_prod
+    working_dir: /app
+    env_file: .env
+    networks:
+      - storage
+    volumes:
+      - ./uploads:/app/uploads
+      - ./infra:/app/infra
+    restart: "no"
+
+networks:
+  storage:
+    external: true  
+    name: loja-jm-decoracao-prod_storage

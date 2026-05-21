@@ -1,0 +1,168 @@
+/* ===== CONTAINER DA VITRINE ===== */
+.galeria-professional {
+  display: grid;
+  /* Cria colunas automáticas: mínimo 220px, máximo preenche o espaço */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ===== CARD DO PRODUTO ===== */
+.card-item {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+}
+
+.card-item:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transform: translateY(-4px);
+}
+
+/* ===== SELO DE STATUS (DISPONIBILIDADE) ===== */
+.selo-status {
+  padding: 4px 10px;
+  width: fit-content;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 4px;
+  color: #fff;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ===== ÁREA DA IMAGEM ===== */
+.img-container {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* Mantém a imagem sempre quadrada */
+  background: #fdfdfd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card-item:hover .img-container img {
+  transform: scale(1.08);
+}
+
+/* ===== INFORMAÇÕES (NOME E PREÇO) ===== */
+.produto-info {
+  padding: 15px;
+  flex-grow: 1; /* Garante que esta área ocupe o espaço disponível */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Agrupa o conteúdo no topo, eliminando espaços vazios */
+  gap: 8px; /* Espaçamento padrão e consistente entre todos os elementos internos */
+}
+
+/* Forçamos o parágrafo do nome a não ter margens extras que quebram o layout */
+.produto-info p {
+  margin: 0;
+}
+
+.produto-info p b {
+  font-size: 15px;
+  color: #333;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.2;
+  min-height: 36px; /* Garante que nomes curtos ocupem o mesmo espaço que nomes de 2 linhas */
+}
+
+/* ===== SELO DE STATUS ===== */
+.selo-status {
+  padding: 2px 8px;
+  width: fit-content;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 4px;
+  color: #fff;
+  text-transform: uppercase;
+  margin-bottom: 4px; /* Espaço pequeno antes do preço */
+}
+
+/* Preço Varejo ajustado */
+.preco-varejo {
+  font-weight: 500;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Garante que a área de atacado não "flutue" */
+.info-atacado {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed #eee;
+}.preco-atacado {
+  font-size: 1.1rem;
+  color: #28a745;
+}
+
+.minimo-atacado {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* ===== BOTÕES ===== */
+.compra-acoes {
+  padding: 0 15px 15px;
+}
+
+.btn-add {
+  width: 100%;
+  background-color: #25D366;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-add:hover:not(:disabled) {
+  background-color: #1eb954;
+}
+
+.btn-add:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* ===== ESTADO ESGOTADO ===== */
+.card-esgotado {
+  filter: grayscale(0.8);
+  opacity: 0.7;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 600px) {
+  .galeria-professional {
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas em celulares */
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .produto-info p b {
+    font-size: 13px;
+  }
+}

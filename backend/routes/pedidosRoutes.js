@@ -3,7 +3,8 @@ import {
   listarPedidos,
   buscarPedidoPorId,
   listarPedidosPorCliente,
-  atualizarStatusPedido
+  atualizarStatusPedido,
+  deletePedido
 } from '../controllers/pedidosController.js';
 import { verificarToken as verificarTokenAdmin } from '../middlewares/validarTokenAdmin.js';
 import { verificarToken as verificarTokenCliente } from '../middlewares/validarTokenClient.js';
@@ -12,6 +13,7 @@ const router = express.Router();
 
 router.get('/', verificarTokenAdmin, listarPedidos);
 router.get('/meus', verificarTokenCliente, listarPedidosPorCliente);
+router.delete('/delete/:id', verificarTokenCliente, deletePedido);
 router.get('/meus/:id', verificarTokenCliente, buscarPedidoPorId);
 router.get('/:id', verificarTokenAdmin, buscarPedidoPorId);
 router.patch('/:id/status', verificarTokenAdmin, atualizarStatusPedido);

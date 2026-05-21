@@ -182,3 +182,34 @@ export const atualizarStatusPedido = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao atualizar status' });
   }
 };
+
+export const deletePedido = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [pedido] = await db
+      .select()
+      .from(pedidos)
+      .where(eq(pedidos.id, parseInt(id)));
+
+    if (!pedido)
+      return res.status(404).json({ erro: 'Pedido não encontrado' });
+
+    if (pedido.status !== 'pendente')
+      return res.status(400).json({ erro: 'Apenas pedidos pendentes podem ser deletados' });
+
+    await db
+      .delete(pedidoItens)
+      .where(eq(pedidoItens.pedidoId, parseInt(id)));
+
+    await db
+      .delete(pedidos)
+      .where(eq(pedidos.id, parseInt(id)));
+
+    return res.json({ mensagem: 'Pedido deletado com sucesso' });
+
+  } catch (erro) {
+    console.error('Erro ao deletar pedido:', erro);
+    return res.status(500).json({ erro: 'Erro ao deletar pedido' });
+  }
+};

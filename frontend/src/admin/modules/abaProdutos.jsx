@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
 import { useMensagem } from '../../context/MensagemContext';
-import { cadastrarProduto as cadastrarProdutoService, listarCategorias } from '../../services/adminProducts.js';
+import { 
+  cadastrarProduto as cadastrarProdutoService, 
+  listarCategorias, 
+  deletarCategoria,
+  criarCategoria // Certifique-se de que este método existe no seu service
+} from '../../services/adminProducts.js';
+import { Trash2, Plus } from "lucide-react";
 
 export default function AbaProdutos() {
   const { mostrarMensagem } = useMensagem();
 
+  // Estados do Produto
   const [nome, setNome] = useState("");
   const [precoVarejo, setPrecoVarejo] = useState("");
   const [precoAtacado, setPrecoAtacado] = useState("");
@@ -14,13 +21,23 @@ export default function AbaProdutos() {
   const [estoque, setEstoque] = useState(0);
   const [imagem, setImagem] = useState(null);
   const [previewImagem, setPreviewImagem] = useState(null);
-  const [categorias, setCategorias] = useState([]);
   const [enviando, setEnviando] = useState(false);
 
-  useEffect(() => {
+  // Estados das Categorias
+  const [categorias, setCategorias] = useState([]);
+  const [novaCategoria, setNovaCategoria] = useState("");
+  const [criandoCategoria, setCriandoCategoria] = useState(false);
+  const [excluindoId, setExcluindoId] = useState(null);
+
+  // Função para carregar as categorias do backend
+  const carregarCategorias = () => {
     listarCategorias()
       .then(setCategorias)
       .catch(() => mostrarMensagem("Erro ao carregar categorias do servidor.", "erro"));
+  };
+
+  useEffect(() => {
+    carregarCategorias();
   }, []);
 
   const handleImagemChange = (e) => {
@@ -31,45 +48,86 @@ export default function AbaProdutos() {
     }
   };
 
-const cadastrarProduto = async (e) => {
-  e.preventDefault();
+  // Cadastro de Produto
+  const cadastrarProduto = async (e) => {
+    e.preventDefault();
 
-  // Validações no frontend antes de nem chamar a API
-  if (!categoriaId) {
-    mostrarMensagem("Por favor, selecione uma categoria vinculada.", "erro");
-    return;
-  }
-  if (!imagem) {
-    mostrarMensagem("Por favor, selecione uma imagem para o produto.", "erro");
-    return;
-  }
-  if (!nome || !precoVarejo || !estoque) {
-    mostrarMensagem("Preencha todos os campos obrigatórios.", "erro");
-    return;
-  }
+    if (!categoriaId) {
+      mostrarMensagem("Por favor, selecione uma categoria vinculada.", "erro");
+      return;
+    }
+    if (!imagem) {
+      mostrarMensagem("Por favor, selecione uma imagem para o produto.", "erro");
+      return;
+    }
+    if (!nome || !precoVarejo || !estoque) {
+      mostrarMensagem("Preencha todos os campos obrigatórios.", "erro");
+      return;
+    }
 
-  try {
-    setEnviando(true);
-    await cadastrarProdutoService(
-      { nome, descricao, precoVarejo, precoAtacado: precoAtacado || null,
-        quantidadeMinimaAtacado: quantidadeMinimaAtacado || null,
-        categoriaId: Number(categoriaId), estoque: Number(estoque), disponivel: true },
-      imagem
-    );
+    try {
+      setEnviando(true);
+      await cadastrarProdutoService(
+        { nome, descricao, precoVarejo, precoAtacado: precoAtacado || null,
+          quantidadeMinimaAtacado: quantidadeMinimaAtacado || null,
+          categoriaId: Number(categoriaId), estoque: Number(estoque), disponivel: true },
+        imagem
+      );
 
-    // ✅ Só chega aqui se o service não lançou exceção
-    mostrarMensagem("Produto publicado com sucesso no catálogo!", "sucesso");
-    setNome(""); setPrecoVarejo(""); setPrecoAtacado("");
-    setQuantidadeMinima(""); setDescricao(""); setCategoriaId("");
-    setEstoque(0); setImagem(null); setPreviewImagem(null);
+      mostrarMensagem("Produto publicado com sucesso no catálogo!", "sucesso");
+      setNome(""); setPrecoVarejo(""); setPrecoAtacado("");
+      setQuantidadeMinima(""); setDescricao(""); setCategoriaId("");
+      setEstoque(0); setImagem(null); setPreviewImagem(null);
 
-  } catch (error) {
-    mostrarMensagem(error.message || "Erro ao realizar o cadastro.", "erro");
-    console.error("Erro ao cadastrar produto:", error);
-  } finally {
-    setEnviando(false);
-  }
-};
+    } catch (error) {
+      mostrarMensagem(error.message || "Erro ao realizar o cadastro.", "erro");
+      console.error("Erro ao cadastrar produto:", error);
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  // Criar Nova Categoria
+  const handleAdicionarCategoria = async (e) => {
+    e.preventDefault();
+    if (!novaCategoria.trim()) return;
+
+    try {
+      setCriandoCategoria(true);
+      // Ajuste o envio para o formato que sua API espera (objeto ou apenas a string)
+      await criarCategoria({ nome: novaCategoria.trim() });
+      
+      mostrarMensagem("Nova categoria adicionada com sucesso!", "sucesso");
+      setNovaCategoria("");
+      carregarCategorias(); // Recarrega a lista
+    } catch (error) {
+      mostrarMensagem(error.message || "Erro ao adicionar categoria.", "erro");
+      console.error("Erro ao criar categoria:", error);
+    } finally {
+      setCriandoCategoria(false);
+    }
+  };
+
+  // Excluir Categoria
+  const handleExcluirCategoria = async (id) => {
+    if (!window.confirm("Tem certeza que deseja excluir esta categoria?")) return;
+
+    try {
+      setExcluindoId(id);
+      await deletarCategoria(id);
+      mostrarMensagem("Categoria removida com sucesso!", "sucesso");
+      
+      if (Number(categoriaId) === id) {
+        setCategoriaId("");
+      }
+      carregarCategorias();
+    } catch (error) {
+      mostrarMensagem(error.message || "Erro ao excluir categoria.", "erro");
+      console.error("Erro ao excluir categoria:", error);
+    } finally {
+      setExcluindoId(null);
+    }
+  };
 
   return (
     <div className="container-fluid px-0">
@@ -86,7 +144,7 @@ const cadastrarProduto = async (e) => {
       </div>
 
       {/* FORMULÁRIO COM INPUTS AMPLIADOS */}
-      <div className="card border-0 shadow-sm" style={{ borderRadius: '16px' }}>
+      <div className="card border-0 shadow-sm mb-5" style={{ borderRadius: '16px' }}>
         <form onSubmit={cadastrarProduto} className="card-body p-4 p-md-5">
           
           <div className="row g-4">
@@ -213,14 +271,12 @@ const cadastrarProduto = async (e) => {
               </div>
             </div>
 
-            {/* UPLOAD ZONE ADAPTADA PARA CLIQUES FÁCEIS */}
             <div className="col-md-8 mt-3">
               <label className="form-label fw-bold text-dark fs-5 mb-2">Fotografia do Produto</label>
               <div className="d-flex gap-3 align-items-stretch">
                 
-                {/* ÁREA DE SELEÇÃO GRANDE */}
                 <div className="position-relative flex-grow-1 border border-dashed rounded-3 bg-light d-flex flex-column align-items-center justify-content-center p-4 text-center"
-                     style={{ borderColor: '#94a3b8', border強化: '2px', cursor: 'pointer', minHeight: '120px' }}>
+                     style={{ borderColor: '#94a3b8', borderWidth: '2px', cursor: 'pointer', minHeight: '120px' }}>
                   <input 
                     type="file" 
                     accept="image/*"
@@ -234,7 +290,6 @@ const cadastrarProduto = async (e) => {
                   </span>
                 </div>
 
-                {/* PRÉ-VISUALIZAÇÃO EM TAMANHO GENEROSO */}
                 {previewImagem && (
                   <div className="position-relative shadow rounded-3 overflow-hidden border"
                        style={{ width: '120px', height: '120px', minWidth: '120px', borderColor: '#cbd5e1' }}>
@@ -251,7 +306,6 @@ const cadastrarProduto = async (e) => {
               </div>
             </div>
 
-            {/* BOTÃO SALVAR AGORA EM ESTILO GIGANTE */}
             <div className="col-12 mt-5 border-top pt-4 text-end" style={{ borderColor: '#e2e8f0' }}>
               <button 
                 type="submit" 
@@ -274,6 +328,97 @@ const cadastrarProduto = async (e) => {
 
           </div>
         </form>
+      </div>
+
+      {/* GERENCIADOR DE CATEGORIAS COMPLETO (CRIAR, LISTAR E DELETAR) */}
+      <div className="card border-0 shadow-sm mt-4 mb-5" style={{ borderRadius: '16px' }}>
+        <div className="card-body p-4 p-md-5">
+          <div className="border-bottom pb-2 mb-4" style={{ borderColor: '#e2e8f0' }}>
+            <h3 className="fw-bold text-dark mb-1 fs-4">
+              <i className="bi bi-tags-fill text-primary me-2"></i>
+              Gerenciador de Categorias
+            </h3>
+            <p className="text-secondary mb-0 fs-6">
+              Adicione novas classificações ou remova as categorias existentes que não possuem produtos vinculados.
+            </p>
+          </div>
+
+          {/* FORMULÁRIO INLINE PARA ADICIONAR NOVA CATEGORIA */}
+          <form onSubmit={handleAdicionarCategoria} className="row g-3 mb-4 align-items-end">
+            <div className="col-md-9 col-sm-8">
+              <label className="form-label fw-bold text-dark fs-5 mb-2">Nome da Nova Categoria</label>
+              <input 
+                type="text"
+                className="form-control form-control-lg fs-5 text-dark"
+                style={{ borderRadius: '10px', padding: '0.6rem 1rem', border: '2px solid #cbd5e1' }}
+                placeholder="Ex: Vasos de Cerâmica, Cachepots, Pratos..."
+                value={novaCategoria}
+                onChange={(e) => setNovaCategoria(e.target.value)}
+                disabled={criandoCategoria}
+                required
+              />
+            </div>
+            <div className="col-md-3 col-sm-4">
+              <button
+                type="submit"
+                className="btn btn-primary btn-lg w-100 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm"
+                style={{ borderRadius: '10px', padding: '0.65rem 1rem', fontSize: '1.15rem' }}
+                disabled={criandoCategoria || !novaCategoria.trim()}
+              >
+                {criandoCategoria ? (
+                  <span className="spinner-border spinner-border-sm" role="status"></span>
+                ) : (
+                  <>
+                    <Plus size={20} className="me-2" /> Salvar Categoria
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* LISTAGEM DE CATEGORIAS */}
+          {categorias.length === 0 ? (
+            <div className="alert alert-light text-center p-4 border text-secondary fs-5" style={{ borderRadius: '10px' }}>
+              Nenhuma categoria encontrada no sistema.
+            </div>
+          ) : (
+            <div className="table-responsive" style={{ borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <table className="table table-hover align-middle mb-0 bg-white">
+                <thead className="table-light">
+                  <tr>
+                    <th className="px-4 py-3 text-secondary fw-bold fs-6" style={{ width: '15%' }}>ID</th>
+                    <th className="px-4 py-3 text-secondary fw-bold fs-6">Nome da Categoria</th>
+                    <th className="px-4 py-3 text-secondary fw-bold fs-6 text-end" style={{ width: '20%' }}>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categorias.map((cat) => (
+                    <tr key={cat.id} style={{ transition: 'background-color 0.2s' }}>
+                      <td className="px-4 py-3 fw-bold text-secondary fs-5">#{cat.id}</td>
+                      <td className="px-4 py-3 fw-semibold text-dark fs-5">{cat.nome}</td>
+                      <td className="px-4 py-3 text-end">
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger d-inline-flex align-items-center justify-content-center p-2 shadow-sm"
+                          style={{ borderRadius: '8px', minWidth: '40px', height: '40px' }}
+                          title="Excluir Categoria"
+                          disabled={excluindoId === cat.id}
+                          onClick={() => handleExcluirCategoria(cat.id)}
+                        >
+                          {excluindoId === cat.id ? (
+                            <span className="spinner-border spinner-border-sm" role="status"></span>
+                          ) : (
+                            <Trash2 size={20} />
+                          )}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
 
     </div>

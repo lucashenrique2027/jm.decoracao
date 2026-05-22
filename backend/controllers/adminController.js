@@ -68,13 +68,18 @@ export const dadosAdmin = async (req,res) => {
 
     const adminId = req.adminId;
 
-    const resultado = await  db.select({
+    const resultado = await db.select({
       id: admin.id,
       nome: admin.nome,
       email: admin.email,
       role: admin.role,
-      cpf_cnpj: admin.cpfCnpj,
-      endereco: admin.enderecoFiscal
+      cpfCnpj: admin.cpfCnpj,
+      cep: admin.cep,
+      endereco: admin.endereco,
+      numero: admin.numero,
+      bairro: admin.bairro,
+      cidade: admin.cidade,
+      estado: admin.estado,
     }).from(admin).where(eq(admin.id, adminId));
 
     if(resultado.length === 0) {

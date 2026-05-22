@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS jm.admin (
   nome TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   senha_hash TEXT NOT NULL,
+  cpf_cnpj TEXT,
   role jm.user_role NOT NULL DEFAULT 'colaborador',
   loja_id INTEGER REFERENCES jm.loja(id),
   criado_em TIMESTAMPTZ DEFAULT NOW()

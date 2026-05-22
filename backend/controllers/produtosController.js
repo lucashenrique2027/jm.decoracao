@@ -3,7 +3,7 @@ import { produtos, categorias, pedidoItens } from '../models/schema.js';
 import { uploadImageToMinio } from '../src/services/uploadService.js';
 import s3Client from '../src/config/s3.js';
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { eq, ilike, and } from 'drizzle-orm';
+import { eq, ilike, and, count } from 'drizzle-orm';
 
 
 // Listar todos os produtos em abaProduto.jsx
@@ -414,23 +414,95 @@ export const cadastrarProduto = async (req, res) => {
 
 // Adicionar nova categoria aos produtos
 export const criarCategoria = async (req, res) => {
-    try {
-        const { nome } = req.body;
-        if (!nome || nome.trim() === "") return res.status(400).json({ erro: 'Nome da categoria é obrigatório' });
+  try {
+    const nomeRaw = req.body.nome;
 
-        const nomeFormatado = nome.trim().toLowerCase();
+    const nome =
+      typeof nomeRaw === 'string'
+        ? nomeRaw
+        : nomeRaw?.nome;
 
-        const data = await db.insert(categorias)
-        .values({ nome: nomeFormatado.trim() }).returning();
-        res.status(201).json(data[0]);
-    } catch (error) {
-        if (error.code === '23505') {
-            return res.status(400).json({ erro: 'Esta categoria já existe' });
-        }
-        res.status(500).json({ erro: 'Erro ao criar categoria' });
+    if (!nome || nome.trim() === "") {
+      return res.status(400).json({ erro: 'Nome da categoria é obrigatório' });
     }
+
+    const nomeFormatado = nome.trim().toLowerCase();
+
+    const data = await db.insert(categorias)
+      .values({ nome: nomeFormatado })
+      .returning();
+
+    return res.status(201).json(data[0]);
+
+  } catch (error) {
+    console.error("ERRO CRIAR CATEGORIA:", error);
+
+    if (error.code === '23505') {
+      return res.status(400).json({ erro: 'Esta categoria já existe' });
+    }
+
+    return res.status(500).json({
+      erro: error.message // importante pra debug
+    });
+  }
 };
 
+
+export const deletarCategoria = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const categoriaIdInt = parseInt(id);
+
+    if (isNaN(categoriaIdInt)) {
+      return res.status(400).json({ erro: 'ID da categoria inválido' });
+    }
+
+    // Executa as operações em bloco isolado para garantir consistência
+    const resultado = await db.transaction(async (tx) => {
+      
+      // 1. Verifica se a categoria realmente existe no banco
+      const [categoriaExiste] = await tx
+        .select()
+        .from(categorias)
+        .where(eq(categorias.id, categoriaIdInt));
+
+      if (!categoriaExiste) {
+        return { status: 404, erro: 'Categoria não encontrada' };
+      }
+
+      // 2. Validação ativa: Conta quantos produtos estão usando esta categoria
+      const [contagem] = await tx
+        .select({ total: count() })
+        .from(produtos)
+        .where(eq(produtos.categoriaId, categoriaIdInt));
+
+      if (contagem && contagem.total > 0) {
+        return { 
+          status: 400, 
+          erro: `Não é possível apagar esta categoria pois existem ${contagem.total} produtos vinculados a ela.` 
+        };
+      }
+
+      // 3. Se a contagem for zero, realiza a exclusão com segurança
+      await tx
+        .delete(categorias)
+        .where(eq(categorias.id, categoriaIdInt));
+
+      return { status: 200, sucesso: true };
+    });
+
+    // Retorno das respostas com base no resultado da transação
+    if (resultado.erro) {
+      return res.status(resultado.status).json({ erro: resultado.erro });
+    }
+
+    return res.status(200).json({ mensagem: 'Categoria removida com sucesso' });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro ao deletar categoria' });
+  }
+};
 
 // Expor todas as classificações de produtos
 export const listarCategorias = async (req, res) => {

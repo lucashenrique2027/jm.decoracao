@@ -1,5 +1,5 @@
 import { eq, inArray, gte, lte, and } from 'drizzle-orm';
-import { pedidos, pedidoItens, produtos, clientes } from '../models/schema.js';
+import { pedidos, pedidoItens, produtos, clientes,pagamentos } from '../models/schema.js';
 import { db } from '../models/db.js';
 
 // Admin: listar todos os pedidos com filtros
@@ -145,41 +145,109 @@ export const listarPedidosPorCliente = async (req, res) => {
 export const atualizarStatusPedido = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status: novoStatus } = req.body;
+    const pedidoIdInt = parseInt(id);
 
-    // 1. Busca o pedido para saber o status ATUAL (antes de mudar)
-    const [pedidoAtual] = await db.select().from(pedidos).where(eq(pedidos.id, parseInt(id)));
-    if (!pedidoAtual) return res.status(404).json({ erro: 'Pedido não encontrado' });
+    // Iniciamos uma transação para garantir ACID. Se algo falhar, o banco sofre Rollback automaticamente.
+    const resultado = await db.transaction(async (tx) => {
 
-    // 2. Só faz a mudança se o status for realmente diferente
-    if (pedidoAtual.status === status) {
-      return res.json({ mensagem: 'O pedido já está com este status' });
-    }
+      // 1. Busca o pedido de forma isolada dentro da transação
+      const [pedidoAtual] = await tx
+        .select()
+        .from(pedidos)
+        .where(eq(pedidos.id, pedidoIdInt));
 
-    // 3. Atualiza o status no banco
-    const [pedidoAtualizado] = await db.update(pedidos)
-      .set({ status })
-      .where(eq(pedidos.id, parseInt(id)))
-      .returning();
-
-    // 4. LÓGICA DE ESTOQUE: Só devolve se estiver REJEITANDO algo que estava PENDENTE ou CONFIRMADO
-    const deveDevolverEstoque = status === 'rejeitado' && pedidoAtual.status !== 'rejeitado';
-
-    if (deveDevolverEstoque) {
-      const itens = await db.select().from(pedidoItens).where(eq(pedidoItens.pedidoId, pedidoAtual.id));
-
-      for (const item of itens) {
-        const [produto] = await db.select().from(produtos).where(eq(produtos.id, item.produtoId));
-        
-        await db.update(produtos)
-          .set({ estoque: produto.estoque + item.quantidade })
-          .where(eq(produtos.id, item.produtoId));
+      if (!pedidoAtual) {
+        return { status: 404, erro: 'Pedido não encontrado' };
       }
+
+      const statusAtual = pedidoAtual.status;
+
+      if (statusAtual === novoStatus) {
+        return { status: 200, mensagem: 'O pedido já está com este status' };
+      }
+
+      // 2. Proteção de Estados Finais (Imutabilidade histórica)
+      if (statusAtual === 'rejeitado' || statusAtual === 'entregue') {
+        return { 
+          status: 422, 
+          erro: `Operação negada. O pedido já se encontra em um estado terminal (${statusAtual}).` 
+        };
+      }
+
+      // 3. VERIFICAÇÃO REAL DO PAGAMENTO (Garantia de Origem Financeira)
+      if (novoStatus === 'confirmado') {
+        const [pagamentoVinculado] = await tx
+          .select()
+          .from(pagamentos)
+          .where(eq(pagamentos.pedidoId, pedidoIdInt));
+
+        // Se não houver registro de pagamento ou se o status no banco não for 'pago'
+        if (!pagamentoVinculado || pagamentoVinculado.status !== 'pago') {
+          return {
+            status: 422,
+            erro: 'Violou regra de negócio: Não é possível confirmar um pedido cujo pagamento não consta como "pago" no sistema financeiro.'
+          };
+        }
+      }
+
+      // 4. Validação Logística do Admin
+      if (statusAtual === 'pendente' && novoStatus === 'entregue') {
+        return {
+          status: 422,
+          erro: 'Violou regra de negócio: Um pedido não pode ser entregue sem antes ter sido confirmado (pago).'
+        };
+      }
+
+      // 5. Se passou nas validações reais, executa a atualização do Pedido
+      const [pedidoAtualizado] = await tx
+        .update(pedidos)
+        .set({ status: novoStatus })
+        .where(eq(pedidos.id, pedidoIdInt))
+        .returning();
+
+      // 6. LÓGICA DE ESTOQUE: Reversão estrita em caso de rejeição manual/cancelamento
+      if (novoStatus === 'rejeitado' && statusAtual !== 'rejeitado') {
+        const itens = await tx
+          .select()
+          .from(pedidoItens)
+          .where(eq(pedidoItens.pedidoId, pedidoIdInt));
+
+        for (const item of itens) {
+          const [produto] = await tx
+            .select()
+            .from(produtos)
+            .where(eq(produtos.id, item.produtoId));
+          
+          if (produto) {
+            await tx
+              .update(produtos)
+              .set({ estoque: produto.estoque + item.quantidade })
+              .where(eq(produtos.id, item.produtoId));
+          }
+        }
+      }
+
+      return { status: 200, sucesso: true, pedido: pedidoAtualizado };
+    });
+
+    // Tratamento do retorno da transação
+    if (resultado.erro) {
+      return res.status(resultado.status).json({ erro: resultado.erro });
+    }
+    
+    if (resultado.mensagem) {
+      return res.status(resultado.status).json({ mensagem: resultado.mensagem });
     }
 
-    res.json({ mensagem: 'Status atualizado com sucesso', pedido: pedidoAtualizado });
+    return res.json({ 
+      mensagem: 'Status atualizado com sucesso e validado pelo sistema.', 
+      pedido: resultado.pedido 
+    });
+
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao atualizar status' });
+    console.error(erro);
+    return res.status(500).json({ erro: 'Erro interno ao processar transação de status' });
   }
 };
 

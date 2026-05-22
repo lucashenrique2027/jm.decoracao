@@ -7,6 +7,7 @@ import {
 } from '../controllers/adminController.js';
 import {
   criarCategoria,
+  deletarCategoria,
   listarCategorias, 
   buscarProdutoPorId,
   buscarProdutoPorCategoria,
@@ -466,5 +467,7 @@ router.get('/categorias', listarCategorias);
  * =========================================================
  */
 router.post('/categorias', verificarToken, criarCategoria);
+
+router.delete('/categorias/:id', verificarToken, deletarCategoria);
 
 export default router;

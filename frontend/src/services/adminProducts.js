@@ -20,6 +20,18 @@ export const criarCategoria = async (nome) => {
   return response.json();
 };
 
+export const deletarCategoria = async (id) => {
+  const response = await fetch(`${API_URL}/categorias/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.erro || 'Erro ao deletar categoria');
+  }
+  return response.json();
+};
+
 export const listarProdutosAdmin = async () => {
   const response = await fetch(`${API_URL}/produtos`, {
     credentials: 'include'

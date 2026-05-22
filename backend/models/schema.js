@@ -39,6 +39,25 @@ export const userRoleEnum = jm.enum('user_role', [
   'cliente',
 ]);
 
+
+
+export const loja = jm.table('loja', {
+  id: serial('id').primaryKey(),
+
+  nome: text('nome').notNull(),
+
+  cep: text('cep'),
+  endereco: text('endereco'),
+  numero: text('numero'),
+  bairro: text('bairro'),
+  cidade: text('cidade'),
+  estado: text('estado').default('SP'),
+
+  criadoEm: timestamp('criado_em', {
+    withTimezone: true,
+  }).defaultNow(),
+});
+
 /* =========================================================
    ADMIN
 ========================================================= */
@@ -48,6 +67,7 @@ export const admin = jm.table('admin', {
   nome: text('nome').notNull(),
   email: text('email').notNull().unique(),
   senhaHash: text('senha_hash').notNull(),
+  cpfCnpj: text('cpf_cnpj'),
   role: userRoleEnum('role')
     .notNull()
     .default('colaborador'),
@@ -425,20 +445,3 @@ export const carrinhoItens = jm.table(
       ),
   })
 );
-
-export const loja = jm.table('loja', {
-  id: serial('id').primaryKey(),
-
-  nome: text('nome').notNull(),
-
-  cep: text('cep'),
-  endereco: text('endereco'),
-  numero: text('numero'),
-  bairro: text('bairro'),
-  cidade: text('cidade'),
-  estado: text('estado').default('SP'),
-
-  criadoEm: timestamp('criado_em', {
-    withTimezone: true,
-  }).defaultNow(),
-});

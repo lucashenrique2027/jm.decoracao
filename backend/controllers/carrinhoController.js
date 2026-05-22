@@ -12,9 +12,10 @@ import {
   pedidoItens,
   produtos,
   clientes,
-  pagamentos
+  pagamentos,
+  loja
 } from '../models/schema.js';
-
+import { calcularFrete } from '../src/services/freteService.js';
 import crypto from 'crypto';
 import { gerarImagemQRCode } from '../src/qrcode/qrcode.js';
 import { db } from '../models/db.js';
@@ -114,17 +115,6 @@ export const adicionarProdutosAoCarrinho = async (req, res) => {
           precoUnitario: produto.precoVarejo,
         });
     }
-
-    /* =====================================================
-       BAIXAR ESTOQUE
-    ===================================================== */
-
-    // await db
-    //   .update(produtos)
-    //   .set({
-    //     estoque: produto.estoque - qtdSolicitada,
-    //   })
-    //   .where(eq(produtos.id, produtoId));
 
     return res.status(200).json({
       mensagem: 'Carrinho atualizado com sucesso',
@@ -227,315 +217,200 @@ export const obterCarrinhoAtivo = async (req, res) => {
 };
 
 
-export const criarPedidoPendente =
-  async (req, res) => {
 
-    console.log(
-      '[criarPedidoPendente]',
-      req.body
-    );
-
-    const clienteId = req.clienteId;
-
-    const {
-      usarEnderecoPerfil,
-      novoEndereco,
-      observacaoEntrega,
-    } = req.body;
-
-    try {
-
-      /* ===================================================
-         CLIENTE
-      =================================================== */
-
-      const [cliente] = await db
-        .select()
-        .from(clientes)
-        .where(eq(clientes.id, clienteId));
-
-      if (!cliente) {
-
-        return res.status(404).json({
-          erro: 'Cliente não encontrado',
-        });
-      }
-
-      /* ===================================================
-         CARRINHO
-      =================================================== */
-
-      const [carrinho] = await db
-        .select()
-        .from(carrinhos)
-        .where(eq(carrinhos.clienteId, clienteId));
-
-      if (!carrinho) {
-
-        return res.status(404).json({
-          erro: 'Carrinho não encontrado',
-        });
-      }
-
-      /* ===================================================
-         ITENS
-      =================================================== */
-
-      const itens = await db
-        .select()
-        .from(carrinhoItens)
-        .where(
-          eq(carrinhoItens.carrinhoId, carrinho.id)
-        );
-
-      if (itens.length === 0) {
-
-        return res.status(400).json({
-          erro: 'Carrinho vazio',
-        });
-      }
-
-      /* ===================================================
-         ENDEREÇO
-      =================================================== */
-
-      let enderecoFinal = {};
-
-      if (usarEnderecoPerfil) {
-
-        enderecoFinal = {
-          nomeRecebedor:
-            cliente.nome,
-
-          telefoneEntrega:
-            cliente.telefone,
-
-          cepEntrega:
-            cliente.cep,
-
-          enderecoEntrega:
-            cliente.endereco,
-
-          bairroEntrega:
-            cliente.bairro,
-
-          cidadeEntrega:
-            cliente.cidade,
-
-          estadoEntrega:
-            cliente.estado,
-        };
-
-      } else {
-
-        enderecoFinal = {
-          nomeRecebedor:
-            novoEndereco.nomeRecebedor ||
-            cliente.nome,
-
-          telefoneEntrega:
-            novoEndereco.telefone ||
-            cliente.telefone,
-
-          cepEntrega:
-            novoEndereco.cep,
-
-          enderecoEntrega:
-            novoEndereco.endereco,
-
-          bairroEntrega:
-            novoEndereco.bairro,
-
-          cidadeEntrega:
-            novoEndereco.cidade,
-
-          estadoEntrega:
-            novoEndereco.estado,
-        };
-      }
-
-      /* ===================================================
-         VALORES
-      =================================================== */
-
-      const frete = 0;
-
-      const subtotal = itens.reduce(
-        (acc, item) => {
-
-          return (
-            acc +
-            (
-              Number(item.precoUnitario) *
-              item.quantidade
-            )
-          );
-
-        },
-        0
-      );
-
-      const total = subtotal + frete;
-
-      /* ===================================================
-         CRIAR PEDIDO
-      =================================================== */
-
-      const [pedido] = await db
-        .insert(pedidos)
-        .values({
-
-          clienteId,
-
-          status: 'pendente',
-
-          observacaoEntrega,
-
-          subtotal:
-            subtotal.toFixed(2),
-
-          frete:
-            frete.toFixed(2),
-
-          total:
-            total.toFixed(2),
-
-          ...enderecoFinal,
-        })
-        .returning();
-
-      /* ===================================================
-         ITENS PEDIDO
-      =================================================== */
-
-      await db
-        .insert(pedidoItens)
-        .values(
-
-          itens.map((item) => ({
-
-            pedidoId:
-              pedido.id,
-
-            produtoId:
-              item.produtoId,
-
-            quantidade:
-              item.quantidade,
-
-            precoUnitario:
-              item.precoUnitario,
-          }))
-        );
-
-      /* ===================================================
-         GERAR TOKEN
-      =================================================== */
-
-      const tokenPagamento =
-        crypto.randomUUID();
-
-      /* ===================================================
-         PAYLOAD PIX
-      =================================================== */
-
-      const payloadPix = JSON.stringify({
-
-        pedidoId: pedido.id,
-
-        tokenPagamento,
-      });
-
-      /* ===================================================
-         QR CODE
-      =================================================== */
-
-      const qrCodeVisual =
-        await gerarImagemQRCode(payloadPix);
-
-      /* ===================================================
-         CRIAR PAGAMENTO
-      =================================================== */
-
-      const [pagamento] = await db
-        .insert(pagamentos)
-        .values({
-
-          pedidoId:
-            pedido.id,
-
-          tokenPagamento,
-
-          status:
-            'aguardando_pagamento',
-
-          valor:
-            total.toFixed(2),
-
-          metodoPagamento:
-            'pix_simulado',
-
-          qrCodeVisual,
-
-          qrCodePayload:
-            payloadPix,
-
-          expiracaoPagamento:
-            new Date(
-              Date.now() +
-              1000 * 60 * 30
-            ),
-        })
-        .returning();
-
-      /* ===================================================
-         LIMPAR CARRINHO
-      =================================================== */
-
-      await db
-        .delete(carrinhoItens)
-        .where(
-          eq(
-            carrinhoItens.carrinhoId,
-            carrinho.id
-          )
-        );
-
-      /* ===================================================
-         RESPOSTA
-      =================================================== */
-
-      return res.status(201).json({
-
-        success: true,
-
-        pedidoId:
-          pedido.id,
-
-        pagamentoId:
-          pagamento.id,
-
-        total:
-          total.toFixed(2),
-
-        status:
-          pagamento.status,
-
-        qrCodeVisual:
-          pagamento.qrCodeVisual,
-      });
-
-    } catch (error) {
-
-      console.error(error);
-
+export const criarPedidoPendente = async (req, res) => {
+  const clienteId = req.clienteId;
+
+  const {
+    usarEnderecoPerfil,
+    novoEndereco,
+    observacaoEntrega,
+  } = req.body;
+
+  try {
+
+    /* ===================================================
+       CLIENTE
+    =================================================== */
+    const [cliente] = await db
+      .select()
+      .from(clientes)
+      .where(eq(clientes.id, clienteId));
+
+    if (!cliente) {
+      return res.status(404).json({ erro: 'Cliente não encontrado' });
+    }
+
+    /* ===================================================
+       CARRINHO
+    =================================================== */
+    const [carrinho] = await db
+      .select()
+      .from(carrinhos)
+      .where(eq(carrinhos.clienteId, clienteId));
+
+    if (!carrinho) {
+      return res.status(404).json({ erro: 'Carrinho não encontrado' });
+    }
+
+    /* ===================================================
+       ITENS
+    =================================================== */
+    const itens = await db
+      .select()
+      .from(carrinhoItens)
+      .where(eq(carrinhoItens.carrinhoId, carrinho.id));
+
+    if (itens.length === 0) {
+      return res.status(400).json({ erro: 'Carrinho vazio' });
+    }
+
+    /* ===================================================
+       ENDEREÇO CLIENTE
+    =================================================== */
+    let enderecoFinal = {};
+
+    if (usarEnderecoPerfil) {
+      enderecoFinal = {
+        nomeRecebedor: cliente.nome,
+        telefoneEntrega: cliente.telefone,
+        cepEntrega: cliente.cep,
+        enderecoEntrega: cliente.endereco,
+        bairroEntrega: cliente.bairro,
+        cidadeEntrega: cliente.cidade,
+        estadoEntrega: cliente.estado,
+      };
+    } else {
+      enderecoFinal = {
+        nomeRecebedor: novoEndereco.nomeRecebedor || cliente.nome,
+        telefoneEntrega: novoEndereco.telefone || cliente.telefone,
+        cepEntrega: novoEndereco.cep,
+        enderecoEntrega: novoEndereco.endereco,
+        bairroEntrega: novoEndereco.bairro,
+        cidadeEntrega: novoEndereco.cidade,
+        estadoEntrega: novoEndereco.estado,
+      };
+    }
+
+    /* ===================================================
+       LOJA (ORIGEM CORRETA DO FRETE)
+    =================================================== */
+    const [lojaData] = await db
+      .select()
+      .from(loja)
+      .limit(1);
+
+    if (!lojaData) {
       return res.status(500).json({
-        erro:
-          error.message ||
-          'Erro ao criar pedido',
+        erro: 'Loja não configurada',
       });
     }
-  };
+
+    const enderecoLoja = `${lojaData.endereco}, ${lojaData.numero}, ${lojaData.bairro}, ${lojaData.cidade}, ${lojaData.estado}, Brasil`;
+
+    const enderecoCliente = `${enderecoFinal.enderecoEntrega}, ${enderecoFinal.bairroEntrega}, ${enderecoFinal.cidadeEntrega}, ${enderecoFinal.estadoEntrega}, Brasil`;
+
+    /* ===================================================
+       FRETE
+    =================================================== */
+    const { frete } = await calcularFrete(
+  lojaData.cep,
+  enderecoFinal.cepEntrega
+);
+
+    /* ===================================================
+       SUBTOTAL
+    =================================================== */
+    const subtotal = itens.reduce((acc, item) => {
+      return acc + Number(item.precoUnitario) * item.quantidade;
+    }, 0);
+
+    const total = subtotal + frete;
+
+    /* ===================================================
+       CRIAR PEDIDO
+    =================================================== */
+    const [pedido] = await db
+      .insert(pedidos)
+      .values({
+        clienteId,
+        status: 'pendente',
+        observacaoEntrega,
+
+        subtotal,
+        frete,
+        total,
+
+        ...enderecoFinal,
+      })
+      .returning();
+
+    /* ===================================================
+       ITENS DO PEDIDO
+    =================================================== */
+    await db.insert(pedidoItens).values(
+      itens.map((item) => ({
+        pedidoId: pedido.id,
+        produtoId: item.produtoId,
+        quantidade: item.quantidade,
+        precoUnitario: item.precoUnitario,
+      }))
+    );
+
+    /* ===================================================
+       PAGAMENTO
+    =================================================== */
+    const tokenPagamento = crypto.randomUUID();
+
+    const payloadPix = JSON.stringify({
+      pedidoId: pedido.id,
+      tokenPagamento,
+    });
+
+    const qrCodeVisual = await gerarImagemQRCode(payloadPix);
+
+    const [pagamento] = await db
+      .insert(pagamentos)
+      .values({
+        pedidoId: pedido.id,
+        tokenPagamento,
+        status: 'aguardando_pagamento',
+        valor: total,
+        metodoPagamento: 'pix_simulado',
+        qrCodeVisual,
+        qrCodePayload: payloadPix,
+        expiracaoPagamento: new Date(Date.now() + 1000 * 60 * 30),
+      })
+      .returning();
+
+    /* ===================================================
+       LIMPAR CARRINHO
+    =================================================== */
+    await db
+      .delete(carrinhoItens)
+      .where(eq(carrinhoItens.carrinhoId, carrinho.id));
+
+    /* ===================================================
+       RESPOSTA
+    =================================================== */
+    return res.status(201).json({
+      success: true,
+      pedidoId: pedido.id,
+      pagamentoId: pagamento.id,
+      subtotal,
+      frete,
+      total,
+      status: pagamento.status,
+      qrCodeVisual: pagamento.qrCodeVisual,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      erro: error.message || 'Erro ao criar pedido',
+    });
+  }
+};
 
 /* =========================================================
    SINCRONIZAR CARRINHO

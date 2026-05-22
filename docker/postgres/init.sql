@@ -16,6 +16,19 @@ CREATE TYPE jm.status_pagamento AS ENUM (
   'falhou'
 );
 
+
+CREATE TABLE IF NOT EXISTS jm.loja (
+  id SERIAL PRIMARY KEY,
+  nome TEXT NOT NULL,
+  cep TEXT,
+  endereco TEXT,
+  numero TEXT,
+  bairro TEXT,
+  cidade TEXT,
+  estado TEXT DEFAULT 'SP',
+  criado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ─── USUÁRIOS (admin e colaboradores) ───────────────────
 CREATE TABLE IF NOT EXISTS jm.admin (
   id SERIAL PRIMARY KEY,
@@ -23,10 +36,10 @@ CREATE TABLE IF NOT EXISTS jm.admin (
   email TEXT UNIQUE NOT NULL,
   senha_hash TEXT NOT NULL,
   role jm.user_role NOT NULL DEFAULT 'colaborador',
-  cpf_cnpj TEXT,
-  endereco_fiscal TEXT,
+  loja_id INTEGER REFERENCES jm.loja(id),
   criado_em TIMESTAMPTZ DEFAULT NOW()
 );
+
 
 -- ─── CLIENTES (conta pública) ───────────────────────────
 CREATE TABLE IF NOT EXISTS jm.clientes (

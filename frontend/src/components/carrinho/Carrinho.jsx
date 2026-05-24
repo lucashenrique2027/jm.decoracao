@@ -22,7 +22,7 @@ const precoUnitario = (item) =>
   item.precoAtacado &&
   item.quantidadeMinimaAtacado &&
   item.quantidade >=
-    item.quantidadeMinimaAtacado
+  item.quantidadeMinimaAtacado
 
     ? Number(item.precoAtacado)
 
@@ -52,8 +52,6 @@ export default function Carrinho() {
 
   const [novoEndereco, setNovoEndereco] =
     useState({
-      nomeRecebedor: "",
-      telefone: "",
       cep: "",
       endereco: "",
       bairro: "",
@@ -122,12 +120,6 @@ export default function Carrinho() {
       if (!usarEnderecoPerfil) {
 
         payload.novoEndereco = {
-
-          nomeRecebedor:
-            novoEndereco.nomeRecebedor,
-
-          telefone:
-            novoEndereco.telefone,
 
           cep:
             novoEndereco.cep,
@@ -427,22 +419,6 @@ export default function Carrinho() {
               {!usarEnderecoPerfil && (
 
                 <div className="mb-3">
-
-                  <input
-                    type="text"
-                    name="nomeRecebedor"
-                    placeholder="Nome do recebedor"
-                    className="form-control mb-2"
-                    onChange={handleEnderecoChange}
-                  />
-
-                  <input
-                    type="text"
-                    name="telefone"
-                    placeholder="Telefone"
-                    className="form-control mb-2"
-                    onChange={handleEnderecoChange}
-                  />
 
                   <input
                     type="text"

@@ -5,7 +5,7 @@ FROM node:20-alpine
 WORKDIR /app/backend
 
 # Copia apenas arquivos de dependência para cache do npm
-COPY backend/package*.json ./
+COPY docker/api/package*.json ./
 
 # Instala dependências de produção
 RUN npm install --production

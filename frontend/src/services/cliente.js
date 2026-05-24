@@ -14,20 +14,20 @@ export const loginCliente = async (email, senha) => {
     return dados;
 };
 
-export const buscarDados = async () => {
-    const response = await fetch(`${BASE_URL}/data`, {
-        credentials: 'include'
-    });
-    if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
-    return response.json();
-};
-
 export const logoutCliente = async () => {
     await fetch(`${BASE_URL}/logout`, {
         method: 'POST',
         credentials: 'include'
     });
     localStorage.removeItem('clienteJM');
+};
+
+export const buscarDados = async () => {
+    const response = await fetch(`${BASE_URL}/data`, {
+        credentials: 'include'
+    });
+    if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
+    return response.json();
 };
 
 export const validarSessao = async () => {

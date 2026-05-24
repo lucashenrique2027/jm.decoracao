@@ -282,8 +282,8 @@ export const criarPedidoPendente = async (req, res) => {
       };
     } else {
       enderecoFinal = {
-        nomeRecebedor: novoEndereco.nomeRecebedor || cliente.nome,
-        telefoneEntrega: novoEndereco.telefone || cliente.telefone,
+        nomeRecebedor: cliente.nome,
+        telefoneEntrega: cliente.telefone,
         cepEntrega: novoEndereco.cep,
         enderecoEntrega: novoEndereco.endereco,
         bairroEntrega: novoEndereco.bairro,

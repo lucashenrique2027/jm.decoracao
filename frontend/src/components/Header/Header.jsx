@@ -1,9 +1,9 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCarrinho } from '../../context/CarrinhoContext';
-import { logoutCliente } from '../../services/cliente.js'
+import { logoutCliente, validarSessao } from '../../services/cliente.js'
 import { ShoppingCart, User, LogOut, Search, Menu } from 'lucide-react';
 import "./style.css";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Header({ 
   busca, setBusca, 
@@ -14,14 +14,33 @@ export default function Header({
   const location = useLocation();
   const [menuAberto, setMenuAberto] = useState(false);
 
-  const cliente = JSON.parse(localStorage.getItem('clienteJM') || 'null');
-  const isHome = location.pathname === '/';
+  const [cliente, setCliente] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('clienteJM') || 'null');
+    } catch {
+      localStorage.removeItem('clienteJM');
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (!cliente) return;
+
+    validarSessao().then(({ autenticado }) => {
+      if (!autenticado) {
+        localStorage.removeItem('clienteJM');
+        setCliente(null);
+      }
+    });
+  }, []);
 
   const handleLogout = () => {
     logoutCliente();
     navigate('/');
     window.location.reload();
   };
+
+  const isHome = location.pathname === '/';
 
   return (
     <>

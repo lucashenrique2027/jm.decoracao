@@ -74,12 +74,6 @@ export const dadosAdmin = async (req,res) => {
       email: admin.email,
       role: admin.role,
       cpfCnpj: admin.cpfCnpj,
-      cep: admin.cep,
-      endereco: admin.endereco,
-      numero: admin.numero,
-      bairro: admin.bairro,
-      cidade: admin.cidade,
-      estado: admin.estado,
     }).from(admin).where(eq(admin.id, adminId));
 
     if(resultado.length === 0) {

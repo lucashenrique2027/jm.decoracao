@@ -12,10 +12,9 @@ export default function Login() {
   const clienteLogado = JSON.parse(localStorage.getItem('clienteJM') || 'null');
   const navigate = useNavigate();
 
-  // Se já estiver logado, redireciona para o perfil
   useEffect(() => {
     if (clienteLogado) {
-      navigate("/perfil");
+      navigate("/");
     }
   }, [clienteLogado, navigate]);
 

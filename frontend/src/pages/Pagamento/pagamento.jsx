@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; 
 import {
   buscarPagamento,
   efetuarPagamentoTeste,
@@ -7,6 +7,7 @@ import {
 
 export default function PaginaPagamento() {
   const { pedidoId } = useParams();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [pagamento, setPagamento] = useState(null);
@@ -35,7 +36,7 @@ export default function PaginaPagamento() {
   }, [pedidoId]);
 
   const confirmarPagamento = async () => {
-    if (loadingPay) return; // 🔒 trava clique duplo
+    if (loadingPay) return;
 
     setLoadingPay(true);
 
@@ -50,7 +51,6 @@ export default function PaginaPagamento() {
       }
 
       setStatus("pago");
-
       alert("Pagamento confirmado!");
     } catch (error) {
       alert(error.message);
@@ -82,12 +82,24 @@ export default function PaginaPagamento() {
           Pedido <strong>#{pedidoId}</strong>
         </p>
 
+        {/* Cenário 1: Pagamento confirmado (Simulado agora ou vindo do banco) */}
         {status === "pago" && (
-          <div className="alert alert-success">
-            Pagamento já foi confirmado ✔
-          </div>
+          <>
+            <div className="alert alert-success">
+              Pagamento já foi confirmado ✔
+            </div>
+            
+            {/* Botão de ação inteligente para retornar ao fluxo principal */}
+            <button
+              className="btn btn-primary w-100 mt-3"
+              onClick={() => navigate("/")}
+            >
+              Voltar para o Início
+            </button>
+          </>
         )}
 
+        {/* Cenário 2: Aguardando interação */}
         {status === "aguardando_pagamento" && (
           <>
             <img
@@ -110,6 +122,7 @@ export default function PaginaPagamento() {
           </>
         )}
 
+        {/* Cenário 3: Gateway processando */}
         {status === "processando" && (
           <div className="alert alert-info">
             Processando pagamento...

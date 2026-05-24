@@ -27,31 +27,26 @@ VALUES
 ('Lustre em Vidro', 'Lustre clássico em vidro para ambientes sofisticados.', 280.00, NULL, NULL, 'lustre.jpg', (SELECT id FROM jm.categorias WHERE nome = 'Iluminação'), 5)
 ON CONFLICT DO NOTHING;
 
--- ─── ADMIN ────────────────────────────────────────────────
-INSERT INTO jm.admin (nome, email, senha_hash, role, cpf_cnpj, endereco_fiscal)
+
+INSERT INTO jm.loja (nome, cep, endereco, numero, bairro, cidade, estado)
 VALUES (
-    'Admin',
-    'admin@gmail.com',
-    '$2b$10$zaYuOY0BSpY9c6N7Oiytsuwo/RoRuBAdjJmSOrbtNwMu.783owQJy',
-    'admin',
-    '12345678911',
-    '12345678'
-) ON CONFLICT (email) DO NOTHING;
-/*senha123*/
+  'JM Decoracao',
+  '12952-560',
+  'Estr. Mun. Jucá Sanches',
+  '1050',
+  'Boa Vista',
+  'Atibaia',
+  'SP'
+);
 
--- ─── ZONAS DE ENTREGA ─────────────────────────────────────
-INSERT INTO jm.zonas_entrega (cidade, cep_prefixo, ativo) VALUES
-  ('Atibaia', '12940', true),
-  ('Atibaia', '12941', true),
-  ('Atibaia', '12942', true),
-  ('Atibaia', '12943', true),
-  ('Atibaia', '12944', true),
-  ('Atibaia', '12945', true)
-ON CONFLICT DO NOTHING;
+INSERT INTO jm.admin (nome, email, senha_hash, role)
+VALUES (
+  'Admin',
+  'admin@gmail.com',
+  '$2b$10$zaYuOY0BSpY9c6N7Oiytsuwo/RoRuBAdjJmSOrbtNwMu.783owQJy',
+  'admin'
+)
+ON CONFLICT (email) DO NOTHING;
 
--- ─── SINCRONIZA SEQUENCES ─────────────────────────────────
-SELECT setval('jm.pedidos_id_seq',       (SELECT MAX(id) FROM jm.pedidos));
 SELECT setval('jm.produtos_id_seq',      (SELECT MAX(id) FROM jm.produtos));
-SELECT setval('jm.clientes_id_seq',      (SELECT MAX(id) FROM jm.clientes));
 SELECT setval('jm.categorias_id_seq',    (SELECT MAX(id) FROM jm.categorias));
-SELECT setval('jm.zonas_entrega_id_seq', (SELECT MAX(id) FROM jm.zonas_entrega));

@@ -7,8 +7,11 @@ export const loginCliente = async (email, senha) => {
         credentials: 'include',
         body: JSON.stringify({ email, senha })
     });
-    if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
-
+    if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.erro || 'Email ou senha inválidos.');
+    }       
+    
     const dados = await response.json();
     localStorage.setItem('clienteJM', JSON.stringify({ nome: dados.nome, email: dados.email }));
     return dados;

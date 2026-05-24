@@ -3,12 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import logoJm from "../../../public/logo.jpeg";
-
+import { useMensagem } from '../../context/MensagemContext.jsx';
 import { loginCliente } from '../../services/cliente.js';
 import { cadastrarCliente } from '../../services/cadastraCliente.js';
 import "./style.css";
 
 export default function Login() {
+  const { mostrarMensagem } = useMensagem();
   const clienteLogado = JSON.parse(localStorage.getItem('clienteJM') || 'null');
   const navigate = useNavigate();
 
@@ -62,9 +63,9 @@ export default function Login() {
     try {
       await loginCliente(email, senha);
       navigate('/');
-    } catch {
-      setErrosLogin({ geral: 'Email ou senha inválidos' });
-    }
+    } catch (error) {
+  mostrarMensagem(error.message || 'Email ou senha inválidos.', 'erro');
+}
   };
 
   const handleCadastro = async (e) => {
@@ -81,9 +82,13 @@ export default function Login() {
       setErrosCad({});
       await cadastrarCliente(cad);
       navigate("/perfil");
-    } catch {
-      setErrosCad({ geral: 'Erro ao cadastrar. Tente novamente.' });
-    }
+    } catch (error) {
+  if (error.code === '23505' || (error.message && error.message.includes('email'))) {
+    setErrosCad({ email: 'Este email já está cadastrado.' });
+  } else {
+    mostrarMensagem(error.message || 'Erro ao cadastrar. Tente novamente.', 'erro');
+  }
+}
   };
 
   const fc = (k) => (e) => setCad(prev => ({ ...prev, [k]: e.target.value }));

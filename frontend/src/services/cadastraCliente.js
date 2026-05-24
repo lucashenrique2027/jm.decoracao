@@ -9,7 +9,9 @@ export const cadastrarCliente = async (dados) => {
         body: JSON.stringify(payload)
     });
 
-    if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
-
+    if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.erro || `Erro HTTP! status: ${response.status}`);
+    }
     return response.json();
 };

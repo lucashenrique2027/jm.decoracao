@@ -266,6 +266,27 @@ export const criarPedidoPendente = async (req, res) => {
     }
 
     /* ===================================================
+   PEDIDO PENDENTE EM ABERTO
+=================================================== */
+const [pedidoPendente] = await db
+  .select()
+  .from(pedidos)
+  .where(
+    and(
+      eq(pedidos.clienteId, clienteId),
+      eq(pedidos.status, 'pendente')
+    )
+  )
+  .limit(1);
+
+if (pedidoPendente) {
+  return res.status(409).json({
+    erro: 'Você já possui um pedido pendente. Conclua ou cancele antes de criar um novo.',
+    pedidoId: pedidoPendente.id,
+  });
+}
+
+    /* ===================================================
        ENDEREÇO CLIENTE
     =================================================== */
     let enderecoFinal = {};

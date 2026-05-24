@@ -163,28 +163,18 @@ export const criarPedidoPendente = async ({
   novoEndereco = null,
   observacaoEntrega = "",
 }) => {
-
   try {
-
     const response = await fetch(
-
       `${API_URL_CARRINHO}/criar-pedido`,
-
       {
         method: 'POST',
-
         credentials: 'include',
-
         headers: {
           'Content-Type': 'application/json',
         },
-
         body: JSON.stringify({
-
           usarEnderecoPerfil,
-
           novoEndereco,
-
           observacaoEntrega,
         }),
       }
@@ -204,18 +194,24 @@ export const criarPedidoPendente = async ({
           'Você precisa estar logado'
         );
       }
+      if (response.status === 409) {
+        const erroComPedido = new Error(
+          erro.erro || 'Você já possui um pedido pendente.'
+        );
+        erroComPedido.pedidoId = erro.pedidoId;
+        throw erroComPedido;
+      }
 
       if (
         response.status === 400 ||
         response.status === 404
       ) {
-
         throw new Error(
           erro.erro ||
           'Erro ao criar pedido'
         );
       }
-
+      
       throw new Error(
         erro.erro ||
         'Erro interno'
@@ -225,13 +221,9 @@ export const criarPedidoPendente = async ({
     /* =============================================
        SUCESSO
     ============================================= */
-
     return await response.json();
-
   } catch (error) {
-
     console.error(error);
-
     throw error;
   }
 };

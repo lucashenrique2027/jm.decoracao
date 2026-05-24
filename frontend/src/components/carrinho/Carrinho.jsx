@@ -1,13 +1,9 @@
 import { useState, useEffect } from "react";
-
 import { useCarrinho } from "../../context/CarrinhoContext";
-
 import { criarPedidoPendente } from "../../services/pedidos.js";
-
 import { buscarDados } from "../../services/cliente.js";
-
 import { useNavigate } from "react-router-dom";
-
+import { useMensagem } from '../../context/MensagemContext.jsx';
 import {
   Trash,
   ShoppingCart,
@@ -29,7 +25,7 @@ const precoUnitario = (item) =>
     : Number(item.precoVarejo);
 
 export default function Carrinho() {
-
+  const { mostrarMensagem } = useMensagem();
   const navigate = useNavigate();
 
   const {
@@ -156,12 +152,12 @@ export default function Carrinho() {
       }
 
     } catch (error) {
-
-      alert(
-        error.message ||
-        "Erro ao conectar com o servidor!"
-      );
-    }
+        if (error.pedidoId) {
+          mostrarMensagem(error.message, "erro");
+          navigate(`/pagamento/${error.pedidoId}`);
+        } else {
+          mostrarMensagem(error.message || "Erro ao conectar com o servidor!", "erro");
+      }}
   };
 
   return (

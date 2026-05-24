@@ -9,62 +9,40 @@ const API_URL =
 
 export const buscarPagamento =
   async (pedidoId) => {
-
     try {
-
       const response = await fetch(
-
         `${API_URL}/${pedidoId}`,
-
         {
           method: 'GET',
-
           credentials: 'include',
         }
       );
-
       /* =============================================
          TRATAR ERROS
       ============================================= */
-
       if (!response.ok) {
-
         let erroBackend = {};
-
         try {
-
           erroBackend =
             await response.json();
-
         } catch {
-
           throw new Error(
             'Erro inesperado no servidor'
           );
         }
-
         throw new Error(
-
           erroBackend.erro ||
-
           'Erro ao buscar pagamento'
         );
       }
-
       /* =============================================
          SUCESSO
       ============================================= */
-
       return await response.json();
-
     } catch (error) {
-
       console.error(error);
-
       return {
-
         success: false,
-
         erro: error.message,
       };
     }

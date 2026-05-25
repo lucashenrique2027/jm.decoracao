@@ -1,6 +1,4 @@
-import { db } from '../models/db.js';
-import { pedidos, pedidoItens, produtos, categorias, clientes } from '../models/schema.js';
-import { eq, desc, sql, inArray, and, gte, lte } from 'drizzle-orm';
+import { pool } from '../models/db.js';
 import { gerarPdfFaturamento, gerarPdfProdutos, gerarPdfCategorias } from '../src/pdf/pdfService.js';
 
 /* =========================================================
@@ -23,82 +21,91 @@ const extrairPeriodo = (req, res) => {
 };
 
 /* =========================================================
-   QUERIES PURAS
+   QUERIES PURAS (SQL DIRETO NO METAL)
 ========================================================= */
 
 const queryFaturamento = async ({ inicio, fim }) => {
-  const resultado = await db
-    .select({
-      pedidoId: pedidos.id,
-      clienteId: clientes.id,
-      cliente: clientes.nome,
-      status: pedidos.status,
-      total: pedidos.total,
-      criadoEm: pedidos.criadoEm,
-    })
-    .from(pedidos)
-    .innerJoin(clientes, eq(clientes.id, pedidos.clienteId))
-    .where(
-      and(
-        inArray(pedidos.status, STATUS_VALIDOS),
-        gte(pedidos.criadoEm, new Date(`${inicio}T00:00:00`)),
-        lte(pedidos.criadoEm, new Date(`${fim}T23:59:59`))
-      )
-    )
-    .orderBy(desc(pedidos.criadoEm));
+  // Passamos as strings exatas de data com o timezone local/ISO para o Postgres
+  const dataInicio = `${inicio}T00:00:00`;
+  const dataFim = `${fim}T23:59:59`;
 
-  const totalPeriodo = resultado.reduce((acc, p) => acc + Number(p.total), 0);
+  const queryTexto = `
+    SELECT 
+      p.id AS "pedidoId", 
+      c.id AS "clienteId", 
+      c.nome AS "cliente", 
+      p.status, 
+      p.total, 
+      p.criado_em AS "criadoEm"
+    FROM jm.pedidos p
+    INNER JOIN jm.clientes c ON c.id = p.cliente_id
+    WHERE p.status ANY($1)
+      AND p.criado_em >= $2::timestamp
+      AND p.criado_em <= $3::timestamp
+    ORDER BY p.criado_em DESC
+  `;
 
-  return { totalPeriodo, quantidadePedidos: resultado.length, pedidos: resultado };
+  // Executa no driver pg nativo e captura o array .rows
+  const resultado = await pool.query(queryTexto, [STATUS_VALIDOS, dataInicio, dataFim]);
+  const linhas = resultado.rows;
+
+  // Preserva exatamente a lógica de agregação em memória solicitada
+  const totalPeriodo = linhas.reduce((acc, p) => acc + Number(p.total), 0);
+
+  return { 
+    totalPeriodo, 
+    quantidadePedidos: linhas.length, 
+    pedidos: linhas 
+  };
 };
 
 const queryProdutos = async ({ inicio, fim }) => {
-  const resultado = await db
-    .select({
-      produtoId: produtos.id,
-      nome: produtos.nome,
-      quantidadeVendida: sql`COALESCE(SUM(${pedidoItens.quantidade}), 0)`,
-      faturamento: sql`COALESCE(SUM(${pedidoItens.quantidade} * ${pedidoItens.precoUnitario}), 0)`,
-    })
-    .from(pedidoItens)
-    .innerJoin(produtos, eq(produtos.id, pedidoItens.produtoId))
-    .innerJoin(pedidos, eq(pedidos.id, pedidoItens.pedidoId))
-    .where(
-      and(
-        inArray(pedidos.status, STATUS_VALIDOS),
-        gte(pedidos.criadoEm, new Date(`${inicio}T00:00:00`)),
-        lte(pedidos.criadoEm, new Date(`${fim}T23:59:59`))
-      )
-    )
-    .groupBy(produtos.id, produtos.nome)
-    .orderBy(desc(sql`SUM(${pedidoItens.quantidade})`));
+  const dataInicio = `${inicio}T00:00:00`;
+  const dataFim = `${fim}T23:59:59`;
 
-  return resultado;
+  const queryTexto = `
+    SELECT 
+      prod.id AS "produtoId", 
+      prod.nome, 
+      COALESCE(SUM(pi.quantidade), 0)::int AS "quantidadeVendida", 
+      COALESCE(SUM(pi.quantidade * pi.preco_unitario), 0)::numeric AS "faturamento"
+    FROM jm.pedido_itens pi
+    INNER JOIN jm.produtos prod ON prod.id = pi.produto_id
+    INNER JOIN jm.pedidos p ON p.id = pi.pedido_id
+    WHERE p.status ANY($1)
+      AND p.criado_em >= $2::timestamp
+      AND p.criado_em <= $3::timestamp
+    GROUP BY prod.id, prod.nome
+    ORDER BY SUM(pi.quantidade) DESC
+  `;
+
+  const resultado = await pool.query(queryTexto, [STATUS_VALIDOS, dataInicio, dataFim]);
+  return resultado.rows;
 };
 
 const queryCategorias = async ({ inicio, fim }) => {
-  const resultado = await db
-    .select({
-      categoriaId: categorias.id,
-      categoria: categorias.nome,
-      quantidadeVendida: sql`COALESCE(SUM(${pedidoItens.quantidade}), 0)`,
-      faturamento: sql`COALESCE(SUM(${pedidoItens.quantidade} * ${pedidoItens.precoUnitario}), 0)`,
-    })
-    .from(pedidoItens)
-    .innerJoin(produtos, eq(produtos.id, pedidoItens.produtoId))
-    .innerJoin(categorias, eq(categorias.id, produtos.categoriaId))
-    .innerJoin(pedidos, eq(pedidos.id, pedidoItens.pedidoId))
-    .where(
-      and(
-        inArray(pedidos.status, STATUS_VALIDOS),
-        gte(pedidos.criadoEm, new Date(`${inicio}T00:00:00`)),
-        lte(pedidos.criadoEm, new Date(`${fim}T23:59:59`))
-      )
-    )
-    .groupBy(categorias.id, categorias.nome)
-    .orderBy(desc(sql`SUM(${pedidoItens.quantidade})`));
+  const dataInicio = `${inicio}T00:00:00`;
+  const dataFim = `${fim}T23:59:59`;
 
-  return resultado;
+  const queryTexto = `
+    SELECT 
+      cat.id AS "categoriaId", 
+      cat.nome AS "categoria", 
+      COALESCE(SUM(pi.quantidade), 0)::int AS "quantidadeVendida", 
+      COALESCE(SUM(pi.quantidade * pi.preco_unitario), 0)::numeric AS "faturamento"
+    FROM jm.pedido_itens pi
+    INNER JOIN jm.produtos prod ON prod.id = pi.produto_id
+    INNER JOIN jm.categorias cat ON cat.id = prod.categoria_id
+    INNER JOIN jm.pedidos p ON p.id = pi.pedido_id
+    WHERE p.status ANY($1)
+      AND p.criado_em >= $2::timestamp
+      AND p.criado_em <= $3::timestamp
+    GROUP BY cat.id, cat.nome
+    ORDER BY SUM(pi.quantidade) DESC
+  `;
+
+  const resultado = await pool.query(queryTexto, [STATUS_VALIDOS, dataInicio, dataFim]);
+  return resultado.rows;
 };
 
 /* =========================================================

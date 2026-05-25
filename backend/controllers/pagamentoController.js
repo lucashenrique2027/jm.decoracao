@@ -1,33 +1,24 @@
-import { eq, and } from 'drizzle-orm';
-import {
-  pedidos,
-  pagamentos,
-  pedidoItens,
-  produtos,
-} from '../models/schema.js';
-import { db } from '../models/db.js';
+import { pool } from '../models/db.js'; // Conexão nativa do PostgreSQL
 
 import client from '../src/mercadoPago/mercadopago.js';
 import { Preference, Payment } from 'mercadopago';
 
 import Stripe from 'stripe';
 
-async function confirmarPedidoComEstoque(tx, pedidoId) {
-
-  const itensPedido = await tx
-    .select()
-    .from(pedidoItens)
-    .where(eq(pedidoItens.pedidoId, pedidoId));
+// Função Auxiliar Transacional interna para controle rígido de estoque e confirmação
+async function confirmarPedidoComEstoque(clientTransacao, pedidoId) {
+  const queryItens = `SELECT id, produto_id, quantidade FROM jm.pedido_itens WHERE pedido_id = $1`;
+  const resultadoItens = await clientTransacao.query(queryItens, [pedidoId]);
+  const itensPedido = resultadoItens.rows;
 
   for (const item of itensPedido) {
-
-    const [produto] = await tx
-      .select()
-      .from(produtos)
-      .where(eq(produtos.id, item.produtoId));
+    // Busca o produto com bloqueio de linha (FOR UPDATE) para evitar Race Conditions de estoque concorrente
+    const queryProduto = `SELECT id, nome, disponivel, estoque FROM jm.produtos WHERE id = $1 FOR UPDATE`;
+    const resultadoProduto = await clientTransacao.query(queryProduto, [item.produto_id]);
+    const produto = resultadoProduto.rows[0];
 
     if (!produto)
-      throw new Error(`Produto ${item.produtoId} inexistente`);
+      throw new Error(`Produto ${item.produto_id} inexistente`);
 
     if (!produto.disponivel)
       throw new Error(`Produto "${produto.nome}" indisponível`);
@@ -35,95 +26,81 @@ async function confirmarPedidoComEstoque(tx, pedidoId) {
     if (produto.estoque < item.quantidade)
       throw new Error(`Estoque insuficiente para "${produto.nome}"`);
 
-    await tx
-      .update(produtos)
-      .set({ estoque: produto.estoque - item.quantidade })
-      .where(eq(produtos.id, produto.id));
+    const queryUpdateEstoque = `UPDATE jm.produtos SET estoque = $1 WHERE id = $2`;
+    await clientTransacao.query(queryUpdateEstoque, [produto.estoque - item.quantidade, produto.id]);
   }
 
-  await tx
-    .update(pedidos)
-    .set({ status: 'confirmado' })
-    .where(eq(pedidos.id, pedidoId));
+  const queryUpdatePedido = `UPDATE jm.pedidos SET status = 'confirmado' WHERE id = $1`;
+  await clientTransacao.query(queryUpdatePedido, [pedidoId]);
 }
 
 export const buscarPagamento = async (req, res) => {
-
   const { pedidoId } = req.params;
   const clienteId = req.clienteId;
 
   try {
-
-    const [pedido] = await db
-      .select()
-      .from(pedidos)
-      .where(eq(pedidos.id, pedidoId));
+    const queryPedido = `SELECT cliente_id FROM jm.pedidos WHERE id = $1`;
+    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
+    const pedido = resultadoPedido.rows[0];
 
     if (!pedido)
       return res.status(404).json({ erro: 'Pedido não encontrado' });
 
-    if (pedido.clienteId !== clienteId)
+    if (pedido.cliente_id !== clienteId)
       return res.status(403).json({ erro: 'Pedido não pertence ao cliente' });
 
-    const [pagamento] = await db
-      .select()
-      .from(pagamentos)
-      .where(eq(pagamentos.pedidoId, pedidoId));
+    const queryPagamento = `
+      SELECT 
+        id, 
+        pedido_id AS "pedidoId", 
+        token_pagamento AS "tokenPagamento", 
+        status, 
+        valor, 
+        metodo_pagamento AS "metodoPagamento", 
+        expiracao_pagamento AS "expiracaoPagamento", 
+        criado_em AS "criadoEm", 
+        qr_code_visual AS "qrCodeVisual" 
+      FROM jm.pagamentos 
+      WHERE pedido_id = $1
+    `;
+    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId]);
+    const pagamento = resultadoPagamento.rows[0];
 
     if (!pagamento)
       return res.status(404).json({ erro: 'Pagamento não encontrado' });
 
     return res.json({
       success: true,
-      pagamento: {
-        id: pagamento.id,
-        pedidoId: pagamento.pedidoId,
-        tokenPagamento: pagamento.tokenPagamento,
-        status: pagamento.status,
-        valor: pagamento.valor,
-        metodoPagamento: pagamento.metodoPagamento,
-        expiracaoPagamento: pagamento.expiracaoPagamento,
-        criadoEm: pagamento.criadoEm,
-        qrCodeVisual: pagamento.qrCodeVisual,
-      },
+      pagamento,
     });
 
   } catch (error) {
-
     console.error('[buscarPagamento]', error);
     return res.status(500).json({ success: false, erro: 'Erro ao buscar pagamento' });
   }
 };
 
 export const pagamentoSimulado = async (req, res) => {
-
   console.log('[pagamentoSimulado]', req.body);
-
   const { pedidoId, tokenPagamento } = req.body;
   const clienteId = req.clienteId;
 
-  try {
+  const clientTransacao = await pool.connect();
 
-    const [pedido] = await db
-      .select()
-      .from(pedidos)
-      .where(eq(pedidos.id, pedidoId));
+  try {
+    const queryPedido = `SELECT cliente_id FROM jm.pedidos WHERE id = $1`;
+    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
+    const pedido = resultadoPedido.rows[0];
 
     if (!pedido)
       return res.status(404).json({ success: false, erro: 'Pedido não encontrado' });
 
-    if (pedido.clienteId !== clienteId)
+    if (pedido.cliente_id !== clienteId)
       return res.status(403).json({ success: false, erro: 'Pedido não pertence ao cliente' });
 
-    const [pagamento] = await db
-      .select()
-      .from(pagamentos)
-      .where(
-        and(
-          eq(pagamentos.pedidoId, pedidoId),
-          eq(pagamentos.tokenPagamento, tokenPagamento)
-        )
-      );
+    const queryPagamento = `SELECT * FROM jm.pagamentos WHERE pedido_id = $1 AND token_pagamento = $2`;
+    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId, tokenPagamento]);
+    const pagamento = resultadoPagamento.rows[0];
 
     if (!pagamento)
       return res.status(403).json({ success: false, erro: 'Sessão de pagamento inválida' });
@@ -135,69 +112,61 @@ export const pagamentoSimulado = async (req, res) => {
         status: pagamento.status,
       });
 
-    if (pagamento.expiracaoPagamento && new Date() > pagamento.expiracaoPagamento)
+    if (pagamento.expiracao_pagamento && new Date() > pagamento.expiracao_pagamento)
       return res.status(400).json({ success: false, erro: 'Pagamento expirado' });
 
-    await db.transaction(async (tx) => {
+    // Início do bloco transacional atômico
+    await clientTransacao.query('BEGIN');
 
-      await confirmarPedidoComEstoque(tx, pedidoId);
+    await confirmarPedidoComEstoque(clientTransacao, pedidoId);
 
-      const [updated] = await tx
-        .update(pagamentos)
-        .set({
-          status: 'pago',
-          pagoEm: new Date(),
-          atualizadoEm: new Date(),
-        })
-        .where(
-          and(
-            eq(pagamentos.id, pagamento.id),
-            eq(pagamentos.status, 'aguardando_pagamento')
-          )
-        )
-        .returning();
+    const queryUpdatePagamento = `
+      UPDATE jm.pagamentos 
+      SET status = 'pago', pago_em = $1, atualizado_em = $2 
+      WHERE id = $3 AND status = 'aguardando_pagamento'
+      RETURNING id
+    `;
+    const resultadoUpdate = await clientTransacao.query(queryUpdatePagamento, [new Date(), new Date(), pagamento.id]);
+    const updated = resultadoUpdate.rows[0];
 
-      if (!updated)
-        throw new Error('Pagamento já foi processado ou duplicado');
-    });
+    if (!updated)
+      throw new Error('Pagamento já foi processado ou duplicado');
 
+    await clientTransacao.query('COMMIT');
     return res.json({ success: true, mensagem: 'Pagamento confirmado', pedidoId });
 
   } catch (error) {
-
+    await clientTransacao.query('ROLLBACK');
     console.error('[pagamentoSimulado]', error);
-    const statusCode = error.message?.includes('processado') ? 409 : 500;
+    const statusCode = error.message?.includes('processado') || error.message?.includes('duplicado') ? 409 : 500;
     return res.status(statusCode).json({
       success: false,
       erro: error.message || 'Erro ao processar pagamento',
     });
+  } finally {
+    clientTransacao.release();
   }
 };
 
 export const mercadoPago = async (req, res) => {
-
   console.log('[mercadoPago]', req.body);
-
   const { pedidoId, clienteEmail } = req.body;
   const clienteId = req.clienteId;
 
   try {
-
-    const [pedido] = await db
-      .select()
-      .from(pedidos)
-      .where(eq(pedidos.id, pedidoId));
+    const queryPedido = `SELECT cliente_id FROM jm.pedidos WHERE id = $1`;
+    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
+    const pedido = resultadoPedido.rows[0];
 
     if (!pedido)
       return res.status(404).json({ erro: 'Pedido não encontrado' });
 
-    if (pedido.clienteId !== clienteId)
+    if (pedido.cliente_id !== clienteId)
       return res.status(403).json({ erro: 'Pedido não pertence ao cliente' });
 
-    const [pagamento] = await db
-      .select()
-      .from(pagamentos)
-      .where(eq(pagamentos.pedidoId, pedidoId));
+    const queryPagamento = `SELECT id, status FROM jm.pagamentos WHERE pedido_id = $1`;
+    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId]);
+    const pagamento = resultadoPagamento.rows[0];
 
     if (!pagamento)
       return res.status(404).json({ erro: 'Pagamento não encontrado' });
@@ -205,20 +174,19 @@ export const mercadoPago = async (req, res) => {
     if (pagamento.status !== 'aguardando_pagamento')
       return res.status(409).json({ erro: 'Pagamento já processado', status: pagamento.status });
 
-    const itensPedido = await db
-      .select()
-      .from(pedidoItens)
-      .where(eq(pedidoItens.pedidoId, pedidoId));
+    const queryItens = `SELECT produto_id, quantidade, preco_unitario FROM jm.pedido_itens WHERE pedido_id = $1`;
+    const resultadoItens = await pool.query(queryItens, [pedidoId]);
+    const itensPedido = resultadoItens.rows;
 
     const preference = new Preference(client);
 
     const resultado = await preference.create({
       body: {
         items: itensPedido.map(item => ({
-          id: String(item.produtoId),
-          title: `Produto ${item.produtoId}`,
+          id: String(item.produto_id),
+          title: `Produto ${item.produto_id}`,
           quantity: Number(item.quantidade),
-          unit_price: parseFloat(item.precoUnitario),
+          unit_price: parseFloat(item.preco_unitario),
           currency_id: 'BRL',
         })),
         payer: {
@@ -234,10 +202,8 @@ export const mercadoPago = async (req, res) => {
       },
     });
 
-    await db
-      .update(pagamentos)
-      .set({ metodoPagamento: 'mercado_pago' })
-      .where(eq(pagamentos.id, pagamento.id));
+    const queryUpdateMetodo = `UPDATE jm.pagamentos SET metodo_pagamento = 'mercado_pago' WHERE id = $1`;
+    await pool.query(queryUpdateMetodo, [pagamento.id]);
 
     console.log('[mercadoPago] preference criada:', resultado.id);
 
@@ -250,14 +216,12 @@ export const mercadoPago = async (req, res) => {
     });
 
   } catch (erro) {
-
     console.error('[mercadoPago]', erro);
     return res.status(erro.status || 500).json({ erro: 'Erro ao processar pagamento Mercado Pago' });
   }
 };
 
 export const webhookMercadoPago = async (req, res) => {
-
   res.sendStatus(200);
 
   const { type, data } = req.body;
@@ -265,8 +229,9 @@ export const webhookMercadoPago = async (req, res) => {
 
   if (type !== 'payment') return;
 
-  try {
+  const clientTransacao = await pool.connect();
 
+  try {
     const payment = new Payment(client);
     const pagamentoMP = await payment.get({ id: data.id });
 
@@ -274,66 +239,66 @@ export const webhookMercadoPago = async (req, res) => {
 
     if (pagamentoMP.status !== 'approved') return;
 
-    const pedidoId = pagamentoMP.external_reference;
+    const pedidoId = parseInt(pagamentoMP.external_reference);
 
-    await db.transaction(async (tx) => {
+    await clientTransacao.query('BEGIN');
 
-      const [updated] = await tx
-        .update(pagamentos)
-        .set({
-          status: 'pago',
-          pagoEm: new Date(),
-          atualizadoEm: new Date(),
-        })
-        .where(
-          and(
-            eq(pagamentos.pedidoId, pedidoId),
-            eq(pagamentos.status, 'aguardando_pagamento')
-          )
-        )
-        .returning();
+    const queryUpdatePagamento = `
+      UPDATE jm.pagamentos 
+      SET status = 'pago', pago_em = $1, updated_at = $2 
+      WHERE pedido_id = $3 AND status = 'aguardando_pagamento'
+      RETURNING id
+    `;
+    // Nota: "updated_at" mapeia para atualizado_em no banco físico
+    const queryUpdatePagamentoFisico = `
+      UPDATE jm.pagamentos 
+      SET status = 'pago', pago_em = $1, atualizado_em = $2 
+      WHERE pedido_id = $3 AND status = 'aguardando_pagamento'
+      RETURNING id
+    `;
+    const resultadoUpdate = await clientTransacao.query(queryUpdatePagamentoFisico, [new Date(), new Date(), pedidoId]);
+    const updated = resultadoUpdate.rows[0];
 
-      if (!updated) {
-        console.log('[webhookMP] pedido já confirmado anteriormente, ignorando:', pedidoId);
-        return;
-      }
+    if (!updated) {
+      console.log('[webhookMP] pedido já confirmado anteriormente, ignorando:', pedidoId);
+      await clientTransacao.query('ROLLBACK');
+      return;
+    }
 
-      await confirmarPedidoComEstoque(tx, pedidoId);
-    });
+    await confirmarPedidoComEstoque(clientTransacao, pedidoId);
+    await clientTransacao.query('COMMIT');
 
     console.log('[webhookMP] ✅ Pedido confirmado:', pedidoId);
 
   } catch (err) {
+    await clientTransacao.query('ROLLBACK');
     console.error('[webhookMP] Erro ao processar evento:', err);
+  } finally {
+    clientTransacao.release();
   }
 };
 
 export const stripePix = async (req, res) => {
-
   console.log('[stripePix]', req.body);
-
   const { pedidoId, clienteEmail } = req.body;
   const clienteId = req.clienteId;
 
   try {
-
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    const [pedido] = await db
-      .select()
-      .from(pedidos)
-      .where(eq(pedidos.id, pedidoId));
+    const queryPedido = `SELECT total, cliente_id FROM jm.pedidos WHERE id = $1`;
+    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
+    const pedido = resultadoPedido.rows[0];
 
     if (!pedido)
       return res.status(404).json({ erro: 'Pedido não encontrado' });
 
-    if (pedido.clienteId !== clienteId)
+    if (pedido.cliente_id !== clienteId)
       return res.status(403).json({ erro: 'Pedido não pertence ao cliente' });
 
-    const [pagamento] = await db
-      .select()
-      .from(pagamentos)
-      .where(eq(pagamentos.pedidoId, pedidoId));
+    const queryPagamento = `SELECT id, status FROM jm.pagamentos WHERE pedido_id = $1`;
+    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId]);
+    const pagamento = resultadoPagamento.rows[0];
 
     if (!pagamento)
       return res.status(404).json({ erro: 'Pagamento não encontrado' });
@@ -356,10 +321,8 @@ export const stripePix = async (req, res) => {
 
     console.log('[stripePix] paymentIntent criado:', paymentIntent.id);
 
-    await db
-      .update(pagamentos)
-      .set({ metodoPagamento: 'stripe_pix' })
-      .where(eq(pagamentos.id, pagamento.id));
+    const queryUpdateMetodo = `UPDATE jm.pagamentos SET metodo_pagamento = 'stripe_pix' WHERE id = $1`;
+    await pool.query(queryUpdateMetodo, [pagamento.id]);
 
     const pixInfo = paymentIntent.next_action?.pix_display_qr_code;
 
@@ -375,29 +338,24 @@ export const stripePix = async (req, res) => {
     });
 
   } catch (err) {
-
     console.error('[stripePix]', err);
     return res.status(err.status || 500).json({ erro: err.message || 'Erro ao gerar Pix via Stripe' });
   }
 };
 
 export const webhookStripe = async (req, res) => {
-
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const sig = req.headers['stripe-signature'];
 
   let event;
 
   try {
-
     event = stripe.webhooks.constructEvent(
       req.rawBody ?? req.body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-
   } catch (err) {
-
     console.error('[webhookStripe] Assinatura inválida:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
@@ -408,46 +366,44 @@ export const webhookStripe = async (req, res) => {
     return res.sendStatus(200);
 
   const pi = event.data.object;
-  const pedidoId = pi.metadata?.pedidoId;
+  const pedidoId = pi.metadata?.pedidoId ? parseInt(pi.metadata.pedidoId) : null;
 
   if (!pedidoId) {
     console.warn('[webhookStripe] pedidoId ausente nos metadata, ignorando');
     return res.sendStatus(200);
   }
 
+  const clientTransacao = await pool.connect();
+
   try {
+    await clientTransacao.query('BEGIN');
 
-    await db.transaction(async (tx) => {
+    const queryUpdatePagamento = `
+      UPDATE jm.pagamentos 
+      SET status = 'pago', pago_em = $1, atualizado_em = $2 
+      WHERE pedido_id = $3 AND status = 'aguardando_pagamento'
+      RETURNING id
+    `;
+    const resultadoUpdate = await clientTransacao.query(queryUpdatePagamento, [new Date(), new Date(), pedidoId]);
+    const updated = resultadoUpdate.rows[0];
 
-      const [updated] = await tx
-        .update(pagamentos)
-        .set({
-          status: 'pago',
-          pagoEm: new Date(),
-          atualizadoEm: new Date(),
-        })
-        .where(
-          and(
-            eq(pagamentos.pedidoId, pedidoId),
-            eq(pagamentos.status, 'aguardando_pagamento')
-          )
-        )
-        .returning();
+    if (!updated) {
+      console.log('[webhookStripe] pedido já confirmado anteriormente, ignorando:', pedidoId);
+      await clientTransacao.query('ROLLBACK');
+      return res.sendStatus(200);
+    }
 
-      if (!updated) {
-        console.log('[webhookStripe] pedido já confirmado anteriormente, ignorando:', pedidoId);
-        return;
-      }
-
-      await confirmarPedidoComEstoque(tx, pedidoId);
-    });
+    await confirmarPedidoComEstoque(clientTransacao, pedidoId);
+    await clientTransacao.query('COMMIT');
 
     console.log('[webhookStripe] ✅ Pedido confirmado:', pedidoId);
 
   } catch (err) {
-
+    await clientTransacao.query('ROLLBACK');
     console.error('[webhookStripe] Erro ao confirmar pedido:', err);
     return res.status(500).json({ erro: err.message });
+  } finally {
+    clientTransacao.release();
   }
 
   return res.sendStatus(200);

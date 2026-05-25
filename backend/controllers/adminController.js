@@ -1,58 +1,70 @@
-import { db } from '../models/db.js';
-import { admin,clientes } from '../models/schema.js';
-import { ilike, eq, and } from 'drizzle-orm';
+import { pool } from '../models/db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-export const authAdmin = async (req,res) => {
-
-  try{
-
+/* =========================================================
+   AUTENTICAR ADMIN
+========================================================= */
+export const authAdmin = async (req, res) => {
+  try {
     const { email, senha } = req.body;
 
-    if( !email || !senha ) {
+    if (!email || !senha) {
       return res.status(400).json({ message: 'Email e senha são obrigatórios' });
     }
     
-    const resultado = await db.select().from(admin).where(eq(admin.email,email));
-    if(resultado.length === 0) {
+    const queryBuscarAdmin = `
+      SELECT id, nome, email, senha_hash AS "senhaHash" 
+      FROM jm.admin 
+      WHERE email = $1
+    `;
+    const resultado = await pool.query(queryBuscarAdmin, [email]);
+
+    if (resultado.rows.length === 0) {
       return res.status(401).json({ message: 'Email ou senha inválidos' });
     }
 
-    const adminEncontrado = resultado[0];
+    const adminEncontrado = resultado.rows[0];
 
     const senhaValida = await bcrypt.compare(senha, adminEncontrado.senhaHash);
 
-    if(!senhaValida) {
+    if (!senhaValida) {
       return res.status(401).json({ message: 'Email ou senha inválidos' });
     }
 
-    const token = jwt.sign({
-      id: adminEncontrado.id,
-      email: adminEncontrado.email,
-      role: 'admin'
-    }, process.env.JWT_SECRET_ADMIN, { expiresIn: '8h' });
+    const token = jwt.sign(
+      {
+        id: adminEncontrado.id,
+        email: adminEncontrado.email,
+        role: 'admin'
+      }, 
+      process.env.JWT_SECRET_ADMIN, 
+      { expiresIn: '8h' }
+    );
 
     res.cookie('admin_token', token, {
       httpOnly: true,                
-      secure: false,                  
+      secure: false, // Mude para true em ambiente de produção com HTTPS                  
       sameSite: 'strict',           
       maxAge: 8 * 60 * 60 * 1000      
-  });
-
-  return res.status(200).json({ 
-      message: 'Autenticado com sucesso',
-        nome: adminEncontrado.nome,
-        email: adminEncontrado.email
     });
 
-  }catch(error){
+    return res.status(200).json({ 
+      message: 'Autenticado com sucesso',
+      nome: adminEncontrado.nome,
+      email: adminEncontrado.email
+    });
+
+  } catch (error) {
+    console.error("Erro em authAdmin:", error);
     return res.status(500).json({ message: 'Erro interno ao autenticar admin' });
   }
-}
+};
 
-export const logOutAdmin = (req,res) => {
-
+/* =========================================================
+   LOGOUT ADMIN
+========================================================= */
+export const logOutAdmin = (req, res) => {
   res.clearCookie('admin_token', {
     httpOnly: true,
     secure: false,
@@ -60,58 +72,68 @@ export const logOutAdmin = (req,res) => {
     path: '/'
   });
   return res.status(200).json({ mensagem: 'Sessão encerrada com sucesso' });
-}
+};
 
-export const dadosAdmin = async (req,res) => {
-
-  try{
-
+/* =========================================================
+   DADOS ADMIN (PERFIL)
+========================================================= */
+export const dadosAdmin = async (req, res) => {
+  try {
     const adminId = req.adminId;
 
-    const resultado = await db.select({
-      id: admin.id,
-      nome: admin.nome,
-      email: admin.email,
-      role: admin.role,
-      cpfCnpj: admin.cpfCnpj,
-    }).from(admin).where(eq(admin.id, adminId));
+    const queryDados = `
+      SELECT 
+        id,
+        nome,
+        email,
+        role,
+        cpf_cnpj AS "cpfCnpj"
+      FROM jm.admin 
+      WHERE id = $1
+    `;
+    const resultado = await pool.query(queryDados, [adminId]);
 
-    if(resultado.length === 0) {
+    if (resultado.rows.length === 0) {
       return res.status(404).json({ message: 'Admin não encontrado' });
     }
 
-    return res.status(200).json({ admin: resultado[0] });
+    return res.status(200).json({ admin: resultado.rows[0] });
 
-  }catch(error){
+  } catch (error) {
     console.error("Erro em dadosAdmin:", error);
     return res.status(500).json({ message: 'Erro interno ao buscar dados do admin' });
   }
-
 };
 
+/* =========================================================
+   LISTAR CLIENTES (PAINEL ADMIN)
+========================================================= */
 export const listarClientes = async (req, res) => {
   try {
-    const data = await db.select({
-      id: clientes.id,
-      nome: clientes.nome,
-      email: clientes.email,
-      telefone: clientes.telefone,
-      cep: clientes.cep,
-      endereco: clientes.endereco,
-      bairro: clientes.bairro,
-      cidade: clientes.cidade,
-      estado: clientes.estado,
-      criadoEm: clientes.criadoEm
-    }).from(clientes);
+    const queryListar = `
+      SELECT 
+        id,
+        nome,
+        email,
+        telefone,
+        cep,
+        endereco,
+        bairro,
+        cidade,
+        estado,
+        criado_em AS "criadoEm"
+      FROM jm.clientes
+    `;
+    const resultado = await pool.query(queryListar);
 
-    if (data.length === 0) {
+    if (resultado.rows.length === 0) {
       return res.status(404).json({ message: 'Nenhum cliente encontrado' });
     }
 
-    return res.status(200).json(data);
+    return res.status(200).json(resultado.rows);
 
   } catch (error) {
-    console.error(error.message);
+    console.error("Erro em listarClientes:", error.message);
     return res.status(500).json({ message: 'Erro interno ao buscar clientes' });
   }
 };

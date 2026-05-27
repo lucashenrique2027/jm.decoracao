@@ -18,6 +18,11 @@ cd  "./Loja-JM-Decoracao"
 ./scripts/init-env.sh
 ```
 
+### Se estiver no Linux
+## De permissões:
+```sh
+chmod +x ./scripts/init-env.sh
+```
 
 ## subir a aplicação com docker:
 ### Após iniciar o Docker Desktop e no mesmo terminal rode:

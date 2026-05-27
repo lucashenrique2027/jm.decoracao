@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS jm.clientes (
   senha_hash TEXT NOT NULL,
   telefone TEXT NOT NULL,
   cep TEXT NOT NULL,
+  numero TEXT,
   endereco TEXT ,
   bairro TEXT ,
   cidade TEXT ,
@@ -104,7 +105,7 @@ CREATE TABLE IF NOT EXISTS jm.pedidos (
   -- snapshot do endereço de entrega
   nome_recebedor TEXT NOT NULL,
   telefone_entrega TEXT NOT NULL,
-
+  numero_entrega TEXT NOT NULL,
   cep_entrega TEXT NOT NULL,
   endereco_entrega TEXT NOT NULL,
   bairro_entrega TEXT NOT NULL,

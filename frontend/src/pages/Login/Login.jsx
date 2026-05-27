@@ -30,7 +30,7 @@ export default function Login() {
   const [aceitouTermos, setAceitouTermos] = useState(false);
 
   const [cad, setCad] = useState({
-    nome: "", email: "", telefone: "", cep: "",
+    nome: "", email: "", telefone: "", cep: "",numero: "", 
     endereco: "", bairro: "", cidade: "", estado: "",
     senha: "", confirmarSenha: ""
   });
@@ -50,6 +50,7 @@ export default function Login() {
             bairro:   data.bairro     || "",
             cidade:   data.localidade || "",
             estado:   data.uf         || "",
+            numero: prev.numero || ""
           }));
           setErrosCad(prev => ({ ...prev, cep: undefined }));
         } else {
@@ -238,6 +239,20 @@ export default function Login() {
                     <div className="login-input-wrapper">
                       <span className="login-input-icon"><i className="bi bi-house"></i></span>
                       <input type="text" className="login-input" placeholder="Rua, número, bairro" value={`${cad.endereco}${cad.bairro ? ', ' + cad.bairro : ''}`} readOnly />
+                    </div>
+                  </div>
+
+                  <div className="login-form-group">
+                    <label className="login-label">Número <span style={{ fontSize: "12px", opacity: 0.6 }}>(opcional)</span></label>
+                    <div className="login-input-wrapper">
+                      <span className="login-input-icon"><i className="bi bi-house-door"></i></span>
+                      <input
+                        type="text"
+                        className="login-input"
+                        placeholder="123"
+                        value={cad.numero}
+                        onChange={fc("numero")}
+                      />
                     </div>
                   </div>
 

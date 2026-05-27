@@ -67,7 +67,7 @@ export const buscarPedidoPorId = async (req, res) => {
       return res.status(404).json({ erro: 'Pedido não encontrado' });
     }
 
-    // Mapeamento explícito de snake_case para camelCase para preservar a API esperada pelo Frontend
+    // Mapeamento ajustado para incluir numeroEntrega
     const pedido = {
       id: pedidoRaw.id,
       clienteId: pedidoRaw.cliente_id,
@@ -80,6 +80,7 @@ export const buscarPedidoPorId = async (req, res) => {
       telefoneEntrega: pedidoRaw.telefone_entrega,
       cepEntrega: pedidoRaw.cep_entrega,
       enderecoEntrega: pedidoRaw.endereco_entrega,
+      numeroEntrega: pedidoRaw.numero_entrega, // <-- Adicionada a nova coluna
       bairroEntrega: pedidoRaw.bairro_entrega,
       cidadeEntrega: pedidoRaw.cidade_entrega,
       estadoEntrega: pedidoRaw.estado_entrega,
@@ -89,16 +90,12 @@ export const buscarPedidoPorId = async (req, res) => {
       criadoEm: pedidoRaw.criado_em
     };
 
-    /* =====================================================
-       BUSCAR CLIENTE
-    ===================================================== */
+    /* ... restante do código permanece igual ... */
+    
     const queryCliente = `SELECT nome, email, telefone FROM jm.clientes WHERE id = $1`;
     const resultadoCliente = await pool.query(queryCliente, [pedido.clienteId]);
     const cliente = resultadoCliente.rows[0];
 
-    /* =====================================================
-       BUSCAR ITENS
-    ===================================================== */
     const queryItens = `
       SELECT 
         pi.id,

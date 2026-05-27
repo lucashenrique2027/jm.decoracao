@@ -5,10 +5,7 @@ import { ShoppingCart, User, LogOut, Search, Menu } from 'lucide-react';
 import "./style.css";
 import { useState, useEffect } from 'react';
 
-export default function Header({ 
-  busca, setBusca, 
-  categorias, categoriaAtiva, setCategoriaAtiva,
-}) {
+export default function Header({ filtros, atualizarFiltro, categorias }) {
   const { totalItens } = useCarrinho();
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,17 +51,30 @@ export default function Header({
             </Link>
 
             {isHome && (
-              <div className="flex-grow-1 d-none d-md-block">
-                <div className="search-wrapper">
+              <div className="flex-grow-1 d-none d-md-flex align-items-center gap-3">
+                <div className="search-wrapper flex-grow-1">
                   <Search size={18} className="search-icon" />
                   <input
                     type="text"
                     className="search-input-jm"
                     placeholder="O que você procura?"
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
+                    value={filtros.busca}
+                    onChange={(e) => atualizarFiltro('busca', e.target.value)}
                   />
                 </div>
+                
+                <select 
+                  className="form-select form-select-sm" 
+                  style={{ width: 'auto', minWidth: '140px' }}
+                  value={filtros.faixaPreco || ""}
+                  onChange={(e) => atualizarFiltro('faixaPreco', e.target.value)}
+                >
+                  <option value="">Preço</option>
+                  <option value="0-50">Até R$ 50</option>
+                  <option value="50-100">R$ 50 - R$ 100</option>
+                  <option value="100-200">R$ 100 - R$ 200</option>
+                  <option value="200+">Acima de R$ 200</option>
+                </select>
               </div>
             )}
 
@@ -81,16 +91,27 @@ export default function Header({
 
           {isHome && (
             <div className="d-md-none mt-2">
-              <div className="search-wrapper">
+              <div className="search-wrapper mb-2">
                 <Search size={18} className="search-icon" />
                 <input
                   type="text"
                   className="search-input-jm"
                   placeholder="Pesquisar..."
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
+                  value={filtros.busca}
+                  onChange={(e) => atualizarFiltro('busca', e.target.value)}
                 />
               </div>
+              <select 
+                className="form-select form-select-sm w-100" 
+                value={filtros.faixaPreco || ""}
+                onChange={(e) => atualizarFiltro('faixaPreco', e.target.value)}
+              >
+                <option value="">Filtrar por Preço</option>
+                <option value="0-50">Até R$ 50</option>
+                <option value="50-100">R$ 50 - R$ 100</option>
+                <option value="100-200">R$ 100 - R$ 200</option>
+                <option value="200+">Acima de R$ 200</option>
+              </select>
             </div>
           )}
 
@@ -124,8 +145,8 @@ export default function Header({
               {categorias.map(cat => (
                 <button
                   key={cat}
-                  className={`cat-pill ${categoriaAtiva === cat ? "active" : ""}`}
-                  onClick={() => setCategoriaAtiva(cat)}
+                  className={`cat-pill ${filtros.categoriaAtiva === cat ? "active" : ""}`}
+                  onClick={() => atualizarFiltro('categoriaAtiva', cat)}
                 >
                   {cat}
                 </button>

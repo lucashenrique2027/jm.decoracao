@@ -206,3 +206,54 @@
   border: none;
   color: var(--primary-jm);
 }
+
+/* Container das categorias */
+.categories-scroll-jm {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto !important;
+  white-space: nowrap;
+  padding: 4px 0 12px 0; /* Espaço inferior extra para a barra não tocar nos itens */
+  margin-top: 10px;
+  width: 100%;
+  
+  /* Firefox: customiza cor de forma elegante */
+  scrollbar-width: thin;
+  scrollbar-color: #e0e0e0 transparent;
+}
+
+/* Chrome, Safari, Edge: Barra customizada e minimalista */
+.categories-scroll-jm::-webkit-scrollbar {
+  height: 4px; /* Barra bem fina para não ser invasiva */
+}
+
+.categories-scroll-jm::-webkit-scrollbar-thumb {
+  background-color: #d1d1d1; /* Cinza claro suave */
+  border-radius: 10px;
+  border: 1px solid #ffffff; /* Efeito de borda para destacar levemente */
+}
+
+.categories-scroll-jm::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Itens das categorias */
+.cat-pill {
+  flex: 0 0 auto; 
+  padding: 5px 15px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.cat-pill.active {
+  background: var(--primary-jm);
+  color: white;
+  border-color: var(--primary-jm);
+}

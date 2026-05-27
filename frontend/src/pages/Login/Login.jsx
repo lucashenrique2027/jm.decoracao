@@ -23,6 +23,8 @@ export default function Login() {
   const [email, setEmail]             = useState("");
   const [senha, setSenha]             = useState("");
   const [verSenha, setVerSenha]       = useState(false);
+  const [verConfirmar, setVerConfirmar]   = useState(false);
+  const [verSenhaCad, setVerSenhaCad]     = useState(false);
   const [errosLogin, setErrosLogin]   = useState({});
   const [errosCad, setErrosCad]       = useState({});
   const [aceitouTermos, setAceitouTermos] = useState(false);
@@ -243,7 +245,17 @@ export default function Login() {
                     <label className="login-label">Senha</label>
                     <div className="login-input-wrapper">
                       <span className="login-input-icon"><i className="bi bi-lock"></i></span>
-                      <input type="password" className="login-input" placeholder="••••••" value={cad.senha} onChange={fc("senha")} required />
+                      <input
+                        type={verSenhaCad ? "text" : "password"}
+                        className="login-input"
+                        placeholder="••••••"
+                        value={cad.senha}
+                        onChange={fc("senha")}
+                        required
+                      />
+                      <button type="button" className="login-btn-eye" onClick={() => setVerSenhaCad(!verSenhaCad)}>
+                        <i className={`bi ${verSenhaCad ? "bi-eye-slash" : "bi-eye"}`}></i>
+                      </button>
                     </div>
                   </div>
 
@@ -251,7 +263,17 @@ export default function Login() {
                     <label className="login-label">Confirmar Senha</label>
                     <div className="login-input-wrapper">
                       <span className="login-input-icon"><i className="bi bi-shield-check"></i></span>
-                      <input type="password" className="login-input" placeholder="••••••" value={cad.confirmarSenha} onChange={fc("confirmarSenha")} required />
+                      <input
+                        type={verConfirmar ? "text" : "password"}
+                        className="login-input"
+                        placeholder="••••••"
+                        value={cad.confirmarSenha}
+                        onChange={fc("confirmarSenha")}
+                        required
+                      />
+                      <button type="button" className="login-btn-eye" onClick={() => setVerConfirmar(!verConfirmar)}>
+                        <i className={`bi ${verConfirmar ? "bi-eye-slash" : "bi-eye"}`}></i>
+                      </button>
                     </div>
                     {errosCad.confirmarSenha && <span className="login-error-msg">{errosCad.confirmarSenha}</span>}
                   </div>

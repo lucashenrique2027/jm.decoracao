@@ -1,9 +1,9 @@
-import { pool } from '../models/db.js'; // Conexão nativa do PostgreSQL
+import { pool } from '../models/db.js';
 
 import client from '../src/mercadoPago/mercadopago.js';
 import { Preference, Payment } from 'mercadopago';
 
-import Stripe from 'stripe';
+import stripe from '../src/stripe/stripe.js';
 
 // Função Auxiliar Transacional interna para controle rígido de estoque e confirmação
 async function confirmarPedidoComEstoque(clientTransacao, pedidoId) {
@@ -278,133 +278,61 @@ export const webhookMercadoPago = async (req, res) => {
   }
 };
 
-export const stripePix = async (req, res) => {
-  console.log('[stripePix]', req.body);
-  const { pedidoId, clienteEmail } = req.body;
-  const clienteId = req.clienteId;
 
+export const confirmarPagamento = async (req, res) => {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const { paymentId, externalRef } = req.body;
 
-    const queryPedido = `SELECT total, cliente_id FROM jm.pedidos WHERE id = $1`;
-    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
-    const pedido = resultadoPedido.rows[0];
+    if (!paymentId) {
+      return res.status(400).json({ erro: 'paymentId obrigatório' });
+    }
 
-    if (!pedido)
-      return res.status(404).json({ erro: 'Pedido não encontrado' });
-
-    if (pedido.cliente_id !== clienteId)
-      return res.status(403).json({ erro: 'Pedido não pertence ao cliente' });
-
-    const queryPagamento = `SELECT id, status FROM jm.pagamentos WHERE pedido_id = $1`;
-    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId]);
-    const pagamento = resultadoPagamento.rows[0];
-
-    if (!pagamento)
-      return res.status(404).json({ erro: 'Pagamento não encontrado' });
-
-    if (pagamento.status !== 'aguardando_pagamento')
-      return res.status(409).json({ erro: 'Pagamento já processado', status: pagamento.status });
-
-    const valorEmCentavos = Math.round(Number(pedido.total) * 100);
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: valorEmCentavos,
-      currency: 'brl',
-      payment_method_types: ['pix'],
-      receipt_email: clienteEmail || undefined,
-      metadata: {
-        pedidoId: String(pedidoId),
-        clienteId: String(clienteId ?? ''),
+    // 1. Consulta ao Mercado Pago (mantemos o fetch pois é uma API externa)
+    const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}`,
       },
     });
 
-    console.log('[stripePix] paymentIntent criado:', paymentIntent.id);
+    const pagamento = await mpRes.json();
 
-    const queryUpdateMetodo = `UPDATE jm.pagamentos SET metodo_pagamento = 'stripe_pix' WHERE id = $1`;
-    await pool.query(queryUpdateMetodo, [pagamento.id]);
+    if (pagamento.status !== 'approved') {
+      return res.json({ sucesso: false, status: pagamento.status });
+    }
 
-    const pixInfo = paymentIntent.next_action?.pix_display_qr_code;
+    // 2. Atualização via SQL puro
+    if (externalRef) {
+      // Lógica de extração idêntica à original
+      const pedidoId = externalRef.replace('jm_', '').split('_')[0];
+      
+      if (pedidoId && !isNaN(Number(pedidoId))) {
+        const query = `UPDATE jm.pedidos SET status = $1 WHERE id = $2`;
+        await pool.query(query, ['confirmado', Number(pedidoId)]);
+      }
+    }
 
-    return res.json({
-      success: true,
-      pedidoId,
-      total: pedido.total,
-      paymentIntentId: paymentIntent.id,
-      clientSecret: paymentIntent.client_secret,
-      pixQrCodeUrl: pixInfo?.image_url_svg ?? null,
-      pixCopiaECola: pixInfo?.data ?? null,
-      expiresAt: pixInfo?.expires_at ?? null,
-    });
-
-  } catch (err) {
-    console.error('[stripePix]', err);
-    return res.status(err.status || 500).json({ erro: err.message || 'Erro ao gerar Pix via Stripe' });
+    return res.json({ sucesso: true, status: 'approved' });
+  } catch (error) {
+    console.error('Erro ao confirmar pagamento:', error);
+    return res.status(500).json({ erro: 'Erro ao confirmar pagamento' });
   }
 };
 
-export const webhookStripe = async (req, res) => {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  const sig = req.headers['stripe-signature'];
-
-  let event;
-
+export const statusPagamento = async (req, res) => {
   try {
-    event = stripe.webhooks.constructEvent(
-      req.rawBody ?? req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.error('[webhookStripe] Assinatura inválida:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    const { paymentId } = req.params;
+
+    const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+      },
+    });
+
+    const pagamento = await mpRes.json();
+    return res.json({ status: pagamento.status, detalhe: pagamento.status_detail });
+
+  } catch (error) {
+    console.error('Erro ao consultar status:', error);
+    res.status(500).json({ erro: 'Erro ao consultar status do pagamento' });
   }
-
-  console.log('[webhookStripe] evento:', event.type);
-
-  if (event.type !== 'payment_intent.succeeded')
-    return res.sendStatus(200);
-
-  const pi = event.data.object;
-  const pedidoId = pi.metadata?.pedidoId ? parseInt(pi.metadata.pedidoId) : null;
-
-  if (!pedidoId) {
-    console.warn('[webhookStripe] pedidoId ausente nos metadata, ignorando');
-    return res.sendStatus(200);
-  }
-
-  const clientTransacao = await pool.connect();
-
-  try {
-    await clientTransacao.query('BEGIN');
-
-    const queryUpdatePagamento = `
-      UPDATE jm.pagamentos 
-      SET status = 'pago', pago_em = $1, atualizado_em = $2 
-      WHERE pedido_id = $3 AND status = 'aguardando_pagamento'
-      RETURNING id
-    `;
-    const resultadoUpdate = await clientTransacao.query(queryUpdatePagamento, [new Date(), new Date(), pedidoId]);
-    const updated = resultadoUpdate.rows[0];
-
-    if (!updated) {
-      console.log('[webhookStripe] pedido já confirmado anteriormente, ignorando:', pedidoId);
-      await clientTransacao.query('ROLLBACK');
-      return res.sendStatus(200);
-    }
-
-    await confirmarPedidoComEstoque(clientTransacao, pedidoId);
-    await clientTransacao.query('COMMIT');
-
-    console.log('[webhookStripe] ✅ Pedido confirmado:', pedidoId);
-
-  } catch (err) {
-    await clientTransacao.query('ROLLBACK');
-    console.error('[webhookStripe] Erro ao confirmar pedido:', err);
-    return res.status(500).json({ erro: err.message });
-  } finally {
-    clientTransacao.release();
-  }
-
-  return res.sendStatus(200);
 };

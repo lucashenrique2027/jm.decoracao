@@ -17,8 +17,6 @@ import Pagamento from "./pages/Pagamento/pagamento.jsx";
 import Admin from "./admin/dashboard/Admin.jsx";
 import LoginAdmin from './admin/login/LoginAdmin.jsx';
 import PedidoSelecionado from './components/PedidoSelected/pagePedido.jsx';
-import PaginaSucesso from "./pages/Pagamento/PaginaSucesso.jsx";
-import PaginaErro from "./pages/Pagamento/PaginaErro.jsx";
 
 import "../styles/global.css";
 

@@ -233,3 +233,38 @@ export const deletarCliente = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao remover cliente' });
   }
 };
+
+export const alterarSenha = async (req, res) => {
+  try {
+    const id = req.clienteId;
+    const { senhaAtual, novaSenha } = req.body;
+
+    if (!senhaAtual || !novaSenha) {
+      return res.status(400).json({ erro: 'Preencha todos os campos.' });
+    }
+    if (novaSenha.length < 6) {
+      return res.status(400).json({ erro: 'Nova senha precisa ter no mínimo 6 caracteres.' });
+    }
+
+    const { rows } = await db.query('SELECT senha_hash FROM jm.clientes WHERE id = $1', [id]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ erro: 'Cliente não encontrado.' });
+    }
+
+    const cliente = rows[0];
+    const senhaValida = await bcrypt.compare(senhaAtual, cliente.senha_hash);
+    
+    if (!senhaValida) {
+      return res.status(401).json({ erro: 'Senha atual incorreta.' });
+    }
+
+    const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+    await db.query('UPDATE jm.clientes SET senha_hash = $1 WHERE id = $2', [novaSenhaHash, id]);
+
+    return res.json({ mensagem: 'Senha alterada com sucesso!' });
+  } catch (erro) {
+    console.error('Erro ao alterar senha:', erro);
+    res.status(500).json({ erro: 'Erro interno ao alterar senha.' });
+  }
+};

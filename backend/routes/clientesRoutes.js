@@ -7,7 +7,8 @@ import {
   listarClientes,
   buscarClientePorId,
   atualizarCliente,
-  deletarCliente
+  deletarCliente,
+  alterarSenha 
 } from '../controllers/clientesController.js';
 import {
   obterCarrinhoAtivo,
@@ -18,6 +19,8 @@ import {
 import { verificarToken } from '../middlewares/validarTokenClient.js';
 
 const router = express.Router();
+
+router.post('/alterar-senha', verificarToken, alterarSenha);
 
 /**
  * =========================================================

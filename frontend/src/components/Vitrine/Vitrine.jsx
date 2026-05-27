@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "./style.css";
 import { buscarProdutos, listarCategorias } from '../../services/products.js';
 
-export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCategoriasCarregadas }) {
+// ← ordemPreco adicionado como prop
+export default function Vitrine({ busca = "", categoriaAtiva = "Todos", ordemPreco = "", onCategoriasCarregadas }) {
   const [todosProdutos, setTodosProdutos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
@@ -31,13 +32,23 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
   }, [onCategoriasCarregadas]);
 
   const produtosFiltrados = useMemo(() => {
-    return todosProdutos.filter(p => {
+    // 1. Filtra por texto e categoria
+    let lista = todosProdutos.filter(p => {
       const termo = busca.toLowerCase();
       const bateTexto = p.nome?.toLowerCase().includes(termo) || p.descricao?.toLowerCase().includes(termo);
       const bateCategoria = categoriaAtiva === "Todos" || p.categoriaNome === categoriaAtiva;
       return bateTexto && bateCategoria;
     });
-  }, [todosProdutos, busca, categoriaAtiva]);
+
+    // 2. ← Ordena por preço (usa precoVarejo como base)
+    if (ordemPreco === "menor") {
+      lista = lista.slice().sort((a, b) => Number(a.precoVarejo) - Number(b.precoVarejo));
+    } else if (ordemPreco === "maior") {
+      lista = lista.slice().sort((a, b) => Number(b.precoVarejo) - Number(a.precoVarejo));
+    }
+
+    return lista;
+  }, [todosProdutos, busca, categoriaAtiva, ordemPreco]);
 
   if (carregando) return <p className="container my-5 text-center">Carregando produtos...</p>;
   if (erro) return <p className="container my-5 text-center text-danger">{erro}</p>;
@@ -52,7 +63,6 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
             <div 
               className={`card-item ${!disponivel ? "card-esgotado" : ""}`} 
               key={produto.id} 
-              // AÇÃO: Navega para a URL própria do produto
               onClick={() => navigate(`/produto/${produto.id}`)}
             >
 
@@ -63,16 +73,15 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
               <div className="produto-info">
                 <p><b>{produto.nome}</b></p>
 
-                 <div className="selo-status" style={{ background: disponivel ? "#25D366" : "#999" }}>
-                {disponivel ? "DISPONÍVEL" : "ESGOTADO"}
-              </div>
+                <div className="selo-status" style={{ background: disponivel ? "#25D366" : "#999" }}>
+                  {disponivel ? "DISPONÍVEL" : "ESGOTADO"}
+                </div>
+
                 {produto.precoVarejo > 0 && (
                   <p className="preco-varejo">
                     Varejo: R$ {Number(produto.precoVarejo).toFixed(2).replace('.', ',')}
                   </p>
                 )}
-
-                             
 
                 {produto.precoAtacado > 0 && (
                   <div className="info-atacado">
@@ -89,7 +98,7 @@ export default function Vitrine({ busca = "", categoriaAtiva = "Todos", onCatego
                   className="btn-add"
                   disabled={!disponivel}
                   onClick={(e) => {
-                    e.stopPropagation(); // Evita navegar para a página de detalhes
+                    e.stopPropagation();
                     if (disponivel) adicionarItem(produto, 1);
                   }}
                 >

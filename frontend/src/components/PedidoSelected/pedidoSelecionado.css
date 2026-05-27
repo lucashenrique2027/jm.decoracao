@@ -289,3 +289,24 @@
 .pedido-selected-btn-pagar:hover {
   background: #16a34a;
 }
+/* Ajuste do grid para 4 colunas */
+.pedido-selected-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Ajuste para telas entre 860px e 1100px para não quebrar */
+@media (max-width: 1100px) {
+  .pedido-selected-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Ajuste para telas menores que 860px (mantém o empilhamento) */
+@media (max-width: 860px) {
+  .pedido-selected-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

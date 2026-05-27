@@ -251,30 +251,42 @@ export default function Pedidos() {
                       </div>
                     </div>
 
-                    {/* ENDEREÇO DE ENTREGA */}
-                    <div className="bg-white rounded-3 border p-3 mb-3">
-                      <h6 className="fw-bold small text-secondary mb-2">
-                        <i className="bi bi-geo-alt-fill me-1"></i> Endereço de Entrega
-                      </h6>
-                      <div className="d-flex justify-content-between mb-1 small">
-                        <span className="text-muted">Recebedor:</span>
-                        <span className="fw-medium text-dark">{pedidoDetalhado.nomeRecebedor ?? "—"}</span>
-                      </div>
-                      <div className="d-flex justify-content-between mb-1 small">
-                        <span className="text-muted">Endereço:</span>
-                        <span className="fw-medium text-dark text-end" style={{ maxWidth: '60%' }}>
-                          {pedidoDetalhado.enderecoEntrega}, {pedidoDetalhado.bairroEntrega}
-                        </span>
-                      </div>
-                      <div className="d-flex justify-content-between mb-1 small">
-                        <span className="text-muted">Cidade / UF:</span>
-                        <span className="fw-medium text-dark">{pedidoDetalhado.cidadeEntrega} - {pedidoDetalhado.estadoEntrega}</span>
-                      </div>
-                      <div className="d-flex justify-content-between small">
-                        <span className="text-muted">CEP:</span>
-                        <span className="fw-medium text-dark">{pedidoDetalhado.cepEntrega}</span>
-                      </div>
+                  {/* ENDEREÇO DE ENTREGA */}
+                  <div className="bg-white rounded-3 border p-3 mb-3">
+                    <h6 className="fw-bold small text-secondary mb-2">
+                      <i className="bi bi-geo-alt-fill me-1"></i> Endereço de Entrega
+                    </h6>
+
+                    <div className="d-flex justify-content-between mb-1 small">
+                      <span className="text-muted">Recebedor:</span>
+                      <span className="fw-medium text-dark">
+                        {pedidoDetalhado.nomeRecebedor ?? "—"}
+                      </span>
                     </div>
+
+                    <div className="d-flex justify-content-between mb-1 small">
+                      <span className="text-muted">Endereço:</span>
+                      <span className="fw-medium text-dark text-end" style={{ maxWidth: '60%' }}>
+                        {pedidoDetalhado.enderecoEntrega}
+                        {pedidoDetalhado.numeroEntrega ? `, ${pedidoDetalhado.numeroEntrega}` : ""} 
+                        {pedidoDetalhado.bairroEntrega ? `, ${pedidoDetalhado.bairroEntrega}` : ""}
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between mb-1 small">
+                      <span className="text-muted">Cidade / UF:</span>
+                      <span className="fw-medium text-dark">
+                        {pedidoDetalhado.cidadeEntrega} - {pedidoDetalhado.estadoEntrega}
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between small">
+                      <span className="text-muted">CEP:</span>
+                      <span className="fw-medium text-dark">
+                        {pedidoDetalhado.cepEntrega}
+                      </span>
+                    </div>
+                  </div>
 
                     {/* OBSERVAÇÃO (só mostra se existir) */}
                     {pedidoDetalhado.observacaoEntrega && (

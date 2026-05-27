@@ -6,6 +6,7 @@ import {
   Calendar,
   CreditCard,
   ShoppingBag,
+  MapPin
 } from 'lucide-react';
 
 import { useNavigate, useParams } from 'react-router-dom';
@@ -155,6 +156,22 @@ export default function PedidoSelecionado() {
                   ).toLocaleDateString('pt-BR')
                 }
               </strong>
+            </div>
+          </div>
+          
+          <div className="pedido-selected-info-card">
+            <MapPin size={18} />
+
+            <div>
+              <p className="pedido-selected-info-label">
+                Endereço de entrega
+              </p>
+              <strong>
+                {pedido.enderecoEntrega}, {pedido.numeroEntrega}
+              </strong>
+              <p style={{ fontSize: '12px', margin: '2px 0 0', color: '#6b7280' }}>
+                {pedido.bairroEntrega} - {pedido.cidadeEntrega}/{pedido.estadoEntrega}
+              </p>
             </div>
           </div>
 

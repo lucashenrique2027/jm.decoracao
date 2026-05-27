@@ -72,6 +72,7 @@ export const dadosCliente = async (req, res) => {
         telefone,
         cep,
         endereco,
+        numero,
         bairro,
         cidade,
         estado
@@ -79,13 +80,10 @@ export const dadosCliente = async (req, res) => {
       WHERE id = $1
     `;
     const resultado = await pool.query(queryDados, [id]);
-
     if (resultado.rows.length === 0) {
       return res.status(404).json({ erro: 'Cliente não encontrado' });
     }
-
     return res.status(200).json(resultado.rows[0]);
-
   } catch (error) {
     console.error('Erro ao buscar dados privados:', error);
     res.status(500).json({ erro: 'Erro interno ao processar dados' });
@@ -94,67 +92,62 @@ export const dadosCliente = async (req, res) => {
 
 export const cadastrarCliente = async (req, res) => {
   try {
-    const { nome, email, senha, telefone, cep, endereco, bairro, city, cidade, estado } = req.body;
+    const {
+      nome, email, senha, telefone, cep,
+      numero, endereco, bairro, city, cidade, estado
+    } = req.body;
+
     const cidadeFinal = cidade || city;
 
     if (!nome || !email || !senha || !telefone || !cep) {
-      return res.status(400).json({ erro: 'Nome, email, senha, telefone e CEP são obrigatórios' });
+      return res.status(400).json({ erro: 'Campos obrigatórios faltando' });
     }
-
-    const hashedPassword = await bcrypt.hash(senha, 10);
-
-    const queryInserir = `
-      INSERT INTO jm.clientes (nome, email, senha_hash, telefone, cep, endereco, bairro, cidade, estado)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING id, nome, email, telefone, cep, endereco, bairro, cidade, estado, criado_em AS "criadoEm"
-    `;
     
-    const valores = [
-      nome,
-      email,
-      hashedPassword,
-      telefone,
-      cep,
+    const hash = await bcrypt.hash(senha, 10);
+    const sql = `
+      INSERT INTO jm.clientes (nome,email,senha_hash,telefone,cep,numero,endereco,bairro,cidade,estado)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      RETURNING id,nome,email,telefone,cep,numero,endereco,bairro,cidade,estado,criado_em AS "criadoEm"
+    `;
+    const vals = [
+      nome, email, hash, telefone, cep,
+      numero || null,
       endereco || null,
       bairro || null,
       cidadeFinal || null,
       estado || 'SP'
     ];
 
-    const resultado = await pool.query(queryInserir, valores);
-    const clienteSemSenha = resultado.rows[0];
+    const { rows } = await pool.query(sql, vals);
 
-    res.status(201).json({ mensagem: 'Cliente cadastrado com sucesso', cliente: clienteSemSenha });
-  } catch (erro) {
-    console.error('Erro ao cadastrar cliente:', erro);
-    if (erro.code === '23505') {
-      return res.status(400).json({ erro: 'Este e-mail já está cadastrado' });
+    return res.status(201).json({
+      mensagem: 'Cliente cadastrado com sucesso',
+      cliente: rows[0]
+    });
+
+  } catch (e) {
+    if (e.code === '23505') {
+      return res.status(400).json({ erro: 'E-mail já cadastrado' });
     }
-    res.status(500).json({ erro: 'Erro ao cadastrar cliente' });
+    return res.status(500).json({ erro: 'Erro ao cadastrar cliente' });
   }
 };
 
 export const listarClientes = async (req, res) => {
   try {
-    const queryListar = `
-      SELECT 
-        id,
-        nome,
-        email,
-        telefone,
-        cep,
-        endereco,
-        bairro,
-        cidade,
-        estado,
+    const sql = `
+      SELECT
+        id, nome, email, telefone, cep,
+        numero, endereco, bairro, cidade, estado,
         criado_em AS "criadoEm"
       FROM jm.clientes
     `;
-    const resultado = await pool.query(queryListar);
-    res.json(resultado.rows);
-  } catch (erro) {
-    console.error('Erro ao buscar clientes:', erro);
-    res.status(500).json({ erro: 'Erro ao buscar clientes' });
+
+    const { rows } = await pool.query(sql);
+    return res.json(rows);
+
+  } catch (e) {
+    return res.status(500).json({ erro: 'Erro ao buscar clientes' });
   }
 };
 
@@ -162,31 +155,25 @@ export const buscarClientePorId = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const queryBuscarPorId = `
-      SELECT 
-        id,
-        nome,
-        email,
-        telefone,
-        cep,
-        endereco,
-        bairro,
-        cidade,
-        estado,
+    const sql = `
+      SELECT
+        id, nome, email, telefone, cep,
+        numero, endereco, bairro, cidade, estado,
         criado_em AS "criadoEm"
-      FROM jm.clientes 
+      FROM jm.clientes
       WHERE id = $1
     `;
-    const resultado = await pool.query(queryBuscarPorId, [parseInt(id)]);
 
-    if (resultado.rows.length === 0) {
+    const { rows } = await pool.query(sql, [Number(id)]);
+
+    if (!rows.length) {
       return res.status(404).json({ erro: 'Cliente não encontrado' });
     }
 
-    res.json(resultado.rows[0]);
-  } catch (erro) {
-    console.error('Erro ao buscar cliente:', erro);
-    res.status(500).json({ erro: 'Erro ao buscar cliente' });
+    return res.json(rows[0]);
+
+  } catch (e) {
+    return res.status(500).json({ erro: 'Erro ao buscar cliente' });
   }
 };
 

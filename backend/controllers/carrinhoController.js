@@ -154,7 +154,11 @@ export const criarPedidoPendente = async (req, res) => {
     /* ===================================================
        CLIENTE
     =================================================== */
-    const queryCliente = `SELECT nome, telefone, cep, endereco, bairro, cidade, estado FROM jm.clientes WHERE id = $1`;
+    const queryCliente = `
+      SELECT nome, telefone, cep, endereco, numero, bairro, cidade, estado
+      FROM jm.clientes
+      WHERE id = $1
+    `;
     const resultadoCliente = await clientTransacao.query(queryCliente, [clienteId]);
     const cliente = resultadoCliente.rows[0];
 
@@ -176,7 +180,11 @@ export const criarPedidoPendente = async (req, res) => {
     /* ===================================================
        ITENS
     =================================================== */
-    const queryItens = `SELECT produto_id, quantidade, preco_unitario FROM jm.carrinho_itens WHERE carrinho_id = $1`;
+    const queryItens = `
+      SELECT produto_id, quantidade, preco_unitario
+      FROM jm.carrinho_itens
+      WHERE carrinho_id = $1
+    `;
     const resultadoItens = await clientTransacao.query(queryItens, [carrinho.id]);
     const itens = resultadoItens.rows;
 
@@ -187,7 +195,12 @@ export const criarPedidoPendente = async (req, res) => {
     /* ===================================================
        PEDIDO PENDENTE EM ABERTO
     =================================================== */
-    const queryVerificarPendente = `SELECT id FROM jm.pedidos WHERE cliente_id = $1 AND status = 'pendente' LIMIT 1`;
+    const queryVerificarPendente = `
+      SELECT id
+      FROM jm.pedidos
+      WHERE cliente_id = $1 AND status = 'pendente'
+      LIMIT 1
+    `;
     const resultadoPendente = await clientTransacao.query(queryVerificarPendente, [clienteId]);
     const pedidoPendente = resultadoPendente.rows[0];
 
@@ -209,6 +222,7 @@ export const criarPedidoPendente = async (req, res) => {
         telefoneEntrega: cliente.telefone,
         cepEntrega: cliente.cep,
         enderecoEntrega: cliente.endereco,
+        numeroEntrega: cliente.numero,
         bairroEntrega: cliente.bairro,
         cidadeEntrega: cliente.cidade,
         estadoEntrega: cliente.estado,
@@ -219,6 +233,7 @@ export const criarPedidoPendente = async (req, res) => {
         telefoneEntrega: cliente.telefone,
         cepEntrega: novoEndereco.cep,
         enderecoEntrega: novoEndereco.endereco,
+        numeroEntrega: novoEndereco.numero,
         bairroEntrega: novoEndereco.bairro,
         cidadeEntrega: novoEndereco.cidade,
         estadoEntrega: novoEndereco.estado,
@@ -226,7 +241,7 @@ export const criarPedidoPendente = async (req, res) => {
     }
 
     /* ===================================================
-       LOJA (ORIGEM CORRETA DO FRETE)
+       LOJA
     =================================================== */
     const queryLoja = `SELECT cep FROM jm.loja LIMIT 1`;
     const resultadoLoja = await clientTransacao.query(queryLoja);
@@ -250,7 +265,6 @@ export const criarPedidoPendente = async (req, res) => {
 
     const total = subtotal + frete;
 
-    // INÍCIO DO ESCOPO ISOLADO ATÔMICO NO BANCO
     await clientTransacao.query('BEGIN');
 
     /* ===================================================
@@ -259,15 +273,34 @@ export const criarPedidoPendente = async (req, res) => {
     const queryInserirPedido = `
       INSERT INTO jm.pedidos (
         cliente_id, status, observacao_entrega, subtotal, frete, total,
-        nome_recebedor, telefone_entrega, cep_entrega, endereco_entrega, bairro_entrega, cidade_entrega, estado_entrega
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        nome_recebedor, telefone_entrega,
+        cep_entrega,
+        endereco_entrega,
+        numero_entrega,
+        bairro_entrega,
+        cidade_entrega,
+        estado_entrega
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
       RETURNING id
     `;
+
     const valoresPedido = [
-      clienteId, 'pendente', observacaoEntrega || null, subtotal, frete, total,
-      enderecoFinal.nomeRecebedor, enderecoFinal.telefoneEntrega, enderecoFinal.cepEntrega,
-      enderecoFinal.enderecoEntrega, enderecoFinal.bairroEntrega, enderecoFinal.cidadeEntrega, enderecoFinal.estadoEntrega
+      clienteId,
+      'pendente',
+      observacaoEntrega || null,
+      subtotal,
+      frete,
+      total,
+      enderecoFinal.nomeRecebedor,
+      enderecoFinal.telefoneEntrega,
+      enderecoFinal.cepEntrega,
+      enderecoFinal.enderecoEntrega,
+      enderecoFinal.numeroEntrega,
+      enderecoFinal.bairroEntrega,
+      enderecoFinal.cidadeEntrega,
+      enderecoFinal.estadoEntrega
     ];
+
     const resultadoNovoPedido = await clientTransacao.query(queryInserirPedido, valoresPedido);
     const pedido = resultadoNovoPedido.rows[0];
 
@@ -279,7 +312,12 @@ export const criarPedidoPendente = async (req, res) => {
         INSERT INTO jm.pedido_itens (pedido_id, produto_id, quantidade, preco_unitario)
         VALUES ($1, $2, $3, $4)
       `;
-      await clientTransacao.query(queryInserirItemPedido, [pedido.id, item.produto_id, item.quantidade, item.preco_unitario]);
+      await clientTransacao.query(queryInserirItemPedido, [
+        pedido.id,
+        item.produto_id,
+        item.quantidade,
+        item.preco_unitario
+      ]);
     }
 
     /* ===================================================
@@ -291,22 +329,33 @@ export const criarPedidoPendente = async (req, res) => {
 
     const queryInserirPagamento = `
       INSERT INTO jm.pagamentos (
-        pedido_id, token_pagamento, status, valor, metodo_pagamento, qr_code_visual, qr_code_payload, expiracao_pagamento
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        pedido_id, token_pagamento, status, valor, metodo_pagamento,
+        qr_code_visual, qr_code_payload, expiracao_pagamento
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       RETURNING status, qr_code_visual AS "qrCodeVisual"
     `;
+
     const valoresPagamento = [
-      pedido.id, tokenPagamento, 'aguardando_pagamento', total, 'pix_simulado',
-      qrCodeVisual, payloadPix, new Date(Date.now() + 1000 * 60 * 30)
+      pedido.id,
+      tokenPagamento,
+      'aguardando_pagamento',
+      total,
+      'pix_simulado',
+      qrCodeVisual,
+      payloadPix,
+      new Date(Date.now() + 1000 * 60 * 30)
     ];
+
     const resultadoPagamento = await clientTransacao.query(queryInserirPagamento, valoresPagamento);
     const pagamento = resultadoPagamento.rows[0];
 
     /* ===================================================
        LIMPAR CARRINHO
     =================================================== */
-    const queryLimparCarrinho = `DELETE FROM jm.carrinho_itens WHERE carrinho_id = $1`;
-    await clientTransacao.query(queryLimparCarrinho, [carrinho.id]);
+    await clientTransacao.query(
+      `DELETE FROM jm.carrinho_itens WHERE carrinho_id = $1`,
+      [carrinho.id]
+    );
 
     await clientTransacao.query('COMMIT');
 

@@ -3,8 +3,6 @@ dist/
 build/
 *.env*
 .env
-docs/
-docs/
 scan-tree.js
 tree-map.json
 memoria.js

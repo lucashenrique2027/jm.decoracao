@@ -385,3 +385,234 @@
     font-size: 16px;
   }
 }
+
+/* ===== EDIÇÃO DE PERFIL ===== */
+.perfil-btn-editar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #eef9ff;
+  color: #077dac;
+  border: 1.5px solid #bae6fd;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.perfil-btn-editar:hover {
+  background: #077dac;
+  color: #fff;
+  border-color: #077dac;
+  transform: translateY(-1px);
+}
+
+.perfil-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.perfil-edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .perfil-edit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.perfil-edit-full {
+  grid-column: 1 / -1;
+}
+
+.perfil-edit-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.perfil-edit-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.perfil-edit-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  height: 48px;
+  padding: 0 14px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  position: relative;
+}
+
+.perfil-edit-input-wrap:focus-within {
+  border-color: #077dac;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(7, 125, 172, 0.1);
+}
+
+.perfil-edit-input-wrap.erro {
+  border-color: #ef4444;
+}
+
+.perfil-edit-input-wrap.readonly {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.perfil-edit-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.perfil-edit-input-wrap:focus-within .perfil-edit-icon {
+  color: #077dac;
+}
+
+.perfil-edit-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  min-width: 0;
+}
+
+.perfil-edit-input::placeholder {
+  color: #9ca3af;
+}
+
+.perfil-edit-input:read-only {
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.perfil-edit-spinner {
+  color: #077dac;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.perfil-edit-erro {
+  font-size: 12px;
+  color: #ef4444;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.perfil-edit-acoes {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.perfil-edit-btn-cancelar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.perfil-edit-btn-cancelar:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.perfil-edit-btn-cancelar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.perfil-edit-btn-salvar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #077dac;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(7, 125, 172, 0.2);
+}
+
+.perfil-edit-btn-salvar:hover:not(:disabled) {
+  background: #065f83;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(7, 125, 172, 0.3);
+}
+
+.perfil-edit-btn-salvar:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.perfil-edit-spinner-btn {
+  animation: spin 0.8s linear infinite;
+}
+
+.perfil-sucesso-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  color: #15803d;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.perfil-erro-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #dc2626;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+}

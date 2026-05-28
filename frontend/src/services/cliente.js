@@ -41,3 +41,19 @@ export const validarSessao = async () => {
         return { autenticado: false };
     }
 };
+
+export const atualizarCliente = async (id, dados) => {
+    const response = await fetch(`${BASE_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(dados)
+    });
+
+    if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.erro || 'Erro ao atualizar dados.');
+    }
+
+    return response.json();
+};

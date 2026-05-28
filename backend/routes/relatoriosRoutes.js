@@ -8,6 +8,7 @@ import {
   relatorioProdutosPdf,
   relatorioCategorias,
   relatorioCategotiasPdf,
+  relatorioPedidoPdf
 } from '../controllers/relatoriosController.js';
 
 const router = express.Router();
@@ -64,5 +65,7 @@ router.get('/produtos/pdf', verificarToken, relatorioProdutosPdf);
  * Exporta visão estratégica por categoria em PDF
  */
 router.get('/categorias/pdf', verificarToken, relatorioCategotiasPdf);
+
+router.get('/pedidos/:id/pdf', verificarToken, relatorioPedidoPdf);
 
 export default router;

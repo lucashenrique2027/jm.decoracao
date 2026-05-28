@@ -61,3 +61,21 @@ export const buscarCategoriasMaisVendidas = async () => {
 
   return response.json();
 };
+
+const RELATORIOS_URL = 'http://localhost:8080/api/relatorios';
+
+export const baixarPdfPedido = async (id) => {
+
+  const response = await fetch(
+    `${RELATORIOS_URL}/pedidos/${id}/pdf`,
+    {
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Erro ao gerar PDF do pedido');
+  }
+
+  return response.json();
+};

@@ -152,6 +152,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO jm.pedido_itens (pedido_id, produto_id, quantidade, preco_unitario)
 VALUES
 (1, 11, 2, 75.00), (1, 9,  1, 45.00),
+(2, 12, 1, 200.00),
 (3, 14, 1, 350.00),(3, 12, 1, 65.00),
 (4, 13, 1, 135.00),
 (5, 12, 1, 65.00),

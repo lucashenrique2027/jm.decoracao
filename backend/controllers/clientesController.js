@@ -264,7 +264,13 @@ export const atualizarCliente = async (req, res) => {
 
     const queryAtualizar = `
       UPDATE jm.clientes
-      SET nome = $1, telefone = $2, cep = $3, endereco = $4, bairro = $5, cidade = $6, estado = $7
+      SET nome = COALESCE($1, nome),
+          telefone = COALESCE($2, telefone),
+          cep = COALESCE($3, cep),
+          endereco = COALESCE($4, endereco),
+          bairro = COALESCE($5, bairro),
+          cidade = COALESCE($6, cidade),
+          estado = COALESCE($7, estado)
       WHERE id = $8
       RETURNING id, nome, email, telefone, cep, endereco, bairro, cidade, estado, criado_em AS "criadoEm"
     `;

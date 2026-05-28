@@ -4,7 +4,7 @@ import {
   cadastrarProduto as cadastrarProdutoService, 
   listarCategorias, 
   deletarCategoria,
-  criarCategoria // Certifique-se de que este método existe no seu service
+  criarCategoria
 } from '../../services/adminProducts.js';
 import { Trash2, Plus } from "lucide-react";
 

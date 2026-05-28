@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS jm.admin (
 
 
 -- ─── CLIENTES (conta pública) ───────────────────────────
-CREATE TABLE IF NOT EXISTS jm.clientes (
+CREATE TABLE jm.clientes (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
@@ -51,10 +51,14 @@ CREATE TABLE IF NOT EXISTS jm.clientes (
   telefone TEXT NOT NULL,
   cep TEXT NOT NULL,
   numero TEXT,
-  endereco TEXT ,
-  bairro TEXT ,
-  cidade TEXT ,
-  estado TEXT  DEFAULT 'SP',
+  endereco TEXT,
+  bairro TEXT,
+  cidade TEXT,
+  estado TEXT DEFAULT 'SP',
+  status TEXT DEFAULT 'pendente',
+  email_verificado BOOLEAN DEFAULT FALSE,
+  token_verificacao TEXT,
+  token_expira_em TIMESTAMPTZ,
   criado_em TIMESTAMPTZ DEFAULT NOW()
 );
 

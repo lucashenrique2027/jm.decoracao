@@ -8,6 +8,7 @@ import { TemaProvider } from "./context/TemaContext.jsx";
 import RotaProtegida from './components/rotaPriveCliente/rotaProtegida.jsx';
 import RotaProtegidaAdmin from './components/rotaPriveAdmin/rotaProtegidaAdmin.jsx';
 
+import VerificarEmail from "./pages/verificar-email/page.jsx";
 import Carrinho from "./components/carrinho/Carrinho.jsx";
 import Home from "./pages/Home/Home.jsx";
 import Sobre from "./pages/Sobre/Sobre.jsx";
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")).render(
         <MensagemProvider>
           <CarrinhoProvider>
             <Routes>
+              <Route path="/verificar-email" element={<VerificarEmail />} />
               <Route path="/" element={<Home />} /> {/*http://localhost:8080/*/}
               <Route path="/sobre" element={<Sobre />} />{/*http://localhost:8080/sobre*/}
               <Route path="/login" element={<Login />} />{/*http://localhost:8080/Login*/}

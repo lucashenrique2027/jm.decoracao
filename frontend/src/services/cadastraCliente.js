@@ -15,3 +15,18 @@ export const cadastrarCliente = async (dados) => {
     }
     return response.json();
 };
+
+export const confirmarEmail = async (dados) => {
+    const response = await fetch(`${API_URL}/confirmar-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+    });
+
+    if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.erro || `Erro HTTP! status: ${response.status}`);
+    }
+
+    return response.json();
+};

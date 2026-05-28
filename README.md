@@ -2,10 +2,22 @@
 ### Instale os pacotes a seguir:
 (Docker Desktop),(Git)
 
+
 ### Ambiente Linux:
 (Docker engine,Docker compose),(Git)
+Siga as instruções corretas e baixe atraves do link a sua versão adequada: 
+https://docs.docker.com/engine/install/
 
-## baixar repositório (no terminal git bash)
+Certifique de que o Docker daemon esteja rodando em sua máquina.
+
+## baixar repositório (no terminal BASH)
+
+### Ambiente Linux ou WSL:
+faça:
+```BASH
+cd $HOME
+```
+
 
 ```BASH
 git clone https://github.com/lucashenrique2027/jm.decoracao.git
@@ -13,7 +25,7 @@ git clone https://github.com/lucashenrique2027/jm.decoracao.git
 
 ## Mude de diretório:
 ```BASH
-cd  "./Loja-JM-Decoracao"
+cd  "./jm.decoracao"
 ```
 
 ### Se estiver no Linux
@@ -32,13 +44,13 @@ chmod +x ./scripts/init-env.sh
 ### Após iniciar o Docker Desktop e no mesmo terminal rode:
 
 ```BASH
-docker compose up --build
+docker compose up --build -d
 ```
 
-> Versão legada: `docker-compose up --build`
+> Versão legada: `docker-compose up --build -d`
 
 ## Enviar imagens para a aplicação:
-### Se for a primeira vez iniciando o projeto rode isto para popular o estoque de imagens do projeto:
+### Se for a primeira vez iniciando o projeto rode isto para popular o estoque de imagens do projeto Após o comando anterior ser finalizado:
 
 ```BASH
 docker compose -f docker-compose.upload.yml run --rm storage-migrator

@@ -8,7 +8,8 @@ import {
   buscarClientePorId,
   atualizarCliente,
   deletarCliente,
-  alterarSenha 
+  alterarSenha ,
+  confirmarEmail
 } from '../controllers/clientesController.js';
 import {
   obterCarrinhoAtivo,
@@ -58,7 +59,7 @@ router.post('/alterar-senha', verificarToken, alterarSenha);
  * =========================================================
  */
 router.post('/login', autenticarCliente);
-
+router.post('/confirmar-email', confirmarEmail);
 /**
  * =========================================================
  * POST /logout

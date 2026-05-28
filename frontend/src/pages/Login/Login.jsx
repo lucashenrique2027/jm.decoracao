@@ -84,7 +84,8 @@ export default function Login() {
     try {
       setErrosCad({});
       await cadastrarCliente(cad);
-      navigate("/perfil");
+      localStorage.setItem("emailVerificacao", cad.email);
+      navigate("/verificar-email");
     } catch (error) {
   if (error.code === '23505' || (error.message && error.message.includes('email'))) {
     setErrosCad({ email: 'Este email já está cadastrado.' });

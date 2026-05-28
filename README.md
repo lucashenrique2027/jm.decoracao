@@ -2,32 +2,36 @@
 ### Instale os pacotes a seguir:
 (Docker Desktop),(Git)
 
+### Ambiente Linux:
+(Docker engine,Docker compose),(Git)
+
 ## baixar repositório (no terminal git bash)
 
-```sh
+```BASH
 git clone https://github.com/lucashenrique2027/jm.decoracao.git
 ```
 
 ## Mude de diretório:
-```sh
+```BASH
 cd  "./Loja-JM-Decoracao"
-```
-
-## Gere as variaveis:
-```sh
-./scripts/init-env.sh
 ```
 
 ### Se estiver no Linux
 ## De permissões:
-```sh
+```BASH
 chmod +x ./scripts/init-env.sh
 ```
+
+## Gere as variaveis:
+```BASH
+./scripts/init-env.sh
+```
+
 
 ## subir a aplicação com docker:
 ### Após iniciar o Docker Desktop e no mesmo terminal rode:
 
-```sh
+```BASH
 docker compose up --build
 ```
 
@@ -36,12 +40,12 @@ docker compose up --build
 ## Enviar imagens para a aplicação:
 ### Se for a primeira vez iniciando o projeto rode isto para popular o estoque de imagens do projeto:
 
-```sh
+```BASH
 docker compose -f docker-compose.upload.yml run --rm storage-migrator
 ```
 
 ## Delete as variáveis:
-```sh
+```BASH
 rm ./.env
 ```
 

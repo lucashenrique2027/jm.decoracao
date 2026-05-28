@@ -1,15 +1,7 @@
 import { pool } from '../models/db.js';
 import { gerarPdfFaturamento, gerarPdfProdutos, gerarPdfCategorias } from '../src/pdf/pdfService.js';
 
-/* =========================================================
-   CONSTANTES
-========================================================= */
-
 const STATUS_VALIDOS = ['confirmado', 'entregue'];
-
-/* =========================================================
-   HELPER — valida e extrai período
-========================================================= */
 
 const extrairPeriodo = (req, res) => {
   const { inicio, fim } = req.query;
@@ -20,12 +12,7 @@ const extrairPeriodo = (req, res) => {
   return { inicio, fim };
 };
 
-/* =========================================================
-   QUERIES PURAS (SQL DIRETO NO METAL)
-========================================================= */
-
 const queryFaturamento = async ({ inicio, fim }) => {
-  // Passamos as strings exatas de data com o timezone local/ISO para o Postgres
   const dataInicio = `${inicio}T00:00:00`;
   const dataFim = `${fim}T23:59:59`;
 
@@ -39,17 +26,15 @@ const queryFaturamento = async ({ inicio, fim }) => {
       p.criado_em AS "criadoEm"
     FROM jm.pedidos p
     INNER JOIN jm.clientes c ON c.id = p.cliente_id
-    WHERE p.status ANY($1)
+    WHERE p.status = ANY($1)
       AND p.criado_em >= $2::timestamp
       AND p.criado_em <= $3::timestamp
     ORDER BY p.criado_em DESC
   `;
 
-  // Executa no driver pg nativo e captura o array .rows
   const resultado = await pool.query(queryTexto, [STATUS_VALIDOS, dataInicio, dataFim]);
   const linhas = resultado.rows;
 
-  // Preserva exatamente a lógica de agregação em memória solicitada
   const totalPeriodo = linhas.reduce((acc, p) => acc + Number(p.total), 0);
 
   return { 
@@ -72,7 +57,7 @@ const queryProdutos = async ({ inicio, fim }) => {
     FROM jm.pedido_itens pi
     INNER JOIN jm.produtos prod ON prod.id = pi.produto_id
     INNER JOIN jm.pedidos p ON p.id = pi.pedido_id
-    WHERE p.status ANY($1)
+    WHERE p.status = ANY($1)
       AND p.criado_em >= $2::timestamp
       AND p.criado_em <= $3::timestamp
     GROUP BY prod.id, prod.nome
@@ -97,7 +82,7 @@ const queryCategorias = async ({ inicio, fim }) => {
     INNER JOIN jm.produtos prod ON prod.id = pi.produto_id
     INNER JOIN jm.categorias cat ON cat.id = prod.categoria_id
     INNER JOIN jm.pedidos p ON p.id = pi.pedido_id
-    WHERE p.status ANY($1)
+    WHERE p.status = ANY($1)
       AND p.criado_em >= $2::timestamp
       AND p.criado_em <= $3::timestamp
     GROUP BY cat.id, cat.nome
@@ -107,10 +92,6 @@ const queryCategorias = async ({ inicio, fim }) => {
   const resultado = await pool.query(queryTexto, [STATUS_VALIDOS, dataInicio, dataFim]);
   return resultado.rows;
 };
-
-/* =========================================================
-   CONTROLLERS — JSON
-========================================================= */
 
 export const relatorioFaturamento = async (req, res) => {
   const periodo = extrairPeriodo(req, res);
@@ -147,10 +128,6 @@ export const relatorioCategorias = async (req, res) => {
     return res.status(500).json({ message: 'Erro ao gerar relatório de categorias' });
   }
 };
-
-/* =========================================================
-   CONTROLLERS — PDF
-========================================================= */
 
 export const relatorioFaturamentoPdf = async (req, res) => {
   const periodo = extrairPeriodo(req, res);

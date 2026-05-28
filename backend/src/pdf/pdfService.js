@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import { faturamentoTemplate } from './templates/faturamentoTemplate.js';
-
+import { pedidoTemplate } from './templates/pedidoTemplate.js';
 /* =========================================================
    HELPER — pipe direto na res (sem buffer)
 ========================================================= */
@@ -67,5 +67,11 @@ export const gerarPdfCategorias = (res, dados, periodo) => {
     doc.moveDown();
   });
 
+  doc.end();
+};
+
+export const gerarPdfPedido = (res, pedido) => {
+  const doc = iniciarPdf(res, `pedido-${pedido.id}.pdf`);
+  pedidoTemplate(doc, pedido);
   doc.end();
 };

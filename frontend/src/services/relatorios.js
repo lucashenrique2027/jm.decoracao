@@ -119,3 +119,22 @@ export const baixarPdfCategorias = async (inicio, fim) => {
 
   return response.blob();
 };
+
+/* =========================================================
+   PEDIDO — PDF
+========================================================= */
+export const baixarPdfPedido = async (id) => {
+
+  const response = await fetch(
+    `${API}/pedidos/${id}/pdf`,
+    {
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Erro ao baixar PDF do pedido');
+  }
+
+  return response.blob();
+};

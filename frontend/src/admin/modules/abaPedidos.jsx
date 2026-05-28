@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { listarTodosPedidos, atualizarStatusPedido, buscarPedidoPorId } from "../../services/pedidos.js";
+import { baixarPdfPedido } from "../../services/relatorios.js";
 
 export default function Pedidos() {
   const [pedidos, setPedidos] = useState([]);
@@ -27,10 +28,9 @@ export default function Pedidos() {
     }
   }
 
-  // ─── ABRE O MODAL BUSCANDO O PEDIDO COMPLETO (com cliente, endereço e itens) ───
   const abrirDetalhe = async (id) => {
     setCarregandoDetalhe(true);
-    setPedidoDetalhado({ id }); // abre o modal já com spinner
+    setPedidoDetalhado({ id });
     try {
       const completo = await buscarPedidoPorId(id);
       setPedidoDetalhado(completo);
@@ -57,13 +57,22 @@ export default function Pedidos() {
       setStatusConfirmacao(null);
       dispararNotificacao(`Status da Ordem #${id} alterado com sucesso para ${novoStatus}.`);
       await carregar();
-
       if (pedidoDetalhado && pedidoDetalhado.id === id) {
         setPedidoDetalhado({ ...pedidoDetalhado, status: novoStatus });
       }
     } catch (error) {
       setStatusConfirmacao(null);
       dispararNotificacao("Não foi possível atualizar o status operacional do pedido.", "danger");
+    }
+  };
+
+  const handlePdfPedido = async (id) => {
+    try {
+      const blob = await baixarPdfPedido(id);
+      const url  = URL.createObjectURL(blob);
+      window.open(url);
+    } catch (error) {
+      dispararNotificacao('Erro ao gerar PDF do pedido.', 'danger');
     }
   };
 
@@ -161,7 +170,6 @@ export default function Pedidos() {
                       </td>
                       <td className="py-3 text-end">
                         <div className="d-flex gap-2 justify-content-end align-items-center">
-                          {/* ── CORRIGIDO: busca pedido completo ao inspecionar ── */}
                           <button
                             className="btn btn-sm btn-light border-0 text-dark"
                             style={{ borderRadius: '8px', fontSize: '0.85rem', fontWeight: '500' }}
@@ -218,7 +226,6 @@ export default function Pedidos() {
 
               <div className="modal-body p-4" style={{ backgroundColor: '#fafafa' }}>
 
-                {/* SPINNER enquanto carrega o detalhe */}
                 {carregandoDetalhe ? (
                   <div className="d-flex flex-column align-items-center justify-content-center py-4">
                     <div className="spinner-border text-primary mb-2" role="status"></div>
@@ -251,44 +258,36 @@ export default function Pedidos() {
                       </div>
                     </div>
 
-                  {/* ENDEREÇO DE ENTREGA */}
-                  <div className="bg-white rounded-3 border p-3 mb-3">
-                    <h6 className="fw-bold small text-secondary mb-2">
-                      <i className="bi bi-geo-alt-fill me-1"></i> Endereço de Entrega
-                    </h6>
-
-                    <div className="d-flex justify-content-between mb-1 small">
-                      <span className="text-muted">Recebedor:</span>
-                      <span className="fw-medium text-dark">
-                        {pedidoDetalhado.nomeRecebedor ?? "—"}
-                      </span>
+                    {/* ENDEREÇO DE ENTREGA */}
+                    <div className="bg-white rounded-3 border p-3 mb-3">
+                      <h6 className="fw-bold small text-secondary mb-2">
+                        <i className="bi bi-geo-alt-fill me-1"></i> Endereço de Entrega
+                      </h6>
+                      <div className="d-flex justify-content-between mb-1 small">
+                        <span className="text-muted">Recebedor:</span>
+                        <span className="fw-medium text-dark">{pedidoDetalhado.nomeRecebedor ?? "—"}</span>
+                      </div>
+                      <div className="d-flex justify-content-between mb-1 small">
+                        <span className="text-muted">Endereço:</span>
+                        <span className="fw-medium text-dark text-end" style={{ maxWidth: '60%' }}>
+                          {pedidoDetalhado.enderecoEntrega}
+                          {pedidoDetalhado.numeroEntrega ? `, ${pedidoDetalhado.numeroEntrega}` : ""}
+                          {pedidoDetalhado.bairroEntrega ? `, ${pedidoDetalhado.bairroEntrega}` : ""}
+                        </span>
+                      </div>
+                      <div className="d-flex justify-content-between mb-1 small">
+                        <span className="text-muted">Cidade / UF:</span>
+                        <span className="fw-medium text-dark">
+                          {pedidoDetalhado.cidadeEntrega} - {pedidoDetalhado.estadoEntrega}
+                        </span>
+                      </div>
+                      <div className="d-flex justify-content-between small">
+                        <span className="text-muted">CEP:</span>
+                        <span className="fw-medium text-dark">{pedidoDetalhado.cepEntrega}</span>
+                      </div>
                     </div>
 
-                    <div className="d-flex justify-content-between mb-1 small">
-                      <span className="text-muted">Endereço:</span>
-                      <span className="fw-medium text-dark text-end" style={{ maxWidth: '60%' }}>
-                        {pedidoDetalhado.enderecoEntrega}
-                        {pedidoDetalhado.numeroEntrega ? `, ${pedidoDetalhado.numeroEntrega}` : ""} 
-                        {pedidoDetalhado.bairroEntrega ? `, ${pedidoDetalhado.bairroEntrega}` : ""}
-                      </span>
-                    </div>
-
-                    <div className="d-flex justify-content-between mb-1 small">
-                      <span className="text-muted">Cidade / UF:</span>
-                      <span className="fw-medium text-dark">
-                        {pedidoDetalhado.cidadeEntrega} - {pedidoDetalhado.estadoEntrega}
-                      </span>
-                    </div>
-
-                    <div className="d-flex justify-content-between small">
-                      <span className="text-muted">CEP:</span>
-                      <span className="fw-medium text-dark">
-                        {pedidoDetalhado.cepEntrega}
-                      </span>
-                    </div>
-                  </div>
-
-                    {/* OBSERVAÇÃO (só mostra se existir) */}
+                    {/* OBSERVAÇÃO */}
                     {pedidoDetalhado.observacaoEntrega && (
                       <div className="bg-white rounded-3 border p-3 mb-3">
                         <h6 className="fw-bold small text-secondary mb-2">
@@ -322,7 +321,6 @@ export default function Pedidos() {
                         <p className="text-muted small mb-0">Nenhum item encontrado.</p>
                       )}
 
-                      {/* SUBTOTAL + FRETE + TOTAL */}
                       <div className="pt-2 mt-1">
                         <div className="d-flex justify-content-between small text-muted mb-1">
                           <span>Subtotal:</span>
@@ -341,7 +339,6 @@ export default function Pedidos() {
                       </div>
                     </div>
 
-                    {/* DATA */}
                     <p className="text-muted small text-end mb-0">
                       Pedido realizado em {new Date(pedidoDetalhado.criadoEm).toLocaleString('pt-BR')}
                     </p>
@@ -349,9 +346,23 @@ export default function Pedidos() {
                 )}
               </div>
 
-              <div className="modal-footer border-0 bg-light px-4 py-3">
-                <button type="button" className="btn btn-secondary w-100 fw-medium"
-                  style={{ borderRadius: '8px' }} onClick={() => setPedidoDetalhado(null)}>
+              <div className="modal-footer border-0 bg-light px-4 py-3 d-flex gap-2">
+                <button
+                  type="button"
+                  className="btn btn-outline-danger fw-medium flex-grow-1"
+                  style={{ borderRadius: '8px' }}
+                  onClick={() => handlePdfPedido(pedidoDetalhado.id)}
+                  disabled={carregandoDetalhe}
+                >
+                  <i className="bi bi-file-earmark-pdf-fill me-2"></i>
+                  Emitir Comprovante PDF
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary fw-medium flex-grow-1"
+                  style={{ borderRadius: '8px' }}
+                  onClick={() => setPedidoDetalhado(null)}
+                >
                   Fechar
                 </button>
               </div>

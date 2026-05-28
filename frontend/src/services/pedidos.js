@@ -22,7 +22,9 @@ export const buscarPedidoPorId = async (id) => {
     try {
         const response = await fetch(`${API_URL_PEDIDO}/${id}`, { credentials: 'include' });
         if (!response.ok) throw new Error("Erro ao buscar pedido");
-        return response.json();
+        const data = await response.json();
+        console.log(JSON.stringify(data, null, 2));  // ← log formatado
+        return data;
     } catch (error) {
         console.log(error.message);
     }

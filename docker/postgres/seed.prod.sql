@@ -145,7 +145,7 @@ VALUES
   (22, 7, 'confirmado', 190.00, 0.00, 190.00, NULL,                                       'Rafael Henrique Lopes',   '(51) 99144-5566', '210',  '90010-000', 'Av. Borges de Medeiros',            'Centro Histórico',          'Porto Alegre',   'RS'),
   (23, 8, 'entregue',   410.00, 0.00, 410.00, NULL,                                       'Juliana Teixeira Rocha',  '(71) 99222-3344', '980',  '40020-000', 'Av. Sete de Setembro',              'Dois de Julho',             'Salvador',       'BA'),
   (24, 9, 'confirmado', 155.00, 0.00, 155.00, NULL,                                       'Bruno Carvalho Nunes',    '(61) 99333-4455', 'A',    '70040-010', 'Esplanada dos Ministérios Bloco A', 'Zona Cívico-Administrativa', 'Brasília',       'DF'),
-  (25,10, 'entregue',   720.00, 0.00, 720.00, 'Maior compra do mês.',                     'Camila Barbosa Freitas',  '(85) 99444-5566', '150',  '60060-000', 'Av. Beira Mar',                     'Meireles',                  'Fortaleza',      'CE')
+  (25,10, 'entregue',   720.00, 0.00, 720.00, 'Maior compra do mês.',                     'Camila Barbosa Freitas',  '(85) 99444-5566', '150',  '60060-000', 'Av. Beira Mar',                     'Meireles',                  'Fortaleza',      'CE')  
 ON CONFLICT (id) DO NOTHING;
 
 -- ─── PEDIDO ITENS ─────────────────────────────────────────

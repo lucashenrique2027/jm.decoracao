@@ -57,3 +57,28 @@ export const atualizarCliente = async (id, dados) => {
 
     return response.json();
 };
+
+export const solicitarRecuperacao = async (email) => {
+    const response = await fetch(`${BASE_URL}/solicitar-recuperacao`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+    });
+    if (!response.ok) {
+        throw new Error('Erro ao solicitar recuperação. Tente novamente.');
+    }
+    return response.json();
+};
+
+export const redefinirSenha = async (email, token, novaSenha) => {
+    const response = await fetch(`${BASE_URL}/redefinir-senha`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, token, novaSenha })
+    });
+    if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.erro || 'Erro ao redefinir senha.');
+    }
+    return response.json();
+};

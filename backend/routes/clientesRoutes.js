@@ -9,7 +9,9 @@ import {
   atualizarCliente,
   deletarCliente,
   alterarSenha ,
-  confirmarEmail
+  confirmarEmail,
+  solicitarRecuperacao,
+  redefinirSenha
 } from '../controllers/clientesController.js';
 import {
   obterCarrinhoAtivo,
@@ -21,8 +23,9 @@ import { verificarToken } from '../middlewares/validarTokenClient.js';
 
 const router = express.Router();
 
+router.post('/solicitar-recuperacao', solicitarRecuperacao);
 router.post('/alterar-senha', verificarToken, alterarSenha);
-
+router.post('/redefinir-senha', redefinirSenha);
 /**
  * =========================================================
  * POST /login
@@ -124,6 +127,7 @@ router.post('/logout', logoutCliente);
  * =========================================================
  */
 router.get('/data', verificarToken, dadosCliente);
+
 
 /**
  * =========================================================

@@ -24,6 +24,7 @@ import "../styles/global.css";
 import Privacidade from './pages/Privacidade';
 import Termos from './pages/Termos'; 
 import RecuperarSenha from "./pages/Login/RecuperarSenha";
+import RedefinirSenha from "./pages/Login/RedefinirSenha.jsx";
 import ProdutoDetalhes from "./components/ProdutoDetalhes/ProdutoDetalhes.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -42,6 +43,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="/privacidade" element={<Privacidade />} />
               <Route path="/termos" element={<Termos />} />
               <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+              <Route path="/redefinir-senha" element={<RedefinirSenha />} />
               <Route element={<RotaProtegidaAdmin />}>
                 <Route path="/admin" element={<Admin />} />{/*http://localhost:8080/admin*/}
               </Route>

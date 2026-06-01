@@ -1,15 +1,31 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
+import { solicitarRecuperacao } from "../../services/cliente.js";
 
 export default function RecuperarSenha() {
   const [email, setEmail] = useState("");
   const [enviado, setEnviado] = useState(false);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
+  const navigate = useNavigate();
 
-  const handleRecuperar = (e) => {
+  const handleRecuperar = async (e) => {
     e.preventDefault();
-    setEnviado(true); // Simula o envio
+    setCarregando(true);
+    setErro("");
+
+    try {
+      await solicitarRecuperacao(email);
+      setEnviado(true);
+      navigate("/redefinir-senha", { state: { email } });
+    } catch (err) {
+      setEnviado(true); 
+      navigate("/redefinir-senha", { state: { email } });
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -33,8 +49,12 @@ export default function RecuperarSenha() {
                     required 
                   />
                 </div>
-                <button type="submit" className="btn btn-primary w-100 py-2 fw-bold shadow-sm">
-                  Enviar Link de Recuperação
+                <button 
+                  type="submit" 
+                  className="btn btn-primary w-100 py-2 fw-bold shadow-sm" 
+                  disabled={carregando}
+                >
+                  {carregando ? "Enviando..." : "Enviar Link de Recuperação"}
                 </button>
               </form>
             </>

@@ -47,9 +47,9 @@ CREATE TABLE jm.clientes (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
-  senha_hash TEXT NOT NULL,
-  telefone TEXT NOT NULL,
-  cep TEXT NOT NULL,
+  senha_hash TEXT,
+  telefone TEXT,
+  cep TEXT,
   numero TEXT,
   endereco TEXT,
   bairro TEXT,
@@ -59,7 +59,9 @@ CREATE TABLE jm.clientes (
   email_verificado BOOLEAN DEFAULT FALSE,
   token_verificacao TEXT,
   token_expira_em TIMESTAMPTZ,
-  criado_em TIMESTAMPTZ DEFAULT NOW()
+  criado_em TIMESTAMPTZ DEFAULT NOW(),
+  reset_token TEXT,
+  reset_token_expira_em TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS jm.categorias (

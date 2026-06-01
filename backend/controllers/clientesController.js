@@ -1,7 +1,7 @@
 import { pool } from '../models/db.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { gerarEEnviarToken } from '../src/email/emailService.js';
+import { gerarEEnviarToken, gerarEEnviarTokenRecuperacao } from '../src/email/emailService.js';
 
 export const cadastrarCliente = async (req, res) => {
   try {
@@ -43,7 +43,6 @@ export const cadastrarCliente = async (req, res) => {
 
     const { rows } = await pool.query(sql, vals);
 
-    // 🔥 integração com email service
     await gerarEEnviarToken(email);
 
     return res.status(201).json({
@@ -64,20 +63,15 @@ export const confirmarEmail = async (req, res) => {
     const { email, token } = req.body;
 
     const result = await pool.query(
-      `
-      SELECT token_verificacao, token_expira_em, status, email_verificado
-      FROM jm.clientes
-      WHERE email = $1
-      `,
+      `SELECT token_verificacao, token_expira_em, status, email_verificado
+       FROM jm.clientes
+       WHERE email = $1`,
       [email]
     );
-
     if (!result.rows.length) {
       return res.status(400).json({ erro: "Usuário não encontrado" });
     }
-
     const user = result.rows[0];
-
     if (user.status === 'ativo') {
       return res.json({ mensagem: "Conta já ativada" });
     }
@@ -95,14 +89,12 @@ export const confirmarEmail = async (req, res) => {
     }
 
     await pool.query(
-      `
-      UPDATE jm.clientes
-      SET status = 'ativo',
-          email_verificado = true,
-          token_verificacao = NULL,
-          token_expira_em = NULL
-      WHERE email = $1
-      `,
+      `UPDATE jm.clientes
+       SET status = 'ativo',
+           email_verificado = true,
+           token_verificacao = NULL,
+           token_expira_em = NULL
+       WHERE email = $1`,
       [email]
     );
 
@@ -111,6 +103,44 @@ export const confirmarEmail = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ erro: "Erro ao confirmar email" });
+  }
+};
+export const solicitarRecuperacao = async (req, res) => {
+  try {
+    const { email } = req.body;
+    await gerarEEnviarTokenRecuperacao(email);
+    
+    return res.json({ mensagem: "Se o e-mail estiver cadastrado, um código foi enviado." });
+  } catch (error) {
+    console.error("Erro na solicitação de recuperação:", error);
+    return res.json({ mensagem: "Se o e-mail estiver cadastrado, um código foi enviado." });
+  }
+};
+export const redefinirSenha = async (req, res) => {
+  try {
+    const { email, token, novaSenha } = req.body;
+    const result = await pool.query(
+      `SELECT reset_token, reset_token_expira_em FROM jm.clientes WHERE email = $1`,
+      [email]
+    );
+    const user = result.rows[0];
+
+    if (!user || user.reset_token !== token || new Date(user.reset_token_expira_em) < new Date()) {
+      return res.status(400).json({ erro: "Código inválido ou expirado" });
+    }
+    const hash = await bcrypt.hash(novaSenha, 10);
+    await pool.query(
+      `UPDATE jm.clientes 
+       SET senha_hash = $1, 
+           reset_token = NULL, 
+           reset_token_expira_em = NULL 
+       WHERE email = $2`,
+      [hash, email]
+    );
+    return res.json({ mensagem: "Senha atualizada com sucesso" });
+  } catch (error) {
+    console.error("Erro ao redefinir senha:", error);
+    return res.status(500).json({ erro: "Erro interno ao redefinir senha" });
   }
 };
 

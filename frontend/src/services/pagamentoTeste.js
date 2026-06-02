@@ -49,3 +49,25 @@ export const pagarComMP = async (pedidoId, tokenPagamento) => {
     return { success: false, erro: error.message };
   }
 };
+
+export const pagarComPix = async (pedidoId, tokenPagamento) => {
+  try {
+    const response = await fetch(`${API_URL}/checkout/pix`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ pedidoId, tokenPagamento }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok)
+      throw new Error(data.erro || 'Erro ao gerar PIX');
+
+    return data;
+
+  } catch (error) {
+    console.error(error);
+    return { success: false, erro: error.message };
+  }
+};

@@ -1,1 +1,0 @@
-router.post('/stripe',       verificarToken, stripeCheckout);router.post('/checkout/stripe/pix', verificarToken, stripePix);router.post('/webhook/stripe', webhookStripe);

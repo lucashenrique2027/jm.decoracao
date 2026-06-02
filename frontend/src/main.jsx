@@ -28,7 +28,6 @@ import RedefinirSenha from "./pages/Login/RedefinirSenha.jsx";
 import ProdutoDetalhes from "./components/ProdutoDetalhes/ProdutoDetalhes.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
     <BrowserRouter>
       <TemaProvider>
         <MensagemProvider>
@@ -58,5 +57,4 @@ createRoot(document.getElementById("root")).render(
         </MensagemProvider>
       </TemaProvider>
     </BrowserRouter>
-  </StrictMode>
 );

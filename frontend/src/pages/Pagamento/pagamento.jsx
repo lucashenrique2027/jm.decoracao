@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { buscarPagamento, pagarComMP } from "../../services/pagamentoTeste.js";
+import { buscarPagamento, pagarComMP, pagarComPix } from "../../services/pagamentoTeste.js";
 import { buscarMeuPedido } from "../../services/pedidos.js";
 
 export default function PaginaPagamento() {
@@ -13,6 +13,8 @@ export default function PaginaPagamento() {
   const [erro, setErro] = useState("");
   const [loadingPay, setLoadingPay] = useState(false);
   const [status, setStatus] = useState("");
+
+  const [pixData, setPixData] = useState(null);
 
   const MINIO_URL = "http://localhost:8080/storageImages/";
 
@@ -49,9 +51,22 @@ export default function PaginaPagamento() {
 
       if (!resultado.success) throw new Error(resultado.erro);
 
-      // Redireciona para o Mercado Pago
       window.location.href = resultado.url;
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoadingPay(false);
+    }
+  };
 
+  const handlePix = async () => {
+    if (loadingPay) return;
+    setLoadingPay(true);
+    try {
+      const resultado = await pagarComPix(pedidoId, pagamento.tokenPagamento);
+      if (!resultado.success) throw new Error(resultado.erro);
+      setPixData(resultado);
+      setStatus("processando");
     } catch (error) {
       alert(error.message);
     } finally {
@@ -70,6 +85,7 @@ export default function PaginaPagamento() {
     <div className="container py-5">
       <div className="card p-4 p-md-5 mx-auto" style={{ maxWidth: 540 }}>
         <h2 className="text-center mb-3">Confirmar Pagamento</h2>
+
         <p className="text-center mb-4">
           Pedido <strong>#{pedidoId}</strong>
         </p>
@@ -79,6 +95,7 @@ export default function PaginaPagamento() {
           <h6 className="fw-bold text-secondary mb-3 text-uppercase" style={{ fontSize: "0.78rem", letterSpacing: "0.5px" }}>
             Resumo do Pedido
           </h6>
+
           <div style={{ overflowY: "auto" }}>
             {dadosPedido.itens && dadosPedido.itens.map((item) => (
               <div key={item.id} className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom" style={{ borderColor: "#e2e8f0" }}>
@@ -98,6 +115,7 @@ export default function PaginaPagamento() {
                     </div>
                   </div>
                 </div>
+
                 <div className="text-end fw-bold text-dark flex-shrink-0" style={{ fontSize: "0.9rem" }}>
                   R$ {(Number(item.precoUnitario) * item.quantidade).toFixed(2).replace(".", ",")}
                 </div>
@@ -110,6 +128,7 @@ export default function PaginaPagamento() {
               <span>Subtotal:</span>
               <span>R$ {Number(dadosPedido.subtotal).toFixed(2).replace(".", ",")}</span>
             </div>
+
             <div className="d-flex justify-content-between text-muted mb-2">
               <span>Frete:</span>
               <span>R$ {Number(dadosPedido.frete).toFixed(2).replace(".", ",")}</span>
@@ -117,36 +136,73 @@ export default function PaginaPagamento() {
           </div>
         </div>
 
-        {/* Cenário 1: Pagamento confirmado */}
+        {/* PAGAMENTO OK */}
         {status === "pago" && (
           <>
             <div className="alert alert-success">Pagamento já foi confirmado ✔</div>
+
             <button className="btn btn-primary w-100 mt-3" onClick={() => navigate("/")}>
               Voltar para o Início
             </button>
           </>
         )}
 
-        {/* Cenário 2: Aguardando pagamento */}
+        {/* INTERFACE DE PAGAMENTO EM ABERTO */}
         {status === "aguardando_pagamento" && (
           <div className="text-center">
             <h3 className="text-success mt-2 mb-4 fw-bold">
               Total: R$ {Number(pagamento.valor).toFixed(2).replace(".", ",")}
             </h3>
 
+            <div className="d-grid gap-2">
+              <button
+                className="btn btn-success py-2 fw-semibold"
+                onClick={handlePagarComMP}
+                disabled={loadingPay}
+              >
+                {loadingPay ? "Redirecionando..." : "Pagar com Mercado Pago"}
+              </button>
+
+              <button
+                className="btn btn-outline-primary py-2 fw-semibold"
+                onClick={handlePix}
+                disabled={loadingPay}
+              >
+                {loadingPay ? "Gerando PIX..." : "Pagar com PIX"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* PIX VISUAL - Movido para fora da condicional de status aguardando */}
+        {pixData && (
+          <div className="mt-4 text-center">
+            <h6 className="fw-bold">PIX Gerado</h6>
+
+            <img
+              src={`data:image/png;base64,${pixData.qr_code_base64}`}
+              alt="QR Code PIX"
+              style={{ width: 220, height: 220 }}
+            />
+
+            <textarea
+              className="form-control mt-2"
+              readOnly
+              value={pixData.qr_code}
+            />
+
             <button
-              className="btn btn-success w-100 py-2 fw-semibold"
-              onClick={handlePagarComMP}
-              disabled={loadingPay}
+              className="btn btn-outline-secondary mt-2"
+              onClick={() => navigator.clipboard.writeText(pixData.qr_code)}
             >
-              {loadingPay ? "Redirecionando..." : "Pagar com Mercado Pago"}
+              Copiar código PIX
             </button>
           </div>
         )}
 
-        {/* Cenário 3: Processando */}
-        {status === "processando" && (
-          <div className="alert alert-info text-center m-0">
+        {/* PROCESSANDO */}
+        {status === "processando" && !pixData && (
+          <div className="alert alert-info text-center mt-3">
             Processando pagamento...
           </div>
         )}
@@ -158,6 +214,7 @@ export default function PaginaPagamento() {
         >
           Cancelar
         </button>
+
         <button
           className="btn btn-link text-muted w-100 mt-2 text-decoration-none small fw-medium"
           onClick={() => navigate("/perfil")}

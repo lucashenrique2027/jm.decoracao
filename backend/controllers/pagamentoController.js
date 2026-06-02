@@ -259,3 +259,110 @@ export const webhookMercadoPago = async (req, res) => {
     clientTransacao.release();
   }
 };
+
+export const pagarPix = async (req, res) => {
+  console.log('[pix]', req.body);
+
+  const { pedidoId, tokenPagamento } = req.body;
+  const clienteId = req.clienteId;
+
+  try {
+    /* =============================================
+       VALIDAR PEDIDO
+    ============================================= */
+    const queryPedido = `SELECT cliente_id FROM jm.pedidos WHERE id = $1`;
+    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
+    const pedido = resultadoPedido.rows[0];
+
+    if (!pedido)
+      return res.status(404).json({ success: false, erro: 'Pedido não encontrado' });
+
+    if (pedido.cliente_id !== clienteId)
+      return res.status(403).json({ success: false, erro: 'Pedido não pertence ao cliente' });
+
+    /* =============================================
+       VALIDAR PAGAMENTO
+    ============================================= */
+    const queryPagamento = `
+      SELECT id, status, expiracao_pagamento, valor
+      FROM jm.pagamentos
+      WHERE pedido_id = $1 AND token_pagamento = $2
+    `;
+    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId, tokenPagamento]);
+    const pagamento = resultadoPagamento.rows[0];
+
+    if (!pagamento)
+      return res.status(403).json({ success: false, erro: 'Sessão de pagamento inválida' });
+
+    if (pagamento.status !== 'aguardando_pagamento')
+      return res.status(409).json({
+        success: false,
+        erro: 'Este pagamento já foi processado',
+        status: pagamento.status
+      });
+
+    if (pagamento.expiracao_pagamento && new Date() > pagamento.expiracao_pagamento)
+      return res.status(400).json({ success: false, erro: 'Pagamento expirado' });
+
+    /* =============================================
+       BUSCAR CLIENTE
+    ============================================= */
+    const queryCliente = `SELECT email FROM jm.clientes WHERE id = $1`;
+    const resultadoCliente = await pool.query(queryCliente, [clienteId]);
+    const cliente = resultadoCliente.rows[0];
+
+    if (!cliente)
+      return res.status(404).json({ success: false, erro: 'Cliente não encontrado' });
+
+    /* =============================================
+       CRIAR PIX NO MERCADO PAGO
+    ============================================= */
+    const payment = new Payment(client);
+
+    const resultado = await payment.create({
+      body: {
+        transaction_amount: Number(pagamento.valor),
+        description: `Pedido ${pedidoId}`,
+        payment_method_id: 'pix',
+        payer: {
+          email: cliente.email,
+        },
+        external_reference: String(pedidoId),
+      }
+    });
+
+    const qrCode = resultado.point_of_interaction?.transaction_data?.qr_code;
+    const qrBase64 = resultado.point_of_interaction?.transaction_data?.qr_code_base64;
+
+    if (!qrCode || !qrBase64)
+      return res.status(500).json({ success: false, erro: 'Erro ao gerar QR Code PIX' });
+
+    /* =============================================
+       ATUALIZAR MÉTODO DE PAGAMENTO
+    ============================================= */
+    const queryUpdateMetodo = `
+      UPDATE jm.pagamentos
+      SET metodo_pagamento = 'pix'
+      WHERE id = $1
+    `;
+    await pool.query(queryUpdateMetodo, [pagamento.id]);
+
+    console.log('[pix] criado:', resultado.id);
+
+    return res.json({
+      success: true,
+      pedidoId,
+      paymentId: resultado.id,
+      qr_code: qrCode,
+      qr_code_base64: qrBase64,
+      status: resultado.status
+    });
+
+  } catch (erro) {
+    console.error('[pix]', erro);
+    return res.status(erro.status || 500).json({
+      success: false,
+      erro: 'Erro ao processar pagamento PIX'
+    });
+  }
+};

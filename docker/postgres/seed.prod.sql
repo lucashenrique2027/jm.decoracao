@@ -104,18 +104,20 @@ VALUES
     (SELECT id FROM jm.categorias WHERE nome = 'Peças Decorativas'), 1);
 
 -- ─── CLIENTES ─────────────────────────────────────────────
-INSERT INTO jm.clientes (nome, email, senha_hash, telefone, cep, numero, endereco, bairro, cidade, estado)
+INSERT INTO jm.clientes (
+    nome, email, senha_hash, telefone, cep, numero, endereco, bairro, cidade, estado, email_verificado, status
+)
 VALUES
-('Carlos Eduardo Silva',    'carlos.silva@gmail.com',      '$2b$10$GnJgQUUy8Wr/XkgAgUVOnuIIWkC3fTgbwEPXXvU3v074CH79pfiJG', '(15) 99876-1234', '18010-000', '123',  'Rua das Flores',                    'Centro',                    'Sorocaba',       'SP'),
-('Mariana Oliveira Santos', 'mariana.oliveira@hotmail.com','$2b$10$kYFIYqf4RuTLADqd.KnT9.KvE9aR37O6BmkobCxQDPGfHZdhdbE/.', '(11) 98765-4321', '01020-000', '1500', 'Av. Paulista',                      'Bela Vista',                'São Paulo',      'SP'),
-('João Pedro Almeida',      'joao.almeida@yahoo.com',      '$2b$10$Gb.sWYmh9rOIHEy1y8bI8.CDX43QJyWwiLGE45AO7WOJ.S1KnH472', '(19) 99123-5678', '13015-000', '89',   'Rua Barão de Jaguara',              'Centro',                    'Campinas',       'SP'),
-('Fernanda Costa Ribeiro',  'fernanda.ribeiro@gmail.com',  '$2b$10$GW81Kpa.E4aClQ6RoK1lQeUZVdBbixawVXDpd9TQIDnWM13qENP.W', '(21) 98877-6655', '20040-000', '45',   'Rua do Ouvidor',                    'Centro',                    'Rio de Janeiro', 'RJ'),
-('Lucas Martins Souza',     'lucas.souza@gmail.com',       '$2b$10$OKbVzRhdSI1wPf1WxwFPdOHVqkw5UuVkFjvuRpJuxEJYGVbIraOAy', '(31) 99711-2233', '30130-000', '700',  'Av. Afonso Pena',                   'Centro',                    'Belo Horizonte', 'MG'),
-('Patrícia Gomes Fernandes','patricia.gomes@outlook.com',  '$2b$10$EC99k1x7xCXGLZ51w9kOoOR/e3ZcyHeJlSFFDzIuP0PZZs5WRSyfO', '(41) 99655-8899', '80010-000', '320',  'Rua XV de Novembro',                'Centro',                    'Curitiba',       'PR'),
-('Rafael Henrique Lopes',   'rafael.lopes@gmail.com',      '$2b$10$epoqsi9rsbXg1pAl9aeOb.limQ/i/RjFzeG.aDbQaIP6rCJoSaDMW', '(51) 99144-5566', '90010-000', '210',  'Av. Borges de Medeiros',            'Centro Histórico',          'Porto Alegre',   'RS'),
-('Juliana Teixeira Rocha',  'juliana.rocha@gmail.com',     '$2b$10$5dxNC.6l0ibiARBnV9etU.KfXl76Y8G1pZCUbVgz4AjPV/kWKTxUW', '(71) 99222-3344', '40020-000', '980',  'Av. Sete de Setembro',              'Dois de Julho',             'Salvador',       'BA'),
-('Bruno Carvalho Nunes',    'bruno.nunes@gmail.com',       '$2b$10$QcFeBpYLcU3xAOdP53jQ3OmhSAmFIWZspAbvXDg5cC1YuCknQ7mqq', '(61) 99333-4455', '70040-010', 'A',    'Esplanada dos Ministérios Bloco A', 'Zona Cívico-Administrativa', 'Brasília',       'DF'),
-('Camila Barbosa Freitas',  'camila.freitas@gmail.com',    '$2b$10$DvWXyHtZlB4.V3iUXKdla.rcpw/CyA8bNsC14wv5SxrKSBT3wd0Ty', '(85) 99444-5566', '60060-000', '150',  'Av. Beira Mar',                     'Meireles',                  'Fortaleza',      'CE')
+('Carlos Eduardo Silva',    'carlos.silva@gmail.com',      '$2b$10$GnJgQUUy8Wr/XkgAgUVOnuIIWkC3fTgbwEPXXvU3v074CH79pfiJG', '(15) 99876-1234', '18010-000', '123',  'Rua das Flores',                     'Centro',                   'Sorocaba',       'SP', TRUE, 'ativo'),
+('Mariana Oliveira Santos', 'mariana.oliveira@hotmail.com','$2b$10$kYFIYqf4RuTLADqd.KnT9.KvE9aR37O6BmkobCxQDPGfHZdhdbE/.', '(11) 98765-4321', '01020-000', '1500', 'Av. Paulista',                       'Bela Vista',               'São Paulo',      'SP', TRUE, 'ativo'),
+('João Pedro Almeida',      'joao.almeida@yahoo.com',      '$2b$10$Gb.sWYmh9rOIHEy1y8bI8.CDX43QJyWwiLGE45AO7WOJ.S1KnH472', '(19) 99123-5678', '13015-000', '89',   'Rua Barão de Jaguara',               'Centro',                   'Campinas',       'SP', TRUE, 'ativo'),
+('Fernanda Costa Ribeiro',  'fernanda.ribeiro@gmail.com',  '$2b$10$GW81Kpa.E4aClQ6RoK1lQeUZVdBbixawVXDpd9TQIDnWM13qENP.W', '(21) 98877-6655', '20040-000', '45',   'Rua do Ouvidor',                     'Centro',                   'Rio de Janeiro', 'RJ', TRUE, 'ativo'),
+('Lucas Martins Souza',     'lucas.souza@gmail.com',       '$2b$10$OKbVzRhdSI1wPf1WxwFPdOHVqkw5UuVkFjvuRpJuxEJYGVbIraOAy', '(31) 99711-2233', '30130-000', '700',  'Av. Afonso Pena',                    'Centro',                   'Belo Horizonte', 'MG', TRUE, 'ativo'),
+('Patrícia Gomes Fernandes','patricia.gomes@outlook.com',  '$2b$10$EC99k1x7xCXGLZ51w9kOoOR/e3ZcyHeJlSFFDzIuP0PZZs5WRSyfO', '(41) 99655-8899', '80010-000', '320',  'Rua XV de Novembro',                 'Centro',                   'Curitiba',       'PR', TRUE, 'ativo'),
+('Rafael Henrique Lopes',   'rafael.lopes@gmail.com',      '$2b$10$epoqsi9rsbXg1pAl9aeOb.limQ/i/RjFzeG.aDbQaIP6rCJoSaDMW', '(51) 99144-5566', '90010-000', '210',  'Av. Borges de Medeiros',            'Centro Histórico',         'Porto Alegre',   'RS', TRUE, 'ativo'),
+('Juliana Teixeira Rocha',  'juliana.rocha@gmail.com',     '$2b$10$5dxNC.6l0ibiARBnV9etU.KfXl76Y8G1pZCUbVgz4AjPV/kWKTxUW', '(71) 99222-3344', '40020-000', '980',  'Av. Sete de Setembro',               'Dois de Julho',            'Salvador',       'BA', TRUE, 'ativo'),
+('Bruno Carvalho Nunes',    'bruno.nunes@gmail.com',       '$2b$10$QcFeBpYLcU3xAOdP53jQ3OmhSAmFIWZspAbvXDg5cC1YuCknQ7mqq', '(61) 99333-4455', '70040-010', 'A',    'Esplanada dos Ministérios Bloco A', 'Zona Cívico-Administrativa', 'Brasília',       'DF', TRUE, 'ativo'),
+('Camila Barbosa Freitas',  'camila.freitas@gmail.com',    '$2b$10$DvWXyHtZlB4.V3iUXKdla.rcpw/CyA8bNsC14wv5SxrKSBT3wd0Ty', '(85) 99444-5566', '60060-000', '150',  'Av. Beira Mar',                      'Meireles',                 'Fortaleza',      'CE', TRUE, 'ativo')
 ON CONFLICT (email) DO NOTHING;
 
 -- ─── PEDIDOS ──────────────────────────────────────────────

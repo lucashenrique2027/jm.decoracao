@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { listarClientes } from '../../services/adminClient.js';
-import { buscarFaturamentoClientes } from '../../services/adminMetrics.js';
+import { listarClientes } from '../../services/adminData.js';
+import { buscarFaturamentoClientes } from '../../services/adminData.js';
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);

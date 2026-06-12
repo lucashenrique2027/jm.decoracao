@@ -12,7 +12,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const clienteLogado = JSON.parse(localStorage.getItem('clienteJM') || 'null');
+    const clienteLogado = JSON.parse(localStorage.getItem('userJM') || 'null');
     if (clienteLogado) navigate("/");
   }, [navigate]);
 

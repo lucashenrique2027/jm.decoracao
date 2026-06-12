@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { buscarPagamento, pagarComMP, pagarComPix } from "../../services/pagamentoTeste.js";
+import { buscarPagamento, pagarComMP, pagarComPix } from "../../services/pagamento.js";
 import { buscarMeuPedido } from "../../services/pedidos.js";
 
 export default function PaginaPagamento() {

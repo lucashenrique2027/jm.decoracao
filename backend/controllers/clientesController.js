@@ -3,6 +3,65 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { gerarEEnviarToken, gerarEEnviarTokenRecuperacao } from '../src/email/emailService.js';
 
+export const autenticarCliente = async (req, res) => {
+  try {
+    const { email, senha } = req.body;
+
+    if (!email || !senha) {
+      return res.status(400).json({ erro: 'Email e senha são obrigatórios' });
+    }
+
+    const queryBuscar = `
+      SELECT id, nome, email, senha_hash, status, email_verificado
+      FROM jm.clientes
+      WHERE email = $1
+    `;
+
+    const resultado = await pool.query(queryBuscar, [email]);
+
+    if (resultado.rows.length === 0) {
+      return res.status(401).json({ erro: 'Email ou senha inválidos' });
+    }
+
+    const cliente = resultado.rows[0];
+
+    const senhaValida = await bcrypt.compare(senha, cliente.senha_hash);
+
+    if (!senhaValida) {
+      return res.status(401).json({ erro: 'Email ou senha inválidos' });
+    }
+
+    if (cliente.status !== 'ativo' || cliente.email_verificado !== true) {
+      return res.status(403).json({
+        erro: 'Confirme seu email antes de acessar a conta'
+      });
+    }
+
+    const token = jwt.sign(
+      { id: cliente.id, email: cliente.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '4h' }
+    );
+
+    res.cookie('user_Token', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 4 * 60 * 60 * 1000
+    });
+
+    return res.status(200).json({
+      mensagem: 'Autenticado com sucesso',
+      nome: cliente.nome,
+      email: cliente.email
+    });
+
+  } catch (error) {
+    console.error('Erro ao autenticar cliente:', error);
+    return res.status(500).json({ erro: 'Erro ao autenticar cliente' });
+  }
+};
+
 export const cadastrarCliente = async (req, res) => {
   try {
     const {
@@ -144,105 +203,6 @@ export const redefinirSenha = async (req, res) => {
   }
 };
 
-export const autenticarCliente = async (req, res) => {
-  try {
-    const { email, senha } = req.body;
-
-    if (!email || !senha) {
-      return res.status(400).json({ erro: 'Email e senha são obrigatórios' });
-    }
-
-    const queryBuscar = `
-      SELECT id, nome, email, senha_hash, status, email_verificado
-      FROM jm.clientes
-      WHERE email = $1
-    `;
-
-    const resultado = await pool.query(queryBuscar, [email]);
-
-    if (resultado.rows.length === 0) {
-      return res.status(401).json({ erro: 'Email ou senha inválidos' });
-    }
-
-    const cliente = resultado.rows[0];
-
-    const senhaValida = await bcrypt.compare(senha, cliente.senha_hash);
-
-    if (!senhaValida) {
-      return res.status(401).json({ erro: 'Email ou senha inválidos' });
-    }
-
-    if (cliente.status !== 'ativo' || cliente.email_verificado !== true) {
-      return res.status(403).json({
-        erro: 'Confirme seu email antes de acessar a conta'
-      });
-    }
-
-    const token = jwt.sign(
-      { id: cliente.id, email: cliente.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '4h' }
-    );
-
-    res.cookie('cliente_token', token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'strict',
-      maxAge: 4 * 60 * 60 * 1000
-    });
-
-    return res.status(200).json({
-      mensagem: 'Autenticado com sucesso',
-      nome: cliente.nome,
-      email: cliente.email
-    });
-
-  } catch (error) {
-    console.error('Erro ao autenticar cliente:', error);
-    return res.status(500).json({ erro: 'Erro ao autenticar cliente' });
-  }
-};
-
-export const logoutCliente = (req, res) => {
-  res.clearCookie('cliente_token', {
-    httpOnly: true,
-    secure: false,
-    sameSite: 'strict',
-    path: '/'
-  });
-  return res.status(200).json({ mensagem: 'Sessão encerrada com sucesso' });
-};
-
-export const dadosCliente = async (req, res) => {
-  try {
-    const id = req.clienteId;
-
-    const queryDados = `
-      SELECT 
-        id,
-        nome,
-        email,
-        telefone,
-        cep,
-        endereco,
-        numero,
-        bairro,
-        cidade,
-        estado
-      FROM jm.clientes 
-      WHERE id = $1
-    `;
-    const resultado = await pool.query(queryDados, [id]);
-    if (resultado.rows.length === 0) {
-      return res.status(404).json({ erro: 'Cliente não encontrado' });
-    }
-    return res.status(200).json(resultado.rows[0]);
-  } catch (error) {
-    console.error('Erro ao buscar dados privados:', error);
-    res.status(500).json({ erro: 'Erro interno ao processar dados' });
-  }
-};
-
 export const listarClientes = async (req, res) => {
   try {
     const sql = `
@@ -339,7 +299,7 @@ export const deletarCliente = async (req, res) => {
 
 export const alterarSenha = async (req, res) => {
   try {
-    const id = req.clienteId;
+    const id = req.user.id;
     const { senhaAtual, novaSenha } = req.body;
 
     if (!senhaAtual || !novaSenha) {

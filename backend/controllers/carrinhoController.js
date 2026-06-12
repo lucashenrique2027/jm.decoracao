@@ -1,4 +1,4 @@
-import { pool } from '../models/db.js'; // Conexão nativa do PostgreSQL
+import { pool } from '../models/db.js'; 
 import { calcularFrete } from '../src/services/freteService.js';
 import crypto from 'crypto';
 import { gerarImagemQRCode } from '../src/qrcode/qrcode.js';
@@ -7,7 +7,7 @@ import { gerarImagemQRCode } from '../src/qrcode/qrcode.js';
    ADICIONAR PRODUTO AO CARRINHO
 ========================================================= */
 export const adicionarProdutosAoCarrinho = async (req, res) => {
-  const clienteId = req.clienteId;
+  const clienteId = req.user.id;
 
   try {
     const { produtoId, quantidade } = req.body;
@@ -87,7 +87,7 @@ export const adicionarProdutosAoCarrinho = async (req, res) => {
 ========================================================= */
 export const obterCarrinhoAtivo = async (req, res) => {
   try {
-    const clienteId = req.clienteId;
+    const clienteId = req.user.id;
 
     /* =====================================================
        BUSCAR CARRINHO
@@ -145,7 +145,7 @@ export const obterCarrinhoAtivo = async (req, res) => {
    CRIAR PEDIDO PENDENTE (CRÍTICO - TRANSACIONAL ATÔMICO)
 ========================================================= */
 export const criarPedidoPendente = async (req, res) => {
-  const clienteId = req.clienteId;
+  const clienteId = req.user.id;
   const { usarEnderecoPerfil, novoEndereco, observacaoEntrega } = req.body;
 
   const clientTransacao = await pool.connect();
@@ -384,7 +384,7 @@ export const criarPedidoPendente = async (req, res) => {
    SINCRONIZAR CARRINHO
 ========================================================= */
 export const sincronizarCarrinho = async (req, res) => {
-  const clienteId = req.clienteId;
+  const clienteId = req.user.id;
 
   try {
     const { itens } = req.body;

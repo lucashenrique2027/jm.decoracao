@@ -1,5 +1,5 @@
 import express from 'express';
-import { verificarToken } from '../middlewares/validarTokenAdmin.js';
+import { verificarToken } from '../middlewares/validarToken.js';
 
 import {
   relatorioFaturamento,
@@ -10,6 +10,7 @@ import {
   relatorioCategotiasPdf,
   relatorioPedidoPdf
 } from '../controllers/relatoriosController.js';
+import { checkRole } from '../middlewares/checkRole.js';
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ const router = express.Router();
  * - quantidade de pedidos
  * - lista detalhada de pedidos (cliente + valores)
  */
-router.get('/faturamento', verificarToken, relatorioFaturamento);
+router.get('/faturamento', verificarToken,checkRole(['admin']), relatorioFaturamento);
 
 /**
  * 📦 Relatório de produtos mais vendidos
@@ -33,7 +34,7 @@ router.get('/faturamento', verificarToken, relatorioFaturamento);
  * - quantidade vendida por produto
  * - faturamento por produto
  */
-router.get('/produtos', verificarToken, relatorioProdutos);
+router.get('/produtos', verificarToken,checkRole(['admin']), relatorioProdutos);
 
 /**
  * 🏷️ Relatório de categorias mais vendidas
@@ -42,7 +43,7 @@ router.get('/produtos', verificarToken, relatorioProdutos);
  * - quantidade vendida por categoria
  * - faturamento por categoria
  */
-router.get('/categorias', verificarToken, relatorioCategorias);
+router.get('/categorias', verificarToken,checkRole(['admin']), relatorioCategorias);
 
 /* =========================================================
    RELATÓRIOS ANALÍTICOS - PDF (EXPORTAÇÃO OFICIAL)
@@ -52,20 +53,20 @@ router.get('/categorias', verificarToken, relatorioCategorias);
  * 📄 PDF - Relatório de faturamento
  * Exporta versão formal do relatório financeiro
  */
-router.get('/faturamento/pdf', verificarToken, relatorioFaturamentoPdf);
+router.get('/faturamento/pdf', verificarToken,checkRole(['admin']), relatorioFaturamentoPdf);
 
 /**
  * 📄 PDF - Relatório de produtos mais vendidos
  * Exporta ranking de produtos em formato PDF
  */
-router.get('/produtos/pdf', verificarToken, relatorioProdutosPdf);
+router.get('/produtos/pdf', verificarToken,checkRole(['admin']), relatorioProdutosPdf);
 
 /**
  * 📄 PDF - Relatório de categorias mais vendidas
  * Exporta visão estratégica por categoria em PDF
  */
-router.get('/categorias/pdf', verificarToken, relatorioCategotiasPdf);
+router.get('/categorias/pdf', verificarToken,checkRole(['admin']), relatorioCategotiasPdf);
 
-router.get('/pedidos/:id/pdf', verificarToken, relatorioPedidoPdf);
+router.get('/pedidos/:id/pdf', verificarToken,checkRole(['admin']), relatorioPedidoPdf);
 
 export default router;

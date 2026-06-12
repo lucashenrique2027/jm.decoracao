@@ -1,8 +1,6 @@
 import express from 'express';
 import { 
   authAdmin,
-  dadosAdmin,
-  logOutAdmin,
   listarClientes,
 } from '../controllers/adminController.js';
 import {
@@ -19,7 +17,8 @@ import {
   cadastrarProduto,
 } from '../controllers/produtosController.js';
 import { upload  }  from  '../middlewares/multer.js'
-import { verificarToken } from '../middlewares/validarTokenAdmin.js';
+import { verificarToken } from '../middlewares/validarToken.js';
+import { checkRole } from '../middlewares/checkRole.js';
 
 const router = express.Router();
 
@@ -48,53 +47,6 @@ const router = express.Router();
  * =========================================================
  */
 router.post('/auth', authAdmin);
-
-/**
- * =========================================================
- * POST /logout
- * =========================================================
- *
- * Responsabilidade:
- * Encerrar sessão administrativa autenticada.
- *
- * Fluxo:
- * - remove cookie administrativo
- * - invalida sessão local
- *
- * Garantias:
- * - encerramento explícito da autenticação
- *
- * Criticidade:
- * Média
- * =========================================================
- */
-router.post('/logout', logOutAdmin);
-
-/**
- * =========================================================
- * GET /data
- * =========================================================
- *
- * Responsabilidade:
- * Retornar dados do administrador autenticado.
- *
- * Fluxo:
- * - valida token administrativo
- * - busca dados persistidos
- * - retorna informações administrativas
- *
- * Garantias:
- * - acesso autenticado
- * - isolamento de sessão
- *
- * Dependências:
- * - verificarToken
- *
- * Criticidade:
- * Média
- * =========================================================
- */
-router.get('/data', verificarToken, dadosAdmin);
 
 /**
  * =========================================================
@@ -148,7 +100,7 @@ router.get('/clientes', verificarToken, listarClientes);
  * Média
  * =========================================================
  */
-router.get('/produtos/categoria/:categoriaId', verificarToken, buscarProdutoPorCategoria);
+router.get('/produtos/categoria/:categoriaId', verificarToken, checkRole(['admin']),buscarProdutoPorCategoria);
 
 /**
  * =========================================================
@@ -221,7 +173,7 @@ router.get('/produtos', verificarToken, listarProdutos);
  * Média
  * =========================================================
  */
-router.get('/produtos/buscar', verificarToken, buscarProduto);
+router.get('/produtos/buscar', verificarToken,checkRole(['admin']), buscarProduto);
 
 /**
  * =========================================================
@@ -289,7 +241,7 @@ router.get('/produtos/:id', verificarToken, buscarProdutoPorId);
  * Alta
  * =========================================================
  */
-router.post('/produtos', verificarToken, upload.single('imagem'), cadastrarProduto);
+router.post('/produtos', verificarToken,checkRole(['admin']), upload.single('imagem'), cadastrarProduto);
 
 /**
  * =========================================================
@@ -331,7 +283,7 @@ router.post('/produtos', verificarToken, upload.single('imagem'), cadastrarProdu
  * Muito Alta
  * =========================================================
  */
-router.put('/produtos/:id', verificarToken,upload.single('imagem'), atualizarProduto);
+router.put('/produtos/:id', verificarToken,checkRole(['admin']),upload.single('imagem'), atualizarProduto);
 
 /**
  * =========================================================
@@ -374,7 +326,7 @@ router.put('/produtos/:id', verificarToken,upload.single('imagem'), atualizarPro
  * Muito Alta
  * =========================================================
  */
-router.delete('/produtos/:id', verificarToken, deletarProduto);
+router.delete('/produtos/:id', verificarToken,checkRole(['admin']), deletarProduto);
 
 /**
  * =========================================================
@@ -407,7 +359,7 @@ router.delete('/produtos/:id', verificarToken, deletarProduto);
  * Média
  * =========================================================
  */
-router.patch('/produtos/:id/imagem', verificarToken, upload.single('imagem'), atualizarImagemProduto);
+router.patch('/produtos/:id/imagem', verificarToken,checkRole(['admin']), upload.single('imagem'), atualizarImagemProduto);
 
 /**
  * =========================================================
@@ -466,8 +418,8 @@ router.get('/categorias', listarCategorias);
  * Média
  * =========================================================
  */
-router.post('/categorias', verificarToken, criarCategoria);
+router.post('/categorias', verificarToken,checkRole(['admin']), criarCategoria);
 
-router.delete('/categorias/:id', verificarToken, deletarCategoria);
+router.delete('/categorias/:id', verificarToken,checkRole(['admin']), deletarCategoria);
 
 export default router;

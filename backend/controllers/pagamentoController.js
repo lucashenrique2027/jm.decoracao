@@ -39,7 +39,7 @@ async function confirmarPedidoComEstoque(clientTransacao, pedidoId) {
 ========================================================= */
 export const buscarPagamento = async (req, res) => {
   const { pedidoId } = req.params;
-  const clienteId = req.clienteId;
+  const clienteId = req.user.id;
 
   try {
     const queryPedido = `SELECT cliente_id FROM jm.pedidos WHERE id = $1`;
@@ -97,7 +97,7 @@ export const buscarPagamento = async (req, res) => {
 export const mercadoPago = async (req, res) => {
   console.log('[mercadoPago]', req.body);
   const { pedidoId, tokenPagamento } = req.body;
-  const clienteId = req.clienteId;
+  const clienteId = req.user.id;
 
   try {
     /* =============================================
@@ -264,7 +264,7 @@ export const pagarPix = async (req, res) => {
   console.log('[pix]', req.body);
 
   const { pedidoId, tokenPagamento } = req.body;
-  const clienteId = req.clienteId;
+  const clienteId = req.user.id;
 
   try {
     /* =============================================

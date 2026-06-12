@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-import { confirmarEmail } from "../../services/cadastraCliente.js";
+import { confirmarEmail } from "../../services/cliente.js";
 import { useMensagem } from "../../context/MensagemContext.jsx";
 
 export default function VerificarEmail() {

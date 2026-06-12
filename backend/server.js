@@ -5,6 +5,7 @@ import routesProdutos from './routes/produtosRoutes.js';
 import routesAdmin from './routes/adminRoutes.js';
 import routesClientes from './routes/clientesRoutes.js';
 import routesPedidos from './routes/pedidosRoutes.js';
+import routesUsers from './routes/usersRoutes.js';
 
 import pagamentoRouter from  './routes/paymentsRoutes.js';
 import routesBusiness from './routes/businessRoutes.js';
@@ -36,6 +37,8 @@ app.use('/api', routesProdutos);
 app.use('/api/admin', routesAdmin);
 
 app.use('/api/clientes', routesClientes);
+
+app.use('/api/users', routesUsers);
 
 app.use('/api/pedidos', routesPedidos);
 

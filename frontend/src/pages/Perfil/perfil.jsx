@@ -88,7 +88,7 @@ export default function Perfil() {
 
   useEffect(() => {
     buscarDados()
-      .then((dadosCliente) => setCliente(dadosCliente))
+      .then((dadosCliente) => setCliente(dadosCliente.user))
       .finally(() => setCarregando(false));
   }, []);
 
@@ -208,9 +208,9 @@ export default function Perfil() {
       setCliente(prev => ({ ...prev, ...clienteAtualizado.cliente }));
 
       // Atualiza localStorage se houver dados salvos lá
-      const localData = JSON.parse(localStorage.getItem('clienteJM') || 'null');
+      const localData = JSON.parse(localStorage.getItem('userJM') || 'null');
       if (localData) {
-        localStorage.setItem('clienteJM', JSON.stringify({ ...localData, ...clienteAtualizado.cliente }));
+        localStorage.setItem('userJM', JSON.stringify({ ...localData, ...clienteAtualizado.cliente }));
       }
 
       setSucessoMsg('Dados atualizados com sucesso!');

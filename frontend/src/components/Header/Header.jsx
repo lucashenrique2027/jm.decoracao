@@ -13,9 +13,9 @@ export default function Header({ filtros, atualizarFiltro, categorias }) {
 
   const [cliente, setCliente] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('clienteJM') || 'null');
+      return JSON.parse(localStorage.getItem('userJM') || 'null');
     } catch {
-      localStorage.removeItem('clienteJM');
+      localStorage.removeItem('userJM');
       return null;
     }
   });
@@ -25,7 +25,7 @@ export default function Header({ filtros, atualizarFiltro, categorias }) {
 
     validarSessao().then(({ autenticado }) => {
       if (!autenticado) {
-        localStorage.removeItem('clienteJM');
+        localStorage.removeItem('userJM');
         setCliente(null);
       }
     });

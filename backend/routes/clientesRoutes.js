@@ -1,8 +1,6 @@
 import express from 'express';
 import {
   autenticarCliente,
-  logoutCliente,
-  dadosCliente,
   cadastrarCliente,
   listarClientes,
   buscarClientePorId,
@@ -19,7 +17,8 @@ import {
   criarPedidoPendente,
   sincronizarCarrinho
 } from '../controllers/carrinhoController.js';
-import { verificarToken } from '../middlewares/validarTokenClient.js';
+import { verificarToken } from '../middlewares/validarToken.js';
+import { checkRole } from '../middlewares/checkRole.js';
 
 const router = express.Router();
 
@@ -63,72 +62,6 @@ router.post('/redefinir-senha', redefinirSenha);
  */
 router.post('/login', autenticarCliente);
 router.post('/confirmar-email', confirmarEmail);
-/**
- * =========================================================
- * POST /logout
- * =========================================================
- *
- * Responsabilidade:
- * Encerrar sessão autenticada do cliente.
- *
- * Fluxo:
- * - remove cookie de autenticação
- * - invalida sessão local do navegador
- *
- * Garantias:
- * - encerramento explícito da autenticação
- * - remoção controlada do token de sessão
- *
- * Dependências:
- * - clientesController.logoutCliente
- *
- * Criticidade:
- * Média
- *
- * Natureza:
- * Autenticação / Sessão
- * =========================================================
- */
-router.post('/logout', logoutCliente);
-
-/**
- * =========================================================
- * GET /data
- * =========================================================
- *
- * Responsabilidade:
- * Retornar dados privados do cliente autenticado.
- *
- * Fluxo:
- * - valida token JWT
- * - identifica cliente autenticado
- * - retorna dados cadastrais permitidos
- *
- * Dados retornados:
- * - nome
- * - email
- * - telefone
- * - endereço
- * - localização
- *
- * Garantias:
- * - isolamento de dados privados
- * - acesso apenas ao próprio perfil
- *
- * Dependências:
- * - verificarToken
- * - clientesController.dadosCliente
- *
- * Criticidade:
- * Alta
- *
- * Natureza:
- * Perfil / Sessão autenticada
- * =========================================================
- */
-router.get('/data', verificarToken, dadosCliente);
-
-
 /**
  * =========================================================
  * POST /
@@ -205,7 +138,7 @@ router.post('/', cadastrarCliente);
  * Carrinho / Sessão comercial
  * =========================================================
  */
-router.post('/adicionar', verificarToken, adicionarProdutosAoCarrinho);
+router.post('/adicionar', verificarToken,checkRole(['cliente']), adicionarProdutosAoCarrinho);
 
 /**
  * =========================================================
@@ -248,7 +181,7 @@ router.post('/adicionar', verificarToken, adicionarProdutosAoCarrinho);
  * Carrinho / Checkout
  * =========================================================
  */
-router.get('/meu-carrinho', verificarToken, obterCarrinhoAtivo);
+router.get('/meu-carrinho', verificarToken, checkRole(['cliente']), obterCarrinhoAtivo);
 
 /**
  * =========================================================
@@ -305,7 +238,7 @@ router.get('/meu-carrinho', verificarToken, obterCarrinhoAtivo);
  * Checkout / Pagamento / Conversão comercial
  * =========================================================
  */
-router.post('/criar-pedido',verificarToken,criarPedidoPendente);
+router.post('/criar-pedido',verificarToken, checkRole(['cliente']),criarPedidoPendente);
 
 /**
  * =========================================================
@@ -356,7 +289,7 @@ router.post('/criar-pedido',verificarToken,criarPedidoPendente);
  * Sincronização / Persistência / Carrinho
  * =========================================================
  */
-router.put('/sincronizar-carrinho',verificarToken,sincronizarCarrinho);
+router.put('/sincronizar-carrinho',verificarToken,checkRole(['cliente']),sincronizarCarrinho);
 
 router.get('/', listarClientes);
 

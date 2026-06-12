@@ -3,7 +3,7 @@ import {
   buscarFaturamentoClientes,
   buscarProdutosMaisVendidos,
   buscarCategoriasMaisVendidas,
-} from '../../services/adminMetrics.js';
+} from '../../services/adminData.js';
 
 export default function DashboardBusiness() {
   const [clientes, setClientes] = useState([]);

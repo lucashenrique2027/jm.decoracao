@@ -6,9 +6,8 @@ import {
   atualizarStatusPedido,
   deletePedido
 } from '../controllers/pedidosController.js';
-
-import { verificarToken as verificarTokenAdmin } from '../middlewares/validarTokenAdmin.js';
-import { verificarToken as verificarTokenCliente } from '../middlewares/validarTokenClient.js';
+import { checkRole } from '../middlewares/checkRole.js';
+import { verificarToken } from '../middlewares/validarToken.js';
 
 const router = express.Router();
 
@@ -16,7 +15,7 @@ const router = express.Router();
 /* =========================================================
    LISTAGEM ADMINISTRATIVA DE PEDIDOS
 ========================================================= */
-router.get('/', verificarTokenAdmin, listarPedidos);
+router.get('/', verificarToken,checkRole(['admin']), listarPedidos);
 /*
   Retorna todos os pedidos do sistema (visão administrativa).
 
@@ -34,7 +33,7 @@ router.get('/', verificarTokenAdmin, listarPedidos);
 /* =========================================================
    LISTAGEM DE PEDIDOS DO CLIENTE AUTENTICADO
 ========================================================= */
-router.get('/meus', verificarTokenCliente, listarPedidosPorCliente);
+router.get('/meus', verificarToken, listarPedidosPorCliente);
 /*
   Retorna apenas os pedidos do cliente logado.
 
@@ -51,7 +50,7 @@ router.get('/meus', verificarTokenCliente, listarPedidosPorCliente);
 /* =========================================================
    EXCLUSÃO DE PEDIDO (CLIENTE)
 ========================================================= */
-router.delete('/delete/:id', verificarTokenCliente, deletePedido);
+router.delete('/delete/:id', verificarToken, deletePedido);
 /*
   Remove um pedido específico do cliente.
 
@@ -68,7 +67,7 @@ router.delete('/delete/:id', verificarTokenCliente, deletePedido);
 /* =========================================================
    DETALHAMENTO DE PEDIDO (CLIENTE)
 ========================================================= */
-router.get('/meus/:id', verificarTokenCliente, buscarPedidoPorId);
+router.get('/meus/:id', verificarToken, buscarPedidoPorId);
 /*
   Retorna os detalhes completos de um pedido do cliente.
 
@@ -85,7 +84,7 @@ router.get('/meus/:id', verificarTokenCliente, buscarPedidoPorId);
 /* =========================================================
    DETALHAMENTO DE PEDIDO (ADMIN)
 ========================================================= */
-router.get('/:id', verificarTokenAdmin, buscarPedidoPorId);
+router.get('/:id', verificarToken, buscarPedidoPorId);
 /*
   Retorna os detalhes completos de qualquer pedido (visão admin).
 
@@ -103,7 +102,7 @@ router.get('/:id', verificarTokenAdmin, buscarPedidoPorId);
 /* =========================================================
    ATUALIZAÇÃO DE STATUS DO PEDIDO (ADMIN)
 ========================================================= */
-router.patch('/:id/status', verificarTokenAdmin, atualizarStatusPedido);
+router.patch('/:id/status', verificarToken,checkRole(['admin']), atualizarStatusPedido);
 /*
   Atualiza o status de um pedido.
 

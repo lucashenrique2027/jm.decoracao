@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useMensagem } from "../../context/MensagemContext.jsx";
-import { cadastrarCliente } from "../../services/cadastraCliente.js";
+import { cadastrarCliente } from "../../services/cliente.js";
 import { useCep } from "../../hooks/useCep.js";
 
 export default function RegisterForm({ setTela }) {

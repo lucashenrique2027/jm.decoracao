@@ -38,11 +38,11 @@ export const authAdmin = async (req, res) => {
         email: adminEncontrado.email,
         role: 'admin'
       }, 
-      process.env.JWT_SECRET_ADMIN, 
+      process.env.JWT_SECRET, 
       { expiresIn: '8h' }
     );
 
-    res.cookie('admin_token', token, {
+    res.cookie('user_Token', token, {
       httpOnly: true,                
       secure: false, // Mude para true em ambiente de produção com HTTPS                  
       sameSite: 'strict',           
@@ -59,19 +59,6 @@ export const authAdmin = async (req, res) => {
     console.error("Erro em authAdmin:", error);
     return res.status(500).json({ message: 'Erro interno ao autenticar admin' });
   }
-};
-
-/* =========================================================
-   LOGOUT ADMIN
-========================================================= */
-export const logOutAdmin = (req, res) => {
-  res.clearCookie('admin_token', {
-    httpOnly: true,
-    secure: false,
-    sameSite: 'strict',
-    path: '/'
-  });
-  return res.status(200).json({ mensagem: 'Sessão encerrada com sucesso' });
 };
 
 /* =========================================================

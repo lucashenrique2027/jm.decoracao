@@ -1,4 +1,5 @@
 const BASE_URL = "http://localhost:8080/api/clientes";
+const API_URL_USER = "http://localhost:8080/api/users";
 
 export const loginCliente = async (email, senha) => {
     const response = await fetch(`${BASE_URL}/login`, {
@@ -13,20 +14,20 @@ export const loginCliente = async (email, senha) => {
     }       
     
     const dados = await response.json();
-    localStorage.setItem('clienteJM', JSON.stringify({ nome: dados.nome, email: dados.email }));
+    localStorage.setItem('userJM', JSON.stringify({ nome: dados.nome, email: dados.email }));
     return dados;
 };
 
 export const logoutCliente = async () => {
-    await fetch(`${BASE_URL}/logout`, {
+    await fetch(`${API_URL_USER}/logout`, {
         method: 'POST',
         credentials: 'include'
     });
-    localStorage.removeItem('clienteJM');
+    localStorage.removeItem('userJM');
 };
 
 export const buscarDados = async () => {
-    const response = await fetch(`${BASE_URL}/data`, {
+    const response = await fetch(`${API_URL_USER}/meu-perfil`, {
         credentials: 'include'
     });
     if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
@@ -80,5 +81,36 @@ export const redefinirSenha = async (email, token, novaSenha) => {
         const erro = await response.json();
         throw new Error(erro.erro || 'Erro ao redefinir senha.');
     }
+    return response.json();
+};
+
+export const cadastrarCliente = async (dados) => {
+    const { confirmarSenha, ...payload } = dados;
+
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.erro || `Erro HTTP! status: ${response.status}`);
+    }
+    return response.json();
+};
+
+export const confirmarEmail = async (dados) => {
+    const response = await fetch(`${API_URL}/confirmar-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+    });
+
+    if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.erro || `Erro HTTP! status: ${response.status}`);
+    }
+
     return response.json();
 };

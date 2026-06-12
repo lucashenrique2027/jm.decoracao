@@ -1,20 +1,20 @@
-import Router from 'router';
+import express from 'express';
 import {
   mercadoPago,
   buscarPagamento,
   webhookMercadoPago,
   pagarPix
 } from '../controllers/pagamentoController.js';
+import { checkRole } from '../middlewares/checkRole.js';
+import { verificarToken } from '../middlewares/validarToken.js';
 
-import { verificarToken } from '../middlewares/validarTokenClient.js';
+const router = express.Router();
 
-const router = Router();
+router.get('/:pedidoId', verificarToken,checkRole(['cliente']), buscarPagamento);
 
-router.get('/:pedidoId', verificarToken, buscarPagamento);
+router.post('/checkout/mp', verificarToken,checkRole(['cliente']), mercadoPago);
 
-router.post('/checkout/mp', verificarToken, mercadoPago);
-
-router.post('/checkout/pix', verificarToken, pagarPix);
+router.post('/checkout/pix', verificarToken,checkRole(['cliente']), pagarPix);
 
 router.post('/webhook/mp', webhookMercadoPago);
 

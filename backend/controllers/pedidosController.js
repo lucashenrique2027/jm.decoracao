@@ -1,6 +1,5 @@
-import { pool } from '../models/db.js'; // Conexão nativa mantendo o padrão exato de importação
+import { pool } from '../models/db.js'; 
 
-// Admin: listar todos os pedidos com filtros
 export const listarPedidos = async (req, res) => {
   try {
     const { status, de, ate } = req.query;
@@ -50,7 +49,7 @@ export const listarPedidos = async (req, res) => {
 export const buscarPedidoPorId = async (req, res) => {
   try {
     const { id } = req.params;
-    const clienteId = req.clienteId;
+    const clienteId = req.user.id;
     const conditions = [`id = $1`];
     const valores = [parseInt(id)];
 
@@ -122,7 +121,7 @@ export const buscarPedidoPorId = async (req, res) => {
 // Cliente: listar apenas os pedidos do cliente autenticado
 export const listarPedidosPorCliente = async (req, res) => {
   try {
-    const clienteId = req.clienteId;
+    const clienteId = req.user.id;
 
     const queryTexto = `
       SELECT 

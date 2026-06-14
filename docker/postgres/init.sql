@@ -86,16 +86,6 @@ CREATE TABLE IF NOT EXISTS jm.produtos (
   desativado_em TIMESTAMPTZ DEFAULT NULL
 );
 
--- ─── ZONAS DE ENTREGA ───────────────────────────────────
-CREATE TABLE IF NOT EXISTS jm.zonas_entrega (
-  id SERIAL PRIMARY KEY,
-  cidade TEXT NOT NULL,
-  bairro TEXT,
-  cep_prefixo TEXT NOT NULL,
-  ativo BOOLEAN DEFAULT true,
-  criado_em TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- ─── PEDIDOS ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS jm.pedidos (
   id SERIAL PRIMARY KEY,

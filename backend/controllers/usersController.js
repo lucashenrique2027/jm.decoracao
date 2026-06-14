@@ -30,7 +30,7 @@ export const getPerfilUsuario = async (req, res) => {
       return res.status(404).json({ message: 'Usuário não encontrado' });
     }
 
-    return res.status(200).json({ user: resultado.rows[0] });
+    return res.status(200).json({ user: resultado.rows[0],role:role });
 
   } catch (error) {
     console.error("Erro em getPerfilUsuario:", error);

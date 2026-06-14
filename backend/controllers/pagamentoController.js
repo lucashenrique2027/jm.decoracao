@@ -1,368 +1,175 @@
 import { pool } from '../models/db.js';
-import client from '../src/mercadoPago/mercadopago.js';
+import mpClient from '../src/mercadoPago/mercadopago.js';
 import { Preference, Payment } from 'mercadopago';
-
-/* =========================================================
-   FUNÇÃO AUXILIAR TRANSACIONAL
-   Controle rígido de estoque e confirmação de pedido
-========================================================= */
-async function confirmarPedidoComEstoque(clientTransacao, pedidoId) {
-  const queryItens = `SELECT id, produto_id, quantidade FROM jm.pedido_itens WHERE pedido_id = $1`;
-  const resultadoItens = await clientTransacao.query(queryItens, [pedidoId]);
-  const itensPedido = resultadoItens.rows;
-
-  for (const item of itensPedido) {
-    const queryProduto = `SELECT id, nome, disponivel, estoque FROM jm.produtos WHERE id = $1 FOR UPDATE`;
-    const resultadoProduto = await clientTransacao.query(queryProduto, [item.produto_id]);
-    const produto = resultadoProduto.rows[0];
-
-    if (!produto)
-      throw new Error(`Produto ${item.produto_id} inexistente`);
-
-    if (!produto.disponivel)
-      throw new Error(`Produto "${produto.nome}" indisponível`);
-
-    if (produto.estoque < item.quantidade)
-      throw new Error(`Estoque insuficiente para "${produto.nome}"`);
-
-    const queryUpdateEstoque = `UPDATE jm.produtos SET estoque = $1 WHERE id = $2`;
-    await clientTransacao.query(queryUpdateEstoque, [produto.estoque - item.quantidade, produto.id]);
-  }
-
-  const queryUpdatePedido = `UPDATE jm.pedidos SET status = 'confirmado' WHERE id = $1`;
-  await clientTransacao.query(queryUpdatePedido, [pedidoId]);
-}
+import * as pagamentoService from '../src/services/pagamentoService.js';
 
 /* =========================================================
    BUSCAR PAGAMENTO
    GET /api/pagamento/:pedidoId
 ========================================================= */
 export const buscarPagamento = async (req, res) => {
-  const { pedidoId } = req.params;
-  const clienteId = req.user.id;
-
   try {
-    const queryPedido = `SELECT cliente_id FROM jm.pedidos WHERE id = $1`;
-    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
-    const pedido = resultadoPedido.rows[0];
-
-    if (!pedido)
-      return res.status(404).json({ erro: 'Pedido não encontrado' });
-
-    if (pedido.cliente_id !== clienteId)
-      return res.status(403).json({ erro: 'Pedido não pertence ao cliente' });
-
-    const queryPagamento = `
-      SELECT 
-        id, 
-        pedido_id AS "pedidoId", 
-        token_pagamento AS "tokenPagamento", 
-        status, 
-        valor, 
-        metodo_pagamento AS "metodoPagamento", 
-        expiracao_pagamento AS "expiracaoPagamento", 
-        criado_em AS "criadoEm", 
-        qr_code_visual AS "qrCodeVisual" 
-      FROM jm.pagamentos 
-      WHERE pedido_id = $1
-    `;
-    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId]);
-    const pagamento = resultadoPagamento.rows[0];
-
-    if (!pagamento)
-      return res.status(404).json({ erro: 'Pagamento não encontrado' });
-
+    const pagamento = await pagamentoService.buscarPagamentoPorPedido(pool, {
+      pedidoId:  parseInt(req.params.pedidoId),
+      clienteId: req.user.id,
+    });
     return res.json({ success: true, pagamento });
-
-  } catch (error) {
-    console.error('[buscarPagamento]', error);
-    return res.status(500).json({ success: false, erro: 'Erro ao buscar pagamento' });
+  } catch (erro) {
+    console.error('[buscarPagamento]', erro);
+    return res.status(erro.status || 500).json({ success: false, erro: erro.message });
   }
 };
 
 /* =========================================================
-   CHECKOUT MERCADO PAGO
-   POST /api/pagamento/checkout/mp
-   
-   Responsabilidades:
-   - Validar pedido e cliente
-   - Validar token de pagamento
-   - Validar status e expiração
-   - Buscar itens e preços do banco (nunca do frontend)
-   - Buscar email do cliente do banco (nunca do frontend)
-   - Criar preference no Mercado Pago
-   - Atualizar método de pagamento
-   - Retornar init_point para redirecionamento
+   PAGAR COM MERCADO PAGO (Preference / redirect)
+   POST /api/pagamento/mercadopago
 ========================================================= */
 export const mercadoPago = async (req, res) => {
-  console.log('[mercadoPago]', req.body);
   const { pedidoId, tokenPagamento } = req.body;
-  const clienteId = req.user.id;
 
   try {
-    /* =============================================
-       VALIDAR PEDIDO
-    ============================================= */
-    const queryPedido = `SELECT cliente_id FROM jm.pedidos WHERE id = $1`;
-    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
-    const pedido = resultadoPedido.rows[0];
+    const { pagamento } = await pagamentoService.validarSessaoPagamento(pool, {
+      pedidoId:       parseInt(pedidoId),
+      tokenPagamento,
+      clienteId:      req.user.id,
+    });
 
-    if (!pedido)
-      return res.status(404).json({ success: false, erro: 'Pedido não encontrado' });
+    // Itens e email do cliente para montar a Preference
+    const [{ rows: itens }, { rows: clienteRows }] = await Promise.all([
+      pool.query(
+        `SELECT pi.produto_id, pi.quantidade, pi.preco_unitario, p.nome
+         FROM jm.pedido_itens pi
+         JOIN jm.produtos p ON p.id = pi.produto_id
+         WHERE pi.pedido_id = $1`,
+        [pedidoId]
+      ),
+      pool.query(
+        `SELECT email FROM jm.clientes WHERE id = $1`,
+        [req.user.id]
+      ),
+    ]);
 
-    if (pedido.cliente_id !== clienteId)
-      return res.status(403).json({ success: false, erro: 'Pedido não pertence ao cliente' });
-
-    /* =============================================
-       VALIDAR TOKEN E STATUS
-    ============================================= */
-    const queryPagamento = `SELECT id, status, expiracao_pagamento FROM jm.pagamentos WHERE pedido_id = $1 AND token_pagamento = $2`;
-    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId, tokenPagamento]);
-    const pagamento = resultadoPagamento.rows[0];
-
-    if (!pagamento)
-      return res.status(403).json({ success: false, erro: 'Sessão de pagamento inválida' });
-
-    if (pagamento.status !== 'aguardando_pagamento')
-      return res.status(409).json({ success: false, erro: 'Este pagamento já foi processado', status: pagamento.status });
-
-    if (pagamento.expiracao_pagamento && new Date() > pagamento.expiracao_pagamento)
-      return res.status(400).json({ success: false, erro: 'Pagamento expirado' });
-
-    /* =============================================
-       BUSCAR ITENS DO BANCO
-    ============================================= */
-    const queryItens = `
-      SELECT pi.produto_id, pi.quantidade, pi.preco_unitario, p.nome
-      FROM jm.pedido_itens pi
-      JOIN jm.produtos p ON p.id = pi.produto_id
-      WHERE pi.pedido_id = $1
-    `;
-    const resultadoItens = await pool.query(queryItens, [pedidoId]);
-    const itensPedido = resultadoItens.rows;
-
-    /* =============================================
-       BUSCAR EMAIL DO CLIENTE DO BANCO
-    ============================================= */
-    const queryCliente = `SELECT email FROM jm.clientes WHERE id = $1`;
-    const resultadoCliente = await pool.query(queryCliente, [clienteId]);
-    const cliente = resultadoCliente.rows[0];
-
-    /* =============================================
-       CRIAR PREFERENCE NO MERCADO PAGO
-    ============================================= */
-    const preference = new Preference(client);
-    const resultado = await preference.create({
+    const preference = new Preference(mpClient);
+    const resultado  = await preference.create({
       body: {
-        items: itensPedido.map(item => ({
-          id: String(item.produto_id),
-          title: item.nome,
-          quantity: Number(item.quantidade),
+        items: itens.map(item => ({
+          id:         String(item.produto_id),
+          title:      item.nome,
+          quantity:   Number(item.quantidade),
           unit_price: parseFloat(item.preco_unitario),
           currency_id: 'BRL',
         })),
-        payer: {
-          email: cliente.email,
-        },
+        payer: { email: clienteRows[0].email },
         back_urls: {
           success: `${process.env.FRONTEND_URL}/pagamento/sucesso`,
           failure: `${process.env.FRONTEND_URL}/pagamento/erro`,
           pending: `${process.env.FRONTEND_URL}/pagamento/pendente`,
         },
-        external_reference: String(pedidoId),
-        notification_url: `${process.env.BACKEND_URL}/api/pagamento/webhook/mp`,
+        external_reference:  String(pedidoId),
+        notification_url:    `${process.env.BACKEND_URL}/api/pagamento/webhook/mp`,
       },
     });
 
-    /* =============================================
-       ATUALIZAR MÉTODO DE PAGAMENTO
-    ============================================= */
-    const queryUpdateMetodo = `UPDATE jm.pagamentos SET metodo_pagamento = 'mercado_pago' WHERE id = $1`;
-    await pool.query(queryUpdateMetodo, [pagamento.id]);
-
-    console.log('[mercadoPago] preference criada:', resultado.id);
+    await pagamentoService.atualizarMetodoPagamento(pool, pagamento.id, 'mercado_pago');
 
     return res.json({
-      success: true,
+      success:      true,
       pedidoId,
-      url: resultado.init_point,
-      sandbox_url: resultado.sandbox_init_point,
+      url:          resultado.init_point,
+      sandbox_url:  resultado.sandbox_init_point,
       preferenceId: resultado.id,
     });
 
   } catch (erro) {
     console.error('[mercadoPago]', erro);
-    return res.status(erro.status || 500).json({ success: false, erro: 'Erro ao processar pagamento Mercado Pago' });
+    return res.status(erro.status || 500).json({ success: false, erro: erro.message || 'Erro ao processar pagamento Mercado Pago' });
   }
 };
 
 /* =========================================================
    WEBHOOK MERCADO PAGO
    POST /api/pagamento/webhook/mp
-
-   Responsabilidades:
-   - Receber evento do Mercado Pago
-   - Consultar status real na API do MP
-   - Confirmar pagamento aprovado
-   - Executar transação atômica:
-       → atualiza pagamento para 'pago'
-       → baixa estoque
-       → confirma pedido
-   - Garantir idempotência
 ========================================================= */
 export const webhookMercadoPago = async (req, res) => {
-  res.sendStatus(200);
+  res.sendStatus(200); // responde imediatamente ao MP
 
   const { type, data } = req.body;
-  console.log('[webhookMP] evento:', type, data);
-
   if (type !== 'payment') return;
 
-  const clientTransacao = await pool.connect();
-
+  const db = await pool.connect();
   try {
-    const payment = new Payment(client);
+    const payment    = new Payment(mpClient);
     const pagamentoMP = await payment.get({ id: data.id });
-
-    console.log('[webhookMP] status:', pagamentoMP.status, '| ref:', pagamentoMP.external_reference);
 
     if (pagamentoMP.status !== 'approved') return;
 
-    const pedidoId = parseInt(pagamentoMP.external_reference);
+    const pedidoId  = parseInt(pagamentoMP.external_reference);
+    const confirmou = await pagamentoService.confirmarPagamento(db, pedidoId);
 
-    await clientTransacao.query('BEGIN');
-
-    const queryUpdatePagamento = `
-      UPDATE jm.pagamentos 
-      SET status = 'pago', pago_em = $1, atualizado_em = $2 
-      WHERE pedido_id = $3 AND status = 'aguardando_pagamento'
-      RETURNING id
-    `;
-    const resultadoUpdate = await clientTransacao.query(queryUpdatePagamento, [new Date(), new Date(), pedidoId]);
-    const updated = resultadoUpdate.rows[0];
-
-    if (!updated) {
-      console.log('[webhookMP] pedido já confirmado anteriormente, ignorando:', pedidoId);
-      await clientTransacao.query('ROLLBACK');
-      return;
+    if (confirmou) {
+      console.log('[webhookMP] ✅ Pedido confirmado:', pedidoId);
+    } else {
+      console.log('[webhookMP] ⚠️ Pedido já processado anteriormente:', pedidoId);
     }
 
-    await confirmarPedidoComEstoque(clientTransacao, pedidoId);
-    await clientTransacao.query('COMMIT');
-
-    console.log('[webhookMP] ✅ Pedido confirmado:', pedidoId);
-
   } catch (err) {
-    await clientTransacao.query('ROLLBACK');
-    console.error('[webhookMP] Erro ao processar evento:', err);
+    console.error('[webhookMP] Erro:', err);
   } finally {
-    clientTransacao.release();
+    db.release();
   }
 };
 
+/* =========================================================
+   PAGAR COM PIX (via Mercado Pago)
+   POST /api/pagamento/pix
+========================================================= */
 export const pagarPix = async (req, res) => {
-  console.log('[pix]', req.body);
-
   const { pedidoId, tokenPagamento } = req.body;
-  const clienteId = req.user.id;
 
   try {
-    /* =============================================
-       VALIDAR PEDIDO
-    ============================================= */
-    const queryPedido = `SELECT cliente_id FROM jm.pedidos WHERE id = $1`;
-    const resultadoPedido = await pool.query(queryPedido, [pedidoId]);
-    const pedido = resultadoPedido.rows[0];
+    const { pagamento } = await pagamentoService.validarSessaoPagamento(pool, {
+      pedidoId:       parseInt(pedidoId),
+      tokenPagamento,
+      clienteId:      req.user.id,
+    });
 
-    if (!pedido)
-      return res.status(404).json({ success: false, erro: 'Pedido não encontrado' });
-
-    if (pedido.cliente_id !== clienteId)
-      return res.status(403).json({ success: false, erro: 'Pedido não pertence ao cliente' });
-
-    /* =============================================
-       VALIDAR PAGAMENTO
-    ============================================= */
-    const queryPagamento = `
-      SELECT id, status, expiracao_pagamento, valor
-      FROM jm.pagamentos
-      WHERE pedido_id = $1 AND token_pagamento = $2
-    `;
-    const resultadoPagamento = await pool.query(queryPagamento, [pedidoId, tokenPagamento]);
-    const pagamento = resultadoPagamento.rows[0];
-
-    if (!pagamento)
-      return res.status(403).json({ success: false, erro: 'Sessão de pagamento inválida' });
-
-    if (pagamento.status !== 'aguardando_pagamento')
-      return res.status(409).json({
-        success: false,
-        erro: 'Este pagamento já foi processado',
-        status: pagamento.status
-      });
-
-    if (pagamento.expiracao_pagamento && new Date() > pagamento.expiracao_pagamento)
-      return res.status(400).json({ success: false, erro: 'Pagamento expirado' });
-
-    /* =============================================
-       BUSCAR CLIENTE
-    ============================================= */
-    const queryCliente = `SELECT email FROM jm.clientes WHERE id = $1`;
-    const resultadoCliente = await pool.query(queryCliente, [clienteId]);
-    const cliente = resultadoCliente.rows[0];
-
-    if (!cliente)
+    const { rows: clienteRows } = await pool.query(
+      `SELECT email FROM jm.clientes WHERE id = $1`,
+      [req.user.id]
+    );
+    if (!clienteRows[0])
       return res.status(404).json({ success: false, erro: 'Cliente não encontrado' });
 
-    /* =============================================
-       CRIAR PIX NO MERCADO PAGO
-    ============================================= */
-    const payment = new Payment(client);
-
+    const payment   = new Payment(mpClient);
     const resultado = await payment.create({
       body: {
         transaction_amount: Number(pagamento.valor),
-        description: `Pedido ${pedidoId}`,
-        payment_method_id: 'pix',
-        payer: {
-          email: cliente.email,
-        },
+        description:        `Pedido ${pedidoId}`,
+        payment_method_id:  'pix',
+        payer:              { email: clienteRows[0].email },
         external_reference: String(pedidoId),
-      }
+      },
     });
 
-    const qrCode = resultado.point_of_interaction?.transaction_data?.qr_code;
+    const qrCode   = resultado.point_of_interaction?.transaction_data?.qr_code;
     const qrBase64 = resultado.point_of_interaction?.transaction_data?.qr_code_base64;
 
     if (!qrCode || !qrBase64)
       return res.status(500).json({ success: false, erro: 'Erro ao gerar QR Code PIX' });
 
-    /* =============================================
-       ATUALIZAR MÉTODO DE PAGAMENTO
-    ============================================= */
-    const queryUpdateMetodo = `
-      UPDATE jm.pagamentos
-      SET metodo_pagamento = 'pix'
-      WHERE id = $1
-    `;
-    await pool.query(queryUpdateMetodo, [pagamento.id]);
-
-    console.log('[pix] criado:', resultado.id);
+    await pagamentoService.atualizarMetodoPagamento(pool, pagamento.id, 'pix');
 
     return res.json({
-      success: true,
+      success:      true,
       pedidoId,
-      paymentId: resultado.id,
-      qr_code: qrCode,
+      paymentId:    resultado.id,
+      qr_code:      qrCode,
       qr_code_base64: qrBase64,
-      status: resultado.status
+      status:       resultado.status,
     });
 
   } catch (erro) {
-    console.error('[pix]', erro);
-    return res.status(erro.status || 500).json({
-      success: false,
-      erro: 'Erro ao processar pagamento PIX'
-    });
+    console.error('[pagarPix]', erro);
+    return res.status(erro.status || 500).json({ success: false, erro: erro.message || 'Erro ao processar pagamento PIX' });
   }
 };

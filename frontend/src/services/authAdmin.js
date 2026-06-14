@@ -31,9 +31,12 @@ export const buscarDadosAdmin = async () => {
 export const validarSessaoAdmin = async () => {
   try {
     const dados = await buscarDadosAdmin();
-    return { autenticado: true, dados };
+    return { 
+        autenticado: true, 
+        role: dados.role 
+    };
   } catch {
-    return { autenticado: false };
+    return { autenticado: false, role: null };
   }
 };
 

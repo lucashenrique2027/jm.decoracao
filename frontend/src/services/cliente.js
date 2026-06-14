@@ -36,10 +36,10 @@ export const buscarDados = async () => {
 
 export const validarSessao = async () => {
     try {
-        const dados = await buscarDados();
-        return { autenticado: true, dados };
+        const { user, role } = await buscarDados();
+        return { autenticado: true, role };         
     } catch {
-        return { autenticado: false };
+        return { autenticado: false, role: null };
     }
 };
 
@@ -87,7 +87,7 @@ export const redefinirSenha = async (email, token, novaSenha) => {
 export const cadastrarCliente = async (dados) => {
     const { confirmarSenha, ...payload } = dados;
 
-    const response = await fetch(API_URL, {
+    const response = await fetch(BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -101,7 +101,7 @@ export const cadastrarCliente = async (dados) => {
 };
 
 export const confirmarEmail = async (dados) => {
-    const response = await fetch(`${API_URL}/confirmar-email`, {
+    const response = await fetch(`${BASE_URL}/confirmar-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)

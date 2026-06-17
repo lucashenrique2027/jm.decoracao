@@ -189,11 +189,11 @@ export default function Estoque() {
                             src={`http://localhost:9000/loja-jm/${produto.imagemUpload}`} 
                             alt={produto.nome} 
                             className="shadow-sm"
-                            style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: '10px', border: '1px solid #f1f5f9' }} 
+                            style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: '10px', border: '1px solid #f1f5f9' }} 
                           />
                         ) : (
                           <div className="d-flex align-items-center justify-content-center text-muted bg-light" 
-                               style={{ width: 44, height: 44, borderRadius: '10px', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                               style={{ width: 90, height: 90, borderRadius: '10px', fontSize: '0.7rem', fontWeight: 'bold' }}>
                             S/ FOTO
                           </div>
                         )}

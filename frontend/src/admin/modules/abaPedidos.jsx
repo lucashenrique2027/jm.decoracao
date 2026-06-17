@@ -244,6 +244,7 @@ export default function Pedidos() {
                       <h6 className="fw-bold small text-secondary mb-2">
                         <i className="bi bi-person-fill me-1"></i> Cliente
                       </h6>
+                      
                       <div className="d-flex justify-content-between mb-1 small">
                         <span className="text-muted">Nome:</span>
                         <span className="fw-medium text-dark">{pedidoDetalhado.cliente?.nome ?? "—"}</span>
@@ -304,22 +305,36 @@ export default function Pedidos() {
                       </h6>
 
                       {pedidoDetalhado.itens?.length > 0 ? (
-                        pedidoDetalhado.itens.map((item) => (
-                          <div key={item.id} className="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <div>
-                              <p className="mb-0 small fw-medium text-dark">{item.nomeProduto}</p>
-                              <p className="mb-0 small text-muted">
-                                {item.quantidade}x — R$ {Number(item.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} cada
-                              </p>
-                            </div>
-                            <span className="small fw-bold text-dark">
-                              R$ {(item.quantidade * Number(item.precoUnitario)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-muted small mb-0">Nenhum item encontrado.</p>
-                      )}
+    pedidoDetalhado.itens.map((item) => (
+      <div key={item.id} className="d-flex align-items-center justify-content-between py-2 border-bottom">
+        <div className="d-flex align-items-center gap-2">
+          {item.imagemUpload ? (
+            <img
+              src={`http://localhost:9000/loja-jm/${item.imagemUpload}`}
+              alt={item.nomeProduto}
+              style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: '8px', border: '1px solid #f1f5f9' }}
+            />
+          ) : (
+            <div className="d-flex align-items-center justify-content-center text-muted bg-light"
+                 style={{ width: 40, height: 40, borderRadius: '8px', fontSize: '0.6rem', fontWeight: 'bold' }}>
+              S/ FOTO
+            </div>
+          )}
+          <div>
+            <p className="mb-0 small fw-medium text-dark">{item.nomeProduto}</p>
+            <p className="mb-0 small text-muted">
+              {item.quantidade}x — R$ {Number(item.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} cada
+            </p>
+          </div>
+        </div>
+        <span className="small fw-bold text-dark">
+          R$ {(item.quantidade * Number(item.precoUnitario)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        </span>
+      </div>
+    ))
+  ) : (
+    <p className="text-muted small mb-0">Nenhum item encontrado.</p>
+  )}
 
                       <div className="pt-2 mt-1">
                         <div className="d-flex justify-content-between small text-muted mb-1">

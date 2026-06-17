@@ -3,7 +3,8 @@ import {
   listarProdutosAdmin, 
   atualizarProduto, 
   deletarProduto, 
-  listarCategorias 
+  listarCategorias,
+  atualizarImagemProduto
 } from "../../services/adminProducts.js";
 
 export default function Estoque() {
@@ -14,6 +15,9 @@ export default function Estoque() {
   const [produtoEmEdicao, setProdutoEmEdicao] = useState(null);
   const [produtoParaExcluir, setProdutoParaExcluir] = useState(null);
   const [modalErro, setModalErro] = useState(null);
+  const [novaImagem, setNovaImagem] = useState(null);
+  const [previewImagem, setPreviewImagem] = useState(null);
+  const [salvando, setSalvando] = useState(false);
   
   // Controla o estado da aba selecionada na interface do administrador
   const [abaAtiva, setAbaAtiva] = useState("ativos");
@@ -21,6 +25,13 @@ export default function Estoque() {
   useEffect(() => {
     carregar();
   }, []);
+
+  // Libera a memória da preview gerada por createObjectURL quando ela mudar ou o componente desmontar
+  useEffect(() => {
+    return () => {
+      if (previewImagem) URL.revokeObjectURL(previewImagem);
+    };
+  }, [previewImagem]);
 
   async function carregar() {
     try {
@@ -46,9 +57,17 @@ export default function Estoque() {
     }
   };
 
+  const handleImagemChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setNovaImagem(file);
+    setPreviewImagem(URL.createObjectURL(file));
+  };
+
   const handleSalvarEdicao = async (e) => {
     e.preventDefault();
     try {
+      setSalvando(true);
       const { id, nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel, aba } = produtoEmEdicao;
       
       // Se o produto veio da aba de excluídos, montamos o payload estritamente com as travas aceitas pelo backend
@@ -57,11 +76,21 @@ export default function Estoque() {
         : { nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel };
 
       await atualizarProduto(id, payload);
+
+      // Só envia a imagem se o admin de fato selecionou um arquivo novo
+      if (novaImagem) {
+        await atualizarImagemProduto(id, novaImagem);
+      }
+
       await carregar();
       setProdutoEmEdicao(null);
+      setNovaImagem(null);
+      setPreviewImagem(null);
       setModalErro(null);
     } catch (error) {
       setModalErro("Erro ao atualizar dados: " + error.message);
+    } finally {
+      setSalvando(false);
     }
   };
 
@@ -227,7 +256,12 @@ export default function Estoque() {
                         <div className="d-flex gap-1 justify-content-end">
                           <button className="btn btn-sm btn-light border-0 text-primary p-2" 
                                   style={{ borderRadius: '8px' }}
-                                  onClick={() => { setProdutoEmEdicao(produto); setModalErro(null); }}>
+                                  onClick={() => { 
+                                    setProdutoEmEdicao(produto); 
+                                    setNovaImagem(null);
+                                    setPreviewImagem(null);
+                                    setModalErro(null); 
+                                  }}>
                             <i className="bi bi-pencil-square fs-6"></i>
                           </button>
                           
@@ -286,6 +320,31 @@ export default function Estoque() {
                       Este produto foi excluido. Para reintroduzi-lo no catálogo operacional, modifique o switch abaixo para ativo e defina um estoque válido. Os dados cadastrais permanecem imutáveis.
                     </div>
                   )}
+
+                  {/* IMAGEM DO PRODUTO */}
+                  <div className="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style={{ borderColor: '#f1f5f9' }}>
+                    <img
+                      src={previewImagem || (produtoEmEdicao.imagemUpload ? `http://localhost:9000/loja-jm/${produtoEmEdicao.imagemUpload}` : 'https://via.placeholder.com/72?text=S/Foto')}
+                      alt={produtoEmEdicao.nome}
+                      style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: '12px', border: '1px solid #f1f5f9' }}
+                    />
+                    <div>
+                      <label className="form-label small fw-semibold text-secondary d-block mb-1">Imagem do Produto</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="form-control form-control-sm"
+                        style={{ borderRadius: '8px', maxWidth: '240px' }}
+                        onChange={handleImagemChange}
+                        disabled={produtoEmEdicao.aba === 'excluidos'}
+                      />
+                      {novaImagem && (
+                        <span className="small text-success fw-medium d-block mt-1">
+                          <i className="bi bi-check-circle-fill me-1"></i> Nova imagem selecionada
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
                   <div className="row g-3">
                     <div className="col-md-8">
@@ -401,9 +460,9 @@ export default function Estoque() {
                 </div>
 
                 <div className="modal-footer border-0 bg-light px-4 py-3">
-                  <button type="button" className="btn btn-link text-secondary text-decoration-none fw-medium" onClick={() => setProdutoEmEdicao(null)}>Cancelar</button>
-                  <button type="submit" className="btn btn-primary px-4 fw-medium" style={{ borderRadius: '8px' }}>
-                    {produtoEmEdicao.aba === 'excluidos' ? 'Reviver Produto' : 'Salvar Alterações'}
+                  <button type="button" className="btn btn-link text-secondary text-decoration-none fw-medium" onClick={() => setProdutoEmEdicao(null)} disabled={salvando}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary px-4 fw-medium" style={{ borderRadius: '8px' }} disabled={salvando}>
+                    {salvando ? 'Salvando...' : (produtoEmEdicao.aba === 'excluidos' ? 'Reviver Produto' : 'Salvar Alterações')}
                   </button>
                 </div>
               </form>

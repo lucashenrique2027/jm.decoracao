@@ -1,4 +1,4 @@
-import { PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, HeadObjectCommand,DeleteObjectCommand  } from "@aws-sdk/client-s3";
 import s3Client from "../config/s3.js";
 import crypto from "crypto";
 
@@ -40,5 +40,25 @@ export const uploadImageToMinio = async (file, forceName = null) => {
   } catch (error) {
     console.error("Erro técnico no upload:", error);
     throw new Error("Falha ao processar o upload.");
+  }
+};
+
+export const deleteImageFromMinio = async (fileName) => {
+  if (!fileName) return;
+
+  try {
+    const exists = await imageExistsInMinio(fileName);
+    if (!exists) {
+      console.log(`Pulo: ${fileName} não existe no MinIO, nada a apagar.`);
+      return;
+    }
+
+    await s3Client.send(new DeleteObjectCommand({
+      Bucket: process.env.MINIO_BUCKET,
+      Key: fileName
+    }));
+  } catch (error) {
+    console.error("Erro técnico ao deletar imagem:", error);
+    throw new Error("Falha ao remover a imagem antiga.");
   }
 };

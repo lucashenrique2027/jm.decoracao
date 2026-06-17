@@ -1,142 +1,102 @@
-import { pool } from '../models/db.js'; // Conexão nativa mantendo o padrão exato de importação
-import { uploadImageToMinio } from '../src/services/uploadService.js';
+import { pool } from '../models/db.js';
+import { uploadImageToMinio, deleteImageFromMinio } from '../src/services/uploadService.js';
 import s3Client from '../src/config/s3.js';
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-// Listar todos os produtos em abaProduto.jsx
 export const listarProdutos = async (req, res) => {
     try {
-        const queryTexto = `
-            SELECT 
-                p.id,
-                p.nome,
-                p.descricao,
-                p.preco_varejo AS "precoVarejo",
-                p.preco_atacado AS "precoAtacado",
-                p.quantidade_minima_atacado AS "quantidadeMinimaAtacado",
-                p.categoria_id AS "categoriaId",
-                c.nome AS "categoriaNome",
-                p.imagem_upload AS "imagemUpload", 
-                p.disponivel,
-                p.estoque,
-                p.desativado_em AS "desativadoEm"
-            FROM jm.produtos p
-            LEFT JOIN jm.categorias c ON p.categoria_id = c.id
-        `;
-
+        const queryTexto = `SELECT p.id, p.nome, p.descricao, p.preco_varejo AS "precoVarejo", p.preco_atacado AS "precoAtacado", p.quantidade_minima_atacado AS "quantidadeMinimaAtacado", p.categoria_id AS "categoriaId", c.nome AS "categoriaNome", p.imagem_upload AS "imagemUpload", p.disponivel, p.estoque, p.desativado_em AS "desativadoEm" FROM jm.produtos p LEFT JOIN jm.categorias c ON p.categoria_id = c.id`;
         const resultado = await pool.query(queryTexto);
-        const data = resultado.rows;
-
-        const resultadoFormatado = data.map(produto => {
+        const resultadoFormatado = resultado.rows.map(produto => {
             const isDisponivel = produto.disponivel === true || produto.disponivel === 'true' || produto.disponivel === 1;
-
-            if (isDisponivel) {
-                return {
-                    ...produto,
-                    disponivel: true,
-                    aba: 'ativos'
-                };
-            }
-
-            if (produto.desativadoEm !== null && produto.desativadoEm !== undefined) {
-                return {
-                    ...produto,
-                    disponivel: false,
-                    aba: 'excluidos'
-                };
-            }
-
-            return {
-                ...produto,
-                disponivel: false,
-                aba: 'indisponivel'
-            };
+            if (isDisponivel) return { ...produto, disponivel: true, aba: 'ativos' };
+            if (produto.desativadoEm !== null && produto.desativadoEm !== undefined) return { ...produto, disponivel: false, aba: 'excluidos' };
+            return { ...produto, disponivel: false, aba: 'indisponivel' };
         });
-
         res.json(resultadoFormatado);
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ erro: 'Erro ao listar produtos' });
-        return;    
-    }    
-}
+    }
+};
 
-// Buscar um Produto específico
 export const buscarProdutoPorId = async (req, res) => {
     const { id } = req.params;
-
     if (isNaN(Number(id))) {
         console.log(`[buscarProdutoPorId] ID inválido recebido: "${id}"`);
         return res.status(400).json({ erro: `ID inválido recebido: ${id}` });
     }
-
     try {
-        const queryTexto = `SELECT * FROM jm.produtos WHERE id = $1`;
-        const resultado = await pool.query(queryTexto, [Number(id)]);
-        
+        const resultado = await pool.query(`SELECT * FROM jm.produtos WHERE id = $1`, [Number(id)]);
         res.json(resultado.rows[0] ?? null);
     } catch (error) {
         console.error(error);
         res.status(500).json({ erro: 'Erro ao buscar produto' });
     }
-}
+};
 
-// Retornar todos os produtos de uma categoria fornecida
 export const buscarProdutoPorCategoria = async (req, res) => {
     try {
         const { categoriaId } = req.params;
-        const queryTexto = `SELECT * FROM jm.produtos WHERE categoria_id = $1`;
-        const resultado = await pool.query(queryTexto, [Number(categoriaId)]);
-
+        const resultado = await pool.query(`SELECT * FROM jm.produtos WHERE categoria_id = $1`, [Number(categoriaId)]);
         res.json(resultado.rows);
     } catch (error) {
         console.error(error);
         res.status(500).json({ erro: 'Erro ao filtrar por categoria' });
     }
-}
-
-// Criar produto
-export const criarProduto = async (req, res) => {
-    try {
-        const { nome, descricao, precoVarejo, precoAtacado, quantidadeMinimaAtacado, categoriaId, estoque, imagem_upload } = req.body;
-
-        if (!nome || !precoVarejo || !categoriaId) {
-            return res.status(400).json({ erro: 'Nome, preço e categoria são obrigatórios' });
-        }
-
-        const valorPrecoAtacado = quantidadeMinimaAtacado > 0 ? precoAtacado : 0;
-        const valorQuantidadeMinima = quantidadeMinimaAtacado > 0 ? quantidadeMinimaAtacado : null;
-        const valorEstoque = Number(estoque) || 0;
-        const valorDisponivel = valorEstoque > 0;
-
-        const queryTexto = `
-            INSERT INTO jm.produtos (
-                nome, descricao, categoria_id, preco_varejo, preco_atacado, quantidade_minima_atacado, estoque, disponivel, imagem_upload
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            RETURNING *, preco_varejo AS "precoVarejo", preco_atacado AS "precoAtacado", quantidade_minima_atacado AS "quantidadeMinimaAtacado", categoria_id AS "categoriaId", imagem_upload AS "imagemUpload", desativado_em AS "desativadoEm"
-        `;
-
-        const valores = [
-            nome,
-            descricao,
-            Number(categoriaId),
-            String(precoVarejo),
-            valorPrecoAtacado,
-            valorQuantidadeMinima,
-            valorEstoque,
-            valorDisponivel,
-            imagem_upload
-        ];
-
-        const resultado = await pool.query(queryTexto, valores);
-        res.status(201).json(resultado.rows[0]);
-    } catch (erro) {
-        console.error(erro);
-        res.status(500).json({ erro: 'Erro ao criar produto' });
-    }
 };
 
+// Adicionar novo Produto
+export const cadastrarProduto = async (req, res) => {
+    const { nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel } = req.body;
+
+    if (!nome || !precoVarejo || !categoriaId) {
+        return res.status(400).json({ erro: 'Nome, preço e categoria são obrigatórios' });
+    }
+
+    try {
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ erro: 'Imagem obrigatória' });
+      }
+      const produtoImg = await uploadImageToMinio(file);
+
+      const valorPrecoAtacado = quantidadeMinimaAtacado > 0 ? String(precoAtacado) : null;
+      const valorQuantidadeMinima = quantidadeMinimaAtacado > 0 ? Number(quantidadeMinimaAtacado) : null;
+      const valorEstoque = Number(estoque) || 0;
+      const valorDisponivel = !(disponivel === 'false' || disponivel === false);
+
+      const queryTexto = `
+        INSERT INTO jm.produtos (
+            nome, descricao, categoria_id, preco_varejo, preco_atacado, quantidade_minima_atacado, estoque, disponivel, imagem_upload
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *, preco_varejo AS "precoVarejo", preco_atacado AS "precoAtacado", quantidade_minima_atacado AS "quantidadeMinimaAtacado", categoria_id AS "categoriaId", imagem_upload AS "imagemUpload", desativado_em AS "desativadoEm"
+      `;
+
+      const valores = [
+        nome,
+        descricao,
+        Number(categoriaId),
+        String(precoVarejo),
+        valorPrecoAtacado,
+        valorQuantidadeMinima,
+        valorEstoque,
+        valorDisponivel,
+        produtoImg
+      ];
+
+      const resultado = await pool.query(queryTexto, valores);
+
+      return res.status(201).json({
+        "Sucesso": "Produto Cadastrado",
+        "produto": resultado.rows[0]
+      });
+    } catch (error) {
+      console.error("Erro no controlador:", error.message);
+      res.status(500).json({ erro: "Falha ao cadastrar produto." });
+    }
+};
 // Modificar dados de um produto fornecendo seu ID
 export const atualizarProduto = async (req, res) => {
   const { id } = req.params;
@@ -273,21 +233,49 @@ export const atualizarProduto = async (req, res) => {
 export const atualizarImagemProduto = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         if (!req.file) {
             return res.status(400).json({ erro: 'Imagem é obrigatória' });
         }
 
-        const queryTexto = `
-            UPDATE jm.produtos 
-            SET imagem_upload = $1 
-            WHERE id = $2 
-            RETURNING *, preco_varejo AS "precoVarejo", preco_atacado AS "precoAtacado", quantidade_minima_atacado AS "quantidadeMinimaAtacado", categoria_id AS "categoriaId", imagem_upload AS "imagemUpload", desativado_em AS "desativadoEm"
-        `;
-        const resultado = await pool.query(queryTexto, [req.file.filename, Number(id)]);
+        // 1. Busca a imagem atual do produto, pra saber o que apagar depois
+        const produtoAtual = await pool.query(
+            'SELECT imagem_upload FROM jm.produtos WHERE id = $1',
+            [Number(id)]
+        );
 
-        if (resultado.rows.length === 0) {
+        if (produtoAtual.rows.length === 0) {
             return res.status(404).json({ erro: 'Produto não encontrado' });
+        }
+
+        const imagemAntiga = produtoAtual.rows[0].imagem_upload;
+
+        // 2. Sobe a nova imagem pro MinIO
+        const novaImagem = await uploadImageToMinio(req.file);
+
+        let resultado;
+        try {
+            // 3. Atualiza o produto apontando pra nova imagem
+            const queryTexto = `
+                UPDATE jm.produtos 
+                SET imagem_upload = $1 
+                WHERE id = $2 
+                RETURNING *, preco_varejo AS "precoVarejo", preco_atacado AS "precoAtacado", quantidade_minima_atacado AS "quantidadeMinimaAtacado", categoria_id AS "categoriaId", imagem_upload AS "imagemUpload", desativado_em AS "desativadoEm"
+            `;
+            resultado = await pool.query(queryTexto, [novaImagem, Number(id)]);
+        } catch (erroUpdate) {
+            // Se o banco falhar, desfaz o upload pra não deixar lixo órfão no MinIO
+            console.error('Falha ao atualizar produto, desfazendo upload:', erroUpdate);
+            await deleteImageFromMinio(novaImagem).catch(() => {});
+            throw erroUpdate;
+        }
+
+        // 4. Só agora apaga a imagem antiga, sem deixar isso quebrar a resposta de sucesso
+        try {
+            await deleteImageFromMinio(imagemAntiga);
+        } catch (erroDelete) {
+            console.error('Falha ao remover imagem antiga do MinIO:', erroDelete);
+            // o produto já foi atualizado com sucesso; isso fica como lixo a limpar depois
         }
 
         res.json(resultado.rows[0]);
@@ -420,53 +408,6 @@ export const deletarProduto = async (req, res) => {
   }
 };
 
-// Adicionar novo Produto
-export const cadastrarProduto = async (req, res) => {
-    const { nome, descricao, categoriaId, precoVarejo, precoAtacado, quantidadeMinimaAtacado, estoque, disponivel } = req.body;
-    
-    try {
-      const file = req.file;
-
-      if (!file) {
-        return res.status(400).json({ "Error": "Imagem obrigatória" });
-      }
-      const produtoImg = await uploadImageToMinio(file);
-
-      const valorPrecoAtacado = quantidadeMinimaAtacado > 0 ? String(precoAtacado) : null;
-      const valorQuantidadeMinima = quantidadeMinimaAtacado > 0 ? Number(quantidadeMinimaAtacado) : null;
-      const valorEstoque = Number(estoque) || 0;
-      const valorDisponivel = !(disponivel === 'false' || disponivel === false);
-
-      const queryTexto = `
-        INSERT INTO jm.produtos (
-            nome, descricao, categoria_id, preco_varejo, preco_atacado, quantidade_minima_atacado, estoque, disponivel, imagem_upload
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING *, preco_varejo AS "precoVarejo", preco_atacado AS "precoAtacado", quantidade_minima_atacado AS "quantidadeMinimaAtacado", categoria_id AS "categoriaId", imagem_upload AS "imagemUpload", desativado_em AS "desativadoEm"
-      `;
-
-      const valores = [
-        nome,
-        descricao,
-        Number(categoriaId),
-        String(precoVarejo),
-        valorPrecoAtacado,
-        valorQuantidadeMinima,
-        valorEstoque,
-        valorDisponivel,
-        produtoImg
-      ];
-
-      const resultado = await pool.query(queryTexto, valores);
-
-      return res.status(201).json({
-        "Sucesso": "Produto Cadastrado",
-        "produto": resultado.rows[0]
-      });
-    } catch (error) {
-      console.error("Erro no controlador:", error.message);
-      res.status(500).json({ "Erro": "Falha ao cadastrar produto." });
-    }
-};
 
 // Adicionar nova categoria aos produtos
 export const criarCategoria = async (req, res) => {

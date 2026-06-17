@@ -1,13 +1,13 @@
 -- ─── CATEGORIAS ───────────────────────────────────────────
 INSERT INTO jm.categorias (nome)
 VALUES
-    ('Decoração'),
-    ('Cozinha e Mesa'),
-    ('Iluminação'),
-    ('Armazenamento'),
-    ('Presentes e Utilidades'),
-    ('Vasos'),
-    ('Peças Decorativas')
+    ('decoração'),
+    ('cozinha e mesa'),
+    ('iluminação'),
+    ('armazenamento'),
+    ('presentes e utilidades'),
+    ('vasos'),
+    ('peças decorativas')
 ON CONFLICT (nome) DO NOTHING;
 
 -- ─── PRODUTOS ─────────────────────────────────────────────
@@ -237,4 +237,3 @@ SELECT setval('jm.pedidos_id_seq',       (SELECT MAX(id) FROM jm.pedidos));
 SELECT setval('jm.produtos_id_seq',      (SELECT MAX(id) FROM jm.produtos));
 SELECT setval('jm.clientes_id_seq',      (SELECT MAX(id) FROM jm.clientes));
 SELECT setval('jm.categorias_id_seq',    (SELECT MAX(id) FROM jm.categorias));
-SELECT setval('jm.zonas_entrega_id_seq', (SELECT MAX(id) FROM jm.zonas_entrega));

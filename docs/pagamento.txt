@@ -1,0 +1,28 @@
+Fluxo de Geração e Confirmação de Pedidos
+Geração do Pedido (Checkout):
+
+Validação de Estado: Verificação de existência do cliente, disponibilidade do carrinho e ausência de pedidos pendentes para evitar duplicidade.
+
+Cálculo de Totais: Cálculo de frete e subtotal via serviços externos (sem bloquear banco).
+
+Atomicidade da Criação: Registro do pedido (jm.pedidos), inserção dos itens (jm.pedido_itens) e registro de pagamento (jm.pagamentos) ocorrem dentro de um BEGIN/COMMIT. Se qualquer um falhar, o ROLLBACK garante que nada seja persistido.
+
+Limpeza: O carrinho é removido via DELETE (com CASCADE nos itens), finalizando a conversão.
+
+Processamento de Pagamento (Gateway):
+
+Interface: O cliente escolhe o meio (Pix ou MP). O sistema valida a sessão (pertencimento do pedido, status e data de expiração) antes de interagir com o Mercado Pago.
+
+Externalização: A geração da Preference (MP) ou do QR Code (Pix) é feita fora das transações de banco para evitar locks desnecessários.
+
+Confirmação e Baixa de Estoque (Webhook):
+
+Resposta Imediata: O Webhook responde 200 OK ao gateway antes de processar, garantindo o recebimento da notificação.
+
+Idempotência: O UPDATE no status do pagamento (...WHERE status = 'aguardando_pagamento') garante que apenas a primeira notificação válida efetive a transação, ignorando chamadas duplicadas.
+
+Concorrência (Pessimistic Locking): O uso de SELECT ... FOR UPDATE no estoque do produto garante a exclusividade do registro durante a baixa, impedindo overselling (venda sem estoque).
+
+Finalização: Atualização do status do pedido para 'confirmado' e, finalmente, o COMMIT da transação.
+
+Esta estrutura garante que o ciclo não apenas crie o registro, mas proteja o estoque e a integridade financeira do site contra falhas de rede, concorrência ou reenvios de notificações do gateway.

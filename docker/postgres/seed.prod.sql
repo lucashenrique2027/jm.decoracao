@@ -1,13 +1,13 @@
 -- ─── CATEGORIAS ───────────────────────────────────────────
 INSERT INTO jm.categorias (nome)
 VALUES
-    ('decoração'),
-    ('cozinha e mesa'),
-    ('iluminação'),
-    ('armazenamento'),
-    ('presentes e utilidades'),
-    ('vasos'),
-    ('peças decorativas')
+    ('Decoração'),
+    ('Cozinha e Mesa'),
+    ('Iluminação'),
+    ('Armazenamento'),
+    ('Presentes e Utilidades'),
+    ('Vasos'),
+    ('Peças Decorativas')
 ON CONFLICT (nome) DO NOTHING;
 
 -- ─── PRODUTOS ─────────────────────────────────────────────

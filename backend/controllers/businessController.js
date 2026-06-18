@@ -65,6 +65,11 @@ export const produtosMaisVendidos = async (req, res) => {
 ========================================================= */
 export const categoriasMaisVendidas = async (req, res) => {
   try {
+    console.log('[categoriasMaisVendidas] inicio request');
+
+    const statusValidos = ['confirmado', 'entregue'];
+    console.log('[categoriasMaisVendidas] statusValidos:', statusValidos);
+
     const query = `
       SELECT 
         cat.id AS "categoriaId",
@@ -72,21 +77,28 @@ export const categoriasMaisVendidas = async (req, res) => {
         COALESCE(SUM(pi.quantidade), 0)::int AS "quantidadeVendida",
         COALESCE(SUM(pi.quantidade * pi.preco_unitario), 0)::float AS "faturamento"
       FROM jm.pedido_itens pi
-      INNER JOIN jm.produtos prod ON prod.id = pi.produto_id
-      INNER JOIN jm.categorias cat ON cat.id = prod.categoria_id
-      INNER JOIN jm.pedidos ped ON ped.id = pi.pedido_id
+      JOIN jm.pedidos ped 
+        ON ped.id = pi.pedido_id
+      JOIN jm.produtos prod 
+        ON prod.id = pi.produto_id
+      LEFT JOIN jm.categorias cat 
+        ON cat.id = prod.categoria_id
       WHERE ped.status = ANY($1::jm.status_pedido[])
       GROUP BY cat.id, cat.nome
       ORDER BY SUM(pi.quantidade) DESC
     `;
 
-    const statusValidos = ['confirmado', 'entregue'];
+    console.log('[categoriasMaisVendidas] executando query');
+
     const resultado = await pool.query(query, [statusValidos]);
+
+    console.log('[categoriasMaisVendidas] rows retornadas:', resultado.rows.length);
+    console.log('[categoriasMaisVendidas] dados:', resultado.rows);
 
     return res.status(200).json(resultado.rows);
 
   } catch (error) {
-    console.error('Erro ao buscar categorias mais vendidas:', error);
+    console.error('[categoriasMaisVendidas] erro:', error);
     return res.status(500).json({ message: 'Erro ao buscar categorias mais vendidas' });
   }
 };

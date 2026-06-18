@@ -24,7 +24,7 @@ const router = express.Router();
 
 router.post('/auth', authAdmin);
 
-router.get('/clientes', verificarToken, listarClientes);
+router.get('/clientes', verificarToken,checkRole(['admin']), listarClientes);
 
 router.get('/produtos/categoria/:categoriaId', verificarToken, checkRole(['admin']),buscarProdutoPorCategoria);
 

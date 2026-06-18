@@ -32,7 +32,7 @@ export default function Admin() {
     try {
       await logoutAdmin();
       localStorage.removeItem('adminJM');
-      window.location.href = '/authAdmin';
+      window.location.href = '/';
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
       alert('Erro ao fazer logout. Tente novamente.');

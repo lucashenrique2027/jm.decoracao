@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { logoutAdmin } from '../../services/authAdmin';
-import './login_admin.css';
+import './admin.css';
 import FormularioCadastro from '../modules/abaProdutos';
 import ListaEstoque from '../modules/abaEstoque';
 import PainelPedidos from '../modules/abaPedidos';
 import AbaClientes from '../modules/abaClientes';
 import Dashboard from '../modules/abaDashboard.jsx';
 import AbaRelatorio from '../modules/abaRelatorio.jsx';
+import { useNavigate } from "react-router-dom";
 
 export default function Admin() {
   const admin = JSON.parse(localStorage.getItem('adminJM') || 'null');
   const [abaAtiva, setAbaAtiva] = useState("dashboard");
-  const [sidebarAberta, setSidebarAberta] = useState(false); // ← novo
+  const [sidebarAberta, setSidebarAberta] = useState(false);
+
+  const navigate = useNavigate();
 
   const renderConteudo = () => {
     switch (abaAtiva) {
@@ -98,6 +101,13 @@ export default function Admin() {
         </nav>
 
         <div className="admin-sidebar-footer">
+            <button
+              onClick={() => navigate("/")}
+              className="admin-btn-vitrine"
+            >
+              <i className="bi bi-shop"></i>
+              <span>Vitrine</span>
+            </button>
           <button className="admin-btn-logout" onClick={handleLogout}>
             <i className="bi bi-box-arrow-left"></i><span>Sair do Sistema</span>
           </button>

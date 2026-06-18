@@ -23,7 +23,7 @@ export default function RotaProtegidaAdmin() {
     }, []);
 
     if (status === "verificando") return null;
-    if (status === "negado") return <Navigate to="/authAdmin" replace />;
+    if (status === "negado") return <Navigate to="/Autenticar/Admin" replace />;
     
     return <Outlet />;
 }

@@ -4,7 +4,11 @@ import { useMensagem } from "../../context/MensagemContext.jsx";
 import { cadastrarCliente } from "../../services/cliente.js";
 import { useCep } from "../../hooks/useCep.js";
 
-export default function RegisterForm({ setTela }) {
+import Header from "../../components/Header/Header.jsx";
+import Footer from "../../components/Footer/Footer.jsx";
+import logoJm from "../../../public/logo.jpeg";
+
+export default function RegisterForm() {
   const { mostrarMensagem } = useMensagem();
   const { buscarCep } = useCep();
   const navigate = useNavigate();
@@ -51,6 +55,18 @@ export default function RegisterForm({ setTela }) {
   const fc = (k) => (e) => setCad(prev => ({ ...prev, [k]: e.target.value }));
 
   return (
+    <>
+    <Header />
+    <div className="login-bg">
+      <div className="login-card-wrapper">
+        <div className="login-card">
+
+                <div className="login-header">
+              <img src={logoJm} alt="Logo JM" className="login-logo" />
+              <h3 className="login-titulo">Acesse sua conta</h3>
+              <p className="login-subtitulo">Informe seus dados para entrar</p>
+            </div>
+
     <form onSubmit={handleCadastro}>
       <div className="login-grid">
         <div className="login-form-group login-full-width">
@@ -149,10 +165,15 @@ export default function RegisterForm({ setTela }) {
       </button>
 
       <div className="text-center">
-        <button type="button" className="login-btn-link" onClick={() => setTela("escolha")}>
+        <button type="button" className="login-btn-link" onClick={() => navigate(-1)}>
           <i className="bi bi-arrow-left"></i> Voltar
         </button>
       </div>
     </form>
+
+        </div>
+      </div>
+    </div>
+</>
   );
-}
+}    

@@ -133,7 +133,7 @@ export default function Header({ filtros, atualizarFiltro, categorias }) {
                   </button>
                 </div>
               ) : (
-                <Link className="btn-login-jm" to="/login">
+                <Link className="btn-login-jm" to="/Autenticar">
                   <User size={18} /> Entrar / Cadastrar
                 </Link>
               )}
@@ -178,7 +178,7 @@ export default function Header({ filtros, atualizarFiltro, categorias }) {
             {cliente ? (
               <button className="btn-logout-minimal text-danger px-2" onClick={handleLogout}>Sair</button>
             ) : (
-              <Link className="nav-link-jm text-primary px-2" to="/login" onClick={() => setMenuAberto(false)}>Login</Link>
+              <Link className="nav-link-jm text-primary px-2" to="/Autenticar" onClick={() => setMenuAberto(false)}>Login</Link>
             )}
           </aside>
         </>

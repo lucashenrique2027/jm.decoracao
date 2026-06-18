@@ -1,63 +1,82 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom"; 
-import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useMensagem } from "../../context/MensagemContext.jsx";
+import { loginCliente } from "../../services/cliente.js";
+import Header from "../../components/Header/Header.jsx";
+import Footer from "../../components/Footer/Footer.jsx";
 import logoJm from "../../../public/logo.jpeg";
-import LoginForm from "../../components/loginForm/page.jsx";     
-import RegisterForm from "../../components/registerForm/page.jsx"; 
 import "./style.css";
 
-export default function Login() {
-  const [tela, setTela] = useState("escolha");
+export default function LoginPage() {
+  const { mostrarMensagem } = useMensagem();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const clienteLogado = JSON.parse(localStorage.getItem('userJM') || 'null');
-    if (clienteLogado) navigate("/");
-  }, [navigate]);
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [verSenha, setVerSenha] = useState(false);
+  const [errosLogin, setErrosLogin] = useState({});
+
+  const handleEntrar = async (e) => {
+    e.preventDefault();
+    setErrosLogin({});
+    try {
+      await loginCliente(email, senha);
+      navigate('/');
+    } catch (error) {
+      mostrarMensagem(error.message || 'Email ou senha inválidos.', 'erro');
+    }
+  };
 
   return (
     <>
       <Header />
       <div className="login-bg">
         <div className="login-card-wrapper">
+          {/* Estrutura necessária para o CSS funcionar */}
           <div className="login-card">
             
             <div className="login-header">
               <img src={logoJm} alt="Logo JM" className="login-logo" />
-              <h3 className="login-titulo">
-                {tela === "escolha" && "Bem-vindo!"}
-                {tela === "login" && "Acesse sua conta"}
-                {tela === "cadastro" && "Crie sua conta"}
-              </h3>
-              <p className="login-subtitulo">
-                {tela === "escolha" && "Seja bem-vindo à JM Decorações"}
-                {tela === "login" && "Informe seus dados para entrar"}
-                {tela === "cadastro" && "Preencha os campos abaixo"}
-              </p>
+              <h3 className="login-titulo">Acesse sua conta</h3>
+              <p className="login-subtitulo">Informe seus dados para entrar</p>
             </div>
 
-            {/* A ESCOLHA FICA NA PÁGINA PRINCIPAL COMO VOCÊ QUERIA */}
-            {tela === "escolha" && (
-              <div className="login-footer-links" style={{ gap: '16px' }}>
-                <button className="login-btn-primary" onClick={() => setTela("login")}>
-                  <i className="bi bi-box-arrow-in-right"></i> Fazer Login
-                </button>
-                <button className="login-btn-outline" onClick={() => setTela("cadastro")}>
-                  <i className="bi bi-person-plus"></i> Novo Cadastro
-                </button>
-                <Link to="/" className="login-btn-link mt-2">
-                  <i className="bi bi-arrow-left"></i> Voltar para a Loja
-                </Link>
-                <div className="login-admin-link text-center">
-                  <Link to="/authAdmin">Área do Administrador</Link>
+            <form onSubmit={handleEntrar}>
+              <div className="login-form-group">
+                <label className="login-label">E-mail</label>
+                <div className={`login-input-wrapper ${errosLogin.geral ? 'erro' : ''}`}>
+                  <span className="login-input-icon"><i className="bi bi-envelope"></i></span>
+                  <input type="email" className="login-input" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
                 </div>
               </div>
-            )}
 
-            {/* OS COMPONENTES QUE EXTRAIMOS */}
-            {tela === "login" && <LoginForm setTela={setTela} />}
-            {tela === "cadastro" && <RegisterForm setTela={setTela} />}
+              <div className="login-form-group">
+                <label className="login-label">Senha</label>
+                <div className={`login-input-wrapper ${errosLogin.geral ? 'erro' : ''}`}>
+                  <span className="login-input-icon"><i className="bi bi-lock"></i></span>
+                  <input type={verSenha ? "text" : "password"} className="login-input" placeholder="••••••" value={senha} onChange={e => setSenha(e.target.value)} required />
+                  <button type="button" className="login-btn-eye" onClick={() => setVerSenha(!verSenha)}>
+                    <i className={`bi ${verSenha ? "bi-eye-slash" : "bi-eye"}`}></i>
+                  </button>
+                </div>
+                {errosLogin.geral && <span className="login-error-msg">{errosLogin.geral}</span>}
+                <div className="text-end mt-2">
+                  <Link to="/recuperar-senha" style={{ fontSize: '13px', color: '#25D366', textDecoration: 'none', fontWeight: '600' }}>
+                    Esqueceu a senha?
+                  </Link>
+                </div>
+              </div>
+
+              <button type="submit" className="login-btn-primary mb-3">
+                Entrar <i className="bi bi-arrow-right"></i>
+              </button>
+
+              <div className="text-center">
+                <button type="button" className="login-btn-link" onClick={() => navigate(-1)}>
+                  <i className="bi bi-arrow-left"></i> Voltar
+                </button>
+              </div>
+            </form>
 
           </div>
         </div>

@@ -124,7 +124,7 @@ export default function AdminLogin() {
 
             {/* Links inferiores estilizados e limpos */}
             <div className="login-footer-links">
-              <Link to="/" className="login-btn-link">
+              <Link to="/Autenticar" className="login-btn-link">
                 <i className="bi bi-house-door"></i> Voltar para o Início
               </Link>
               

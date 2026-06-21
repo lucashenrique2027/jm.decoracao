@@ -44,7 +44,7 @@ export const authAdmin = async (req, res) => {
 
     res.cookie('user_Token', token, {
       httpOnly: true,                
-      secure: false, // Mude para true em ambiente de produção com HTTPS                  
+      secure: false,        
       sameSite: 'strict',           
       maxAge: 8 * 60 * 60 * 1000      
     });

@@ -32,7 +32,6 @@ function calcularIntervalo(periodo = 'mes') {
     };
   }
 
-  // 'tudo' ou qualquer outro valor — sem filtro
   return { dataInicio: null, dataFim: null };
 }
 

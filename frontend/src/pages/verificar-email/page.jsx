@@ -25,7 +25,7 @@ export default function VerificarEmail() {
 
       mostrarMensagem("Conta ativada com sucesso!", "sucesso");
 
-      navigate("/login");
+      navigate("/Autenticar");
     } catch (error) {
       mostrarMensagem(error.message || "Erro ao confirmar email", "erro");
     } finally {

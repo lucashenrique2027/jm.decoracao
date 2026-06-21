@@ -32,9 +32,5 @@ router.post('/adicionar', verificarToken, checkRole(['cliente']), adicionarProdu
 router.get('/meu-carrinho', verificarToken, checkRole(['cliente']), obterCarrinhoAtivo);
 router.post('/criar-pedido', verificarToken, checkRole(['cliente']), criarPedidoPendente);
 router.put('/sincronizar-carrinho', verificarToken, checkRole(['cliente']), sincronizarCarrinho);
-router.get('/', listarClientes);
-router.get('/:id', buscarClientePorId);
-router.put('/:id', atualizarCliente);
-router.delete('/:id', deletarCliente);
 
 export default router;

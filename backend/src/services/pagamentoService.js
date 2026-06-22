@@ -1,18 +1,4 @@
-/* =========================================================
-   pagamentoService.js
-   Responsabilidades:
-   - Buscar pagamento vinculado a um pedido
-   - Validar pedido + pagamento (único lugar, sem duplicação)
-   - Confirmar pagamento + decrementar estoque (atômico)
-========================================================= */
 
-/* ─── Validação compartilhada ─────────────────────────── */
-
-/**
- * Valida que o pedido existe e pertence ao cliente.
- * Valida que o pagamento existe, está aguardando e não expirou.
- * Retorna { pedido, pagamento } ou lança erro com .status HTTP.
- */
 export async function validarSessaoPagamento(db, { pedidoId, tokenPagamento, clienteId }) {
   const { rows: pedidoRows } = await db.query(
     `SELECT id, cliente_id FROM jm.pedidos WHERE id = $1`,
@@ -85,13 +71,6 @@ export async function buscarPagamentoPorPedido(db, { pedidoId, clienteId }) {
   return pgRows[0];
 }
 
-/* ─── Confirmação atômica (webhook) ──────────────────── */
-
-/**
- * Confirma o pagamento e decrementa o estoque de forma atômica.
- * Usa FOR UPDATE para serializar concorrência no nível de linha.
- * Retorna false se o pagamento já foi processado (idempotência).
- */
 export async function confirmarPagamento(db, pedidoId) {
   await db.query('BEGIN');
   try {

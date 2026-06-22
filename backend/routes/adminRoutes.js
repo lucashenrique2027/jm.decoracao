@@ -16,6 +16,11 @@ import {
   deletarProduto,
   cadastrarProduto,
 } from '../controllers/produtosController.js';
+import {
+  faturamentoPorCliente,
+  produtosMaisVendidos,
+  categoriasMaisVendidas,
+} from '../controllers/businessController.js';
 import { upload  }  from  '../middlewares/multer.js'
 import { verificarToken } from '../middlewares/validarToken.js';
 import { checkRole } from '../middlewares/checkRole.js';
@@ -47,5 +52,11 @@ router.get('/categorias', listarCategorias);
 router.post('/categorias', verificarToken,checkRole(['admin']), criarCategoria);
 
 router.delete('/categorias/:id', verificarToken,checkRole(['admin']), deletarCategoria);
+
+router.get('/faturamento-clientes',verificarToken,checkRole(['admin']),faturamentoPorCliente);
+
+router.get('/produtos-mais-vendidos',verificarToken,checkRole(['admin']),produtosMaisVendidos);
+
+router.get('/categorias-mais-vendidas',verificarToken,checkRole(['admin']),categoriasMaisVendidas);
 
 export default router;

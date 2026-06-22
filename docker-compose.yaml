@@ -9,6 +9,11 @@ services:
     depends_on:
       postgres: 
         condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - /app/node_modules
+    working_dir: /app/backend
+    command: npm run dev
     networks:
       - app
       - services
@@ -25,14 +30,15 @@ services:
     build:
       context: .
       dockerfile: docker/vite/Dockerfile
-    expose:
-      - "8080"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
+    volumes:
+    - ./frontend:/app/frontend
+    - /app/frontend/node_modules
+    # healthcheck:
+    #   test: ["CMD", "wget", "--spider", "-q", "http://localhost:5173"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    #   start_period: 10s
     networks:
       - app
     restart: unless-stopped
@@ -47,7 +53,7 @@ services:
       api:
         condition: service_healthy
       vite-app:
-        condition: service_healthy
+        condition: service_started
     networks:
       - app
     restart: unless-stopped

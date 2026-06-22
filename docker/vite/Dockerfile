@@ -1,25 +1,15 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
-WORKDIR /app
 
-COPY docker/vite/package*.json ./
-COPY docker/vite/vite.config.js ./
+WORKDIR /app/frontend
+
+COPY /frontend/package*.json /app/frontend
+COPY /frontend/vite.config.js /app/frontend
 
 RUN npm install
 
-COPY frontend ./frontend
+COPY frontend /app/frontend
 
-RUN npm run build
+EXPOSE 5173
 
-FROM nginxinc/nginx-unprivileged:alpine
-
-USER root
-RUN apk add --no-cache wget
-USER nginx
-
-COPY --from=builder /app/frontend/dist /usr/share/nginx/html
-COPY docker/vite/nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

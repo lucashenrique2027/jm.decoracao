@@ -8,7 +8,6 @@ import routesPedidos from './routes/pedidosRoutes.js';
 import routesUsers from './routes/usersRoutes.js';
 
 import pagamentoRouter from  './routes/paymentsRoutes.js';
-import routesBusiness from './routes/businessRoutes.js';
 import RelatoriosRouter from './routes/relatoriosRoutes.js';
 
 import cookieParser from 'cookie-parser';
@@ -45,8 +44,6 @@ app.use('/api/pedidos', routesPedidos);
 app.use('/api/pagamento',pagamentoRouter);
 
 app.use('/api/relatorios',RelatoriosRouter);
-
-app.use('/api/metrics/business',routesBusiness);
 
 app.listen(PORT, () => {
   console.log(`Backend rodando na porta ${PORT}`);

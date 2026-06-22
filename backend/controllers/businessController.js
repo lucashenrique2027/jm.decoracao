@@ -42,9 +42,10 @@ export const faturamentoPorCliente = async (req, res) => {
   try {
     const { dataInicio, dataFim } = calcularIntervalo(req.query.periodo);
     const filtroData = dataInicio ? `AND p.criado_em BETWEEN $2 AND $3` : '';
-    const params = dataInicio
-      ? [['confirmado', 'entregue'], dataInicio, dataFim]
-      : [['confirmado', 'entregue']];
+    
+    // Correção: Garantindo que o array de status não seja aninhado desnecessariamente
+    const statusPedido = ['confirmado', 'entregue'];
+    const params = dataInicio ? [statusPedido, dataInicio, dataFim] : [statusPedido];
 
     const resultado = await pool.query(`
       SELECT 
